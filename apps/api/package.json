@@ -4,23 +4,24 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "bun run --hot src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "bun run src/server.ts",
     "check-types": "tsc --noEmit",
     "lint": "eslint ."
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.1",
+    "@workspace/db": "workspace:*",
     "@workspace/validators": "workspace:*",
-    "hono": "^4.7.4"
+    "better-auth": "^1.2.8",
+    "hono": "^4.7.4",
+    "resend": "^4.5.2"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/bun": "^1.2.14",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.2",
-    "tsx": "^4.19.3",
     "typescript": "5.9.3"
   }
 }

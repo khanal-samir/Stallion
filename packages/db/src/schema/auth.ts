@@ -1,15 +1,14 @@
 import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
-
 export const user = pgTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  image: text("image"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  id: text().primaryKey(),
+  name: text().notNull(),
+  email: text().notNull().unique(),
+  emailVerified: boolean().notNull().default(false),
+  image: text(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow(),
 });
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -18,51 +17,49 @@ export const userRelations = relations(user, ({ many }) => ({
 }));
 
 export const session = pgTable("session", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
+  id: text().primaryKey(),
+  userId: text()
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  token: text("token").notNull().unique(),
-  expiresAt: timestamp("expires_at").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  token: text().notNull().unique(),
+  expiresAt: timestamp().notNull(),
+  ipAddress: text(),
+  userAgent: text(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow(),
 });
 
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, { fields: [session.userId], references: [user.id] }),
 }));
 
-
 export const account = pgTable("account", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
+  id: text().primaryKey(),
+  userId: text()
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-  scope: text("scope"),
-  idToken: text("id_token"),
-  password: text("password"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  accountId: text().notNull(),
+  providerId: text().notNull(),
+  accessToken: text(),
+  refreshToken: text(),
+  accessTokenExpiresAt: timestamp(),
+  refreshTokenExpiresAt: timestamp(),
+  scope: text(),
+  idToken: text(),
+  password: text(),
+  createdAt: timestamp().notNull().defaultNow(),
+  updatedAt: timestamp().notNull().defaultNow(),
 });
 
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, { fields: [account.userId], references: [user.id] }),
 }));
 
-
 export const verification = pgTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  id: text().primaryKey(),
+  identifier: text().notNull(),
+  value: text().notNull(),
+  expiresAt: timestamp().notNull(),
+  createdAt: timestamp().defaultNow(),
+  updatedAt: timestamp().defaultNow(),
 });
