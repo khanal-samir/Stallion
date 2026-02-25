@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: verio-postgres-dev
+    environment:
+      POSTGRES_USER: verio
+      POSTGRES_PASSWORD: verio123
+      POSTGRES_DB: verio
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+
+volumes:
+  postgres_data:
+ 
