@@ -20,6 +20,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    minPasswordLength:6,
+    autoSignIn:false,
     sendResetPassword: async ({ user, url }) => {
       void sendEmail({
         to: user.email,
@@ -36,6 +38,7 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
+    autoSignInAfterVerification:true,
     sendVerificationEmail: async ({ user, url }) => {
       void sendEmail({
         to: user.email,
@@ -44,6 +47,14 @@ export const auth = betterAuth({
       });
     },
   },
+  session: {
+  expiresIn: 60 * 60 * 24 * 30, // session lasts 30 days
+  updateAge: 60 * 60 * 24, // extend session expiry once per day if user is active
+  cookieCache: {
+    enabled: true,
+    maxAge: 60 * 5, // trust cookie for 5 min before re-checking DB — reduces DB load
+  },
+},
   trustedOrigins: [process.env.WEB_URL!],
   plugins: [openAPI()],
 });
