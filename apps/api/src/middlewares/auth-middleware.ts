@@ -1,5 +1,5 @@
 import type { Context, Next } from "hono";
-import { auth } from "./auth.js";
+import { auth } from "../lib/auth.js";
 
 type AuthSession = typeof auth.$Infer.Session;
 

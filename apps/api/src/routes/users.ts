@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Hono as HonoApp } from "hono";
 import { createUserSchema, updateUserSchema } from "@workspace/validators";
 
 export const userRoutes = new Hono()
@@ -25,3 +25,7 @@ export const userRoutes = new Hono()
 
     return c.json({ user: { id: c.req.param("id"), ...result.data } });
   });
+
+export function registerUserRoutes(app: HonoApp) {
+  app.route("/users", userRoutes);
+}
