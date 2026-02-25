@@ -1,22 +1,14 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { cors } from "hono/cors";
 import { auth } from "./lib/auth.js";
+import { corsMiddleware } from "./lib/cors.js";
+import { notFoundHandler, onErrorHandler } from "./lib/http-handlers.js";
 import { userRoutes } from "./routes/users.js";
 
 const app = new Hono();
 
 app.use("*", logger());
-
-app.use(
-  "*",
-  cors({
-    origin: process.env.WEB_URL!,
-    credentials: true,
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  }),
-);
+app.use("*", corsMiddleware);
 
 app.on(["POST", "GET"], "/api/auth/**", (c) => {
   return auth.handler(c.req.raw);
@@ -25,6 +17,9 @@ app.on(["POST", "GET"], "/api/auth/**", (c) => {
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 app.route("/users", userRoutes);
+
+app.notFound(notFoundHandler);
+app.onError(onErrorHandler);
 
 const port = Number(process.env.PORT!);
 
