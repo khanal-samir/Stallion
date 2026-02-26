@@ -15,7 +15,8 @@
     "@workspace/validators": "workspace:*",
     "better-auth": "^1.2.8",
     "hono": "^4.7.4",
-    "resend": "^4.5.2"
+    "resend": "^4.5.2",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/bun": "^1.2.14",

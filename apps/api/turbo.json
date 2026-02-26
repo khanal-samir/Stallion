@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "outputs": ["dist/**"],
-      "env": ["NODE_ENV", "DATABASE_URL", "PORT", "RESEND_API_KEY", "BETTER_AUTH_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET","BETTER_AUTH_URL", "WEB_URL"],
+      "env": ["NODE_ENV", "DATABASE_URL", "PORT", "RESEND_API_KEY", "RESEND_FROM_EMAIL", "BETTER_AUTH_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET","BETTER_AUTH_URL", "WEB_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },
     "dev": {
