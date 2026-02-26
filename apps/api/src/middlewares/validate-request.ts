@@ -3,6 +3,12 @@ import { validator } from "hono/validator";
 import { STATUS_CODES } from "../constants/status-codes.js";
 import { AppError } from "../errors/app-error.js";
 
+export const VALIDATION_TARGET = {
+  JSON: "json",
+  PARAM: "param",
+  QUERY: "query",
+} as const;
+
 type SafeParseSuccess<TOutput> = {
   success: true;
   data: TOutput;
@@ -24,12 +30,12 @@ export function validateRequest<
   TInput,
   TOutput,
 >(target: Target, schema: SafeParseSchema<TInput, TOutput>) {
-  return validator(target, (value: TInput) => {
+  return validator(target, (value: TInput) => { // hono validator middleware
     const result = schema.safeParse(value);
 
     if (!result.success) {
       const statusCode =
-        target === "json"
+        target === VALIDATION_TARGET.JSON
           ? STATUS_CODES.UNPROCESSABLE_ENTITY
           : STATUS_CODES.BAD_REQUEST;
 

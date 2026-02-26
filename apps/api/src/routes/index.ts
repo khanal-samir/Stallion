@@ -1,10 +1,10 @@
 import type { Hono } from "hono";
-import { registerAuthRoutes } from "./auth.js";
-import { registerHealthRoutes } from "./health.js";
-import { registerUserRoutes } from "./users.js";
+import { authRoutes } from "./auth.js";
+import { healthRoutes } from "./health.js";
+import { userRoutes } from "./users.js";
 
 export function registerRoutes(app: Hono) {
-  registerAuthRoutes(app);
-  registerHealthRoutes(app);
-  registerUserRoutes(app);
+  app.route("/api/auth", authRoutes);
+  app.route("/health", healthRoutes);
+  app.route("/users", userRoutes);
 }
