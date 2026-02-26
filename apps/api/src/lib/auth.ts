@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { openAPI } from "better-auth/plugins";
 import { db } from "@workspace/db/client";
 import * as schema from "@workspace/db/schema";
+import { env } from "../config/env.js";
 import { sendEmail } from "./email.js";
-import { openAPI } from "better-auth/plugins";
 
 export const auth = betterAuth({
   rateLimit: {
@@ -15,13 +16,13 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
-  baseURL: process.env.BETTER_AUTH_URL!,
-  secret: process.env.BETTER_AUTH_SECRET!,
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    minPasswordLength:6,
-    autoSignIn:false,
+    minPasswordLength: 6,
+    autoSignIn: false,
     sendResetPassword: async ({ user, url }) => {
       void sendEmail({
         to: user.email,
@@ -32,13 +33,13 @@ export const auth = betterAuth({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     },
   },
   emailVerification: {
     sendOnSignUp: true,
-    autoSignInAfterVerification:true,
+    autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       void sendEmail({
         to: user.email,
@@ -48,13 +49,13 @@ export const auth = betterAuth({
     },
   },
   session: {
-  expiresIn: 60 * 60 * 24 * 30, // session lasts 30 days
-  updateAge: 60 * 60 * 24, // extend session expiry once per day if user is active
-  cookieCache: {
-    enabled: true,
-    maxAge: 60 * 5, // trust cookie for 5 min before re-checking DB — reduces DB load
+    expiresIn: 60 * 60 * 24 * 30, //session expires in 30 days
+    updateAge: 60 * 60 * 24, // session is updated every 24 hours if the user is active
+    cookieCache: { // enables cookie caching for 5 minutes to reduce database lookups
+      enabled: true,
+      maxAge: 60 * 5,
+    },
   },
-},
-  trustedOrigins: [process.env.WEB_URL!],
+  trustedOrigins: [env.WEB_URL],
   plugins: [openAPI()],
 });

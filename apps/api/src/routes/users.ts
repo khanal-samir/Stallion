@@ -1,30 +1,30 @@
 import { Hono, type Hono as HonoApp } from "hono";
-import { createUserSchema, updateUserSchema } from "@workspace/validators";
+import {
+  createUserSchema,
+  updateUserParamsSchema,
+  updateUserSchema,
+} from "@workspace/validators";
+import {
+  createUser,
+  listUsers,
+  updateUser,
+} from "../controllers/users.controller.js";
+import { validateRequest } from "../middlewares/validate-request.js";
 
 export const userRoutes = new Hono()
-  .get("/", (c) => {
-    return c.json({ users: [] });
-  })
-  .post("/", async (c) => {
-    const body = await c.req.json();
-    const result = createUserSchema.safeParse(body);
-
-    if (!result.success) {
-      return c.json({ error: result.error.flatten() }, 400);
-    }
-
-    return c.json({ user: result.data }, 201);
-  })
-  .patch("/:id", async (c) => {
-    const body = await c.req.json();
-    const result = updateUserSchema.safeParse(body);
-
-    if (!result.success) {
-      return c.json({ error: result.error.flatten() }, 400);
-    }
-
-    return c.json({ user: { id: c.req.param("id"), ...result.data } });
-  });
+  .get("/", listUsers)
+  .post("/", validateRequest("json", createUserSchema), (c) =>
+    createUser(c, c.req.valid("json")),
+  )
+  .patch(
+    "/:id",
+    validateRequest("param", updateUserParamsSchema),
+    validateRequest("json", updateUserSchema),
+    (c) => {
+      const { id } = c.req.valid("param");
+      return updateUser(c, id, c.req.valid("json"));
+    },
+  );
 
 export function registerUserRoutes(app: HonoApp) {
   app.route("/users", userRoutes);
