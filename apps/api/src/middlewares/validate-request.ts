@@ -1,51 +1,27 @@
 import type { ValidationTargets } from "hono";
-import { validator } from "hono/validator";
+import { zValidator } from "@hono/zod-validator";
 import { STATUS_CODES } from "../constants/status-codes.js";
+import { VALIDATION_TARGET } from "../constants/validation-targets.js";
 import { AppError } from "../errors/app-error.js";
 
-export const VALIDATION_TARGET = {
-  JSON: "json",
-  PARAM: "param",
-  QUERY: "query",
-} as const;
-
-type SafeParseSuccess<TOutput> = {
-  success: true;
-  data: TOutput;
+type ValidationSchema = {
+  safeParse: (value: unknown) => unknown;
 };
 
-type SafeParseFailure = {
-  success: false;
-  error: {
-    flatten: () => unknown;
-  };
-};
-
-type SafeParseSchema<TInput, TOutput> = {
-  safeParse: (value: TInput) => SafeParseSuccess<TOutput> | SafeParseFailure;
-};
-
-export function validateRequest<
-  Target extends keyof ValidationTargets,
-  TInput,
-  TOutput,
->(target: Target, schema: SafeParseSchema<TInput, TOutput>) {
-  return validator(target, (value: TInput) => { // hono validator middleware
-    const result = schema.safeParse(value);
-
-    if (!result.success) {
-      const statusCode =
-        target === VALIDATION_TARGET.JSON
-          ? STATUS_CODES.UNPROCESSABLE_ENTITY
-          : STATUS_CODES.BAD_REQUEST;
-
-      throw new AppError(
-        "Validation failed",
-        statusCode,
-        result.error.flatten(),
-      );
+export function validateRequest(
+  target: keyof ValidationTargets,
+  schema: ValidationSchema,
+) {
+  return zValidator(target, schema as never, (result) => {
+    if (result.success) {
+      return;
     }
 
-    return result.data;
+    const statusCode =
+      target === VALIDATION_TARGET.JSON
+        ? STATUS_CODES.UNPROCESSABLE_ENTITY
+        : STATUS_CODES.BAD_REQUEST;
+
+    throw new AppError("Validation failed", statusCode, result.error);
   });
 }

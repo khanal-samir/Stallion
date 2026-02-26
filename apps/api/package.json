@@ -11,6 +11,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
     "@workspace/db": "workspace:*",
     "@workspace/validators": "workspace:*",
     "better-auth": "^1.2.8",
