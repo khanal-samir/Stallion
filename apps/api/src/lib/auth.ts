@@ -1,10 +1,17 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
-import { db } from "@workspace/db/client";
-import * as schema from "@workspace/db/schema";
+import { db } from "../db/client.js";
+import * as schema from "../db/schema/index.js";
 import { env } from "../config/env.js";
 import { sendEmail } from "./email.js";
+
+const authSchema = {
+  user: schema.user,
+  session: schema.session,
+  account: schema.account,
+  verification: schema.verification,
+};
 
 export const auth = betterAuth({
   rateLimit: {
@@ -14,7 +21,7 @@ export const auth = betterAuth({
   },
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema,
+    schema: authSchema,
   }),
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
