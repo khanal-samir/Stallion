@@ -3,7 +3,7 @@ import type { StatusCode } from "../constants/status-codes.js";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "../config/logger.js";
 import { STATUS_CODES } from "../constants/status-codes.js";
-import { AppError } from "../errors/app-error.js";
+import { AppError } from "../utils/app-error.js";
 import { sendError } from "../utils/api-response.js";
 
 export const notFoundHandler: NotFoundHandler = (c) => {
