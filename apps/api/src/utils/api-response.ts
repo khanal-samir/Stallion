@@ -29,12 +29,7 @@ export function sendSuccess<T>(
   return c.json(response, statusCode as ContentfulStatusCode);
 }
 
-export function sendError(
-  c: Context,
-  message: string,
-  statusCode: StatusCode,
-  details?: unknown,
-) {
+export function sendError(c: Context, message: string, statusCode: StatusCode, details?: unknown) {
   const error = details === undefined ? { message } : { message, details };
   const response: ApiErrorResponse = {
     success: false,

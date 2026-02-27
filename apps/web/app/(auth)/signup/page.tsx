@@ -60,9 +60,7 @@ export default function SignupPage() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
-              {error}
-            </div>
+            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">{error}</div>
           )}
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
@@ -107,17 +105,10 @@ export default function SignupPage() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card text-muted-foreground px-2">
-              Or continue with
-            </span>
+            <span className="bg-card text-muted-foreground px-2">Or continue with</span>
           </div>
         </div>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleGoogleSignIn}
-          type="button"
-        >
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} type="button">
           Sign up with Google
         </Button>
       </CardContent>

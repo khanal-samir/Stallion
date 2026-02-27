@@ -50,15 +50,11 @@ export default function ForgotPasswordPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Check your email</CardTitle>
           <CardDescription>
-            If an account exists with that email, we&apos;ve sent a password
-            reset link.
+            If an account exists with that email, we&apos;ve sent a password reset link.
           </CardDescription>
         </CardHeader>
         <CardFooter className="justify-center">
-          <Link
-            href="/login"
-            className="text-foreground hover:underline text-sm"
-          >
+          <Link href="/login" className="text-foreground hover:underline text-sm">
             Back to sign in
           </Link>
         </CardFooter>
@@ -70,16 +66,12 @@ export default function ForgotPasswordPage() {
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Forgot password</CardTitle>
-        <CardDescription>
-          Enter your email and we&apos;ll send you a reset link
-        </CardDescription>
+        <CardDescription>Enter your email and we&apos;ll send you a reset link</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
-              {error}
-            </div>
+            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">{error}</div>
           )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -98,10 +90,7 @@ export default function ForgotPasswordPage() {
         </form>
       </CardContent>
       <CardFooter className="justify-center">
-        <Link
-          href="/login"
-          className="text-muted-foreground hover:text-foreground text-sm"
-        >
+        <Link href="/login" className="text-muted-foreground hover:text-foreground text-sm">
           Back to sign in
         </Link>
       </CardFooter>

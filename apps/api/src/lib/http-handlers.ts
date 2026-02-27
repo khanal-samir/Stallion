@@ -7,11 +7,7 @@ import { AppError } from "../errors/app-error.js";
 import { sendError } from "../utils/api-response.js";
 
 export const notFoundHandler: NotFoundHandler = (c) => {
-  return sendError(
-    c,
-    `Route ${c.req.method} ${c.req.path} not found`,
-    STATUS_CODES.NOT_FOUND,
-  );
+  return sendError(c, `Route ${c.req.method} ${c.req.path} not found`, STATUS_CODES.NOT_FOUND);
 };
 
 export const onErrorHandler: ErrorHandler = (err, c) => {
@@ -49,9 +45,5 @@ export const onErrorHandler: ErrorHandler = (err, c) => {
     stack: err instanceof Error ? err.stack : undefined,
   });
 
-  return sendError(
-    c,
-    "Internal Server Error",
-    STATUS_CODES.INTERNAL_SERVER_ERROR,
-  );
+  return sendError(c, "Internal Server Error", STATUS_CODES.INTERNAL_SERVER_ERROR);
 };

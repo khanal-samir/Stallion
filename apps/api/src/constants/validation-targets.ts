@@ -5,5 +5,4 @@ export const VALIDATION_TARGET = {
   PARAM: "param",
 } as const;
 
-export type ValidationTarget =
-  (typeof VALIDATION_TARGET)[keyof typeof VALIDATION_TARGET];
+export type ValidationTarget = (typeof VALIDATION_TARGET)[keyof typeof VALIDATION_TARGET];

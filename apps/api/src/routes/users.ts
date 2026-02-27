@@ -1,14 +1,6 @@
 import { Hono } from "hono";
-import {
-  createUserSchema,
-  updateUserParamsSchema,
-  updateUserSchema,
-} from "@workspace/validators";
-import {
-  createUser,
-  listUsers,
-  updateUser,
-} from "../controllers/users.controller.js";
+import { createUserSchema, updateUserParamsSchema, updateUserSchema } from "@workspace/validators";
+import { createUser, listUsers, updateUser } from "../controllers/users.controller.js";
 import { VALIDATION_TARGET } from "../constants/validation-targets.js";
 import { validateRequest } from "../middlewares/validate-request.js";
 

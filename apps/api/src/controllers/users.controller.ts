@@ -14,10 +14,6 @@ export async function createUser(c: Context, payload: CreateUserInput) {
   return sendSuccess(c, { user: payload }, STATUS_CODES.CREATED);
 }
 
-export async function updateUser(
-  c: Context,
-  id: string,
-  payload: UpdateUserInput,
-) {
+export async function updateUser(c: Context, id: string, payload: UpdateUserInput) {
   return sendSuccess(c, { user: { id, ...payload } }, STATUS_CODES.OK);
 }

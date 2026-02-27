@@ -8,10 +8,7 @@ type ValidationSchema = {
   safeParse: (value: unknown) => unknown;
 };
 
-export function validateRequest(
-  target: keyof ValidationTargets,
-  schema: ValidationSchema,
-) {
+export function validateRequest(target: keyof ValidationTargets, schema: ValidationSchema) {
   return zValidator(target, schema as never, (result) => {
     if (result.success) {
       return;

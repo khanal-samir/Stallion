@@ -65,15 +65,10 @@ export default function ResetPasswordPage() {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Password reset</CardTitle>
-          <CardDescription>
-            Your password has been successfully reset.
-          </CardDescription>
+          <CardDescription>Your password has been successfully reset.</CardDescription>
         </CardHeader>
         <CardFooter className="justify-center">
-          <Link
-            href="/login"
-            className="text-foreground hover:underline text-sm"
-          >
+          <Link href="/login" className="text-foreground hover:underline text-sm">
             Sign in with your new password
           </Link>
         </CardFooter>
@@ -90,9 +85,7 @@ export default function ResetPasswordPage() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">
-              {error}
-            </div>
+            <div className="bg-destructive/10 text-destructive rounded-md p-3 text-sm">{error}</div>
           )}
           <div className="space-y-2">
             <Label htmlFor="password">New password</Label>
@@ -124,10 +117,7 @@ export default function ResetPasswordPage() {
         </form>
       </CardContent>
       <CardFooter className="justify-center">
-        <Link
-          href="/login"
-          className="text-muted-foreground hover:text-foreground text-sm"
-        >
+        <Link href="/login" className="text-muted-foreground hover:text-foreground text-sm">
           Back to sign in
         </Link>
       </CardFooter>
