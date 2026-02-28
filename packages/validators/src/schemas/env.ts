@@ -15,4 +15,11 @@ export const apiEnvSchema = z
   })
   .strict();
 
+export const webEnvSchema = z
+  .object({
+    NEXT_PUBLIC_API_URL: z.string().url("NEXT_PUBLIC_API_URL must be a valid URL"),
+  })
+  .strict();
+
 export type ApiEnv = z.infer<typeof apiEnvSchema>;
+export type WebEnv = z.infer<typeof webEnvSchema>;

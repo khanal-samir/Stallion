@@ -6,6 +6,21 @@ import * as schema from "../db/schema/index.js";
 import { env } from "../config/env.js";
 import { sendEmail } from "./email.js";
 
+function getTokenFromAuthUrl(url: string): string | null {
+  try {
+    const parsedUrl = new URL(url);
+    const queryToken = parsedUrl.searchParams.get("token");
+    if (queryToken) {
+      return queryToken;
+    }
+
+    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+    return pathParts.at(-1) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 const authSchema = {
   user: schema.user,
   session: schema.session,
@@ -31,10 +46,15 @@ export const auth = betterAuth({
     minPasswordLength: 6,
     autoSignIn: false,
     sendResetPassword: async ({ user, url }) => {
+      const token = getTokenFromAuthUrl(url);
+      const resetUrl = token
+        ? `${env.WEB_URL}/reset-password?token=${encodeURIComponent(token)}`
+        : `${env.WEB_URL}/reset-password`;
+
       void sendEmail({
         to: user.email,
         subject: "Reset your password",
-        html: `<p>Click the link below to reset your password:</p><a href="${url}">${url}</a>`,
+        html: `<p>Click the link below to reset your password:</p><a href="${resetUrl}">${resetUrl}</a>`,
       });
     },
   },
@@ -48,10 +68,15 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
+      const token = getTokenFromAuthUrl(url);
+      const verifyUrl = token
+        ? `${env.WEB_URL}/verify-email?token=${encodeURIComponent(token)}`
+        : `${env.WEB_URL}/verify-email`;
+
       void sendEmail({
         to: user.email,
         subject: "Verify your email address",
-        html: `<p>Click the link below to verify your email address:</p><a href="${url}">${url}</a>`,
+        html: `<p>Click the link below to verify your email address:</p><a href="${verifyUrl}">${verifyUrl}</a>`,
       });
     },
   },
