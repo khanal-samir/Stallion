@@ -64,6 +64,17 @@ export const auth = betterAuth({
       maxAge: 60 * 5,
     },
   },
+  advanced: {
+    disableCSRFCheck: env.NODE_ENV === "development",
+  },
   trustedOrigins: [env.WEB_URL],
   plugins: [openAPI()],
 });
+
+//  Better Auth automatically:
+// 1. Reads session token from cookie
+// 2. Decrypts/verifies token using BETTER_AUTH_SECRET
+// 3. If cookieCache valid (< 5 min) → use cached data
+// 4. Else → query database for session
+// 5. Check if session expired (> 30 days old)
+// 6. If active recently (< 24hrs) → extend expiry

@@ -15,7 +15,9 @@
     "db:push": "turbo run db:push --filter=api",
     "db:generate": "turbo run db:generate --filter=api",
     "db:migrate": "turbo run db:migrate --filter=api",
-    "db:studio": "turbo run db:studio --filter=api"
+    "db:studio": "turbo run db:studio --filter=api",
+    "db:reset:schema": "turbo run db:reset --filter=api",
+    "db:reset": "pnpm docker:clean && pnpm docker:up && pnpm db:migrate"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",

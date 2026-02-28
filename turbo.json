@@ -20,9 +20,12 @@
       "cache": false
     },
     "db:generate": {
-      "outputs": ["drizzle/**"]
+      "outputs": ["src/db/drizzle/**", "drizzle/**"]
     },
     "db:migrate": {
+      "cache": false
+    },
+    "db:reset": {
       "cache": false
     },
     "db:studio": {
