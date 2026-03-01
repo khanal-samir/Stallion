@@ -9,7 +9,7 @@ export const useError = () => {
       if (state.error !== prevState.error && state.error !== null) {
         const { message } = normalizeApiError(state.error);
 
-        sileo.error({ description: message });
+        sileo.error({ title: message });
         // Clear error after showing to prevent duplicate toasts
         useErrorStore.getState().clearError();
       }
