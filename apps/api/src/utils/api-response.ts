@@ -1,20 +1,7 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { STATUS_CODES, type StatusCode } from "../constants/status-codes.js";
-
-type ApiSuccessResponse<T> = {
-  success: true;
-  data: T;
-  message?: string;
-};
-
-type ApiErrorResponse = {
-  success: false;
-  error: {
-    message: string;
-    details?: unknown;
-  };
-};
+import { ApiErrorResponse, ApiSuccessResponse } from "@workspace/validators";
 
 export function sendSuccess<T>(
   c: Context,

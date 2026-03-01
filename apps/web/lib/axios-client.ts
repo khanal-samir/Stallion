@@ -12,16 +12,6 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-export function createServerApiClient(cookieHeader: string) {
-  return axios.create({
-    baseURL: env.NEXT_PUBLIC_API_URL,
-    withCredentials: true,
-    headers: {
-      cookie: cookieHeader,
-    },
-  });
-}
-
 export function normalizeApiError(error: unknown): ApiError {
   if (!axios.isAxiosError(error)) {
     return { message: "An unexpected error occurred" };
