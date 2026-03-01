@@ -47,7 +47,14 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     });
 
     if (error) {
-      sileo.error({ title: error.message });
+      sileo.error({
+        title: "Error creating account",
+        description: (
+          <h1 className="text-center font-bold">
+            {error.statusText}: {error.message}
+          </h1>
+        ),
+      });
       return;
     }
     sileo.success({

@@ -5,6 +5,7 @@ import { db } from "../db/client.js";
 import * as schema from "../db/schema/index.js";
 import { env } from "../config/env.js";
 import { sendEmail } from "./email.js";
+import { logger } from "../config/logger.js";
 
 function getTokenFromAuthUrl(url: string): string | null {
   try {
@@ -45,11 +46,22 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     minPasswordLength: 6,
     autoSignIn: false,
+    // always return success response to prevent email enumeration attacks
     sendResetPassword: async ({ user, url }) => {
       const token = getTokenFromAuthUrl(url);
       const resetUrl = token
         ? `${env.WEB_URL}/reset-password?token=${encodeURIComponent(token)}`
         : `${env.WEB_URL}/reset-password`;
+
+      const isVerified = await db.query.user.findFirst({
+        where: (userTable, { eq }) => eq(userTable.id, user.id),
+        columns: { emailVerified: true },
+      });
+
+      if (!isVerified?.emailVerified) {
+        logger.warn(`Attempt to send reset password email to unverified user: ${user.email}`);
+        return;
+      }
 
       void sendEmail({
         to: user.email,
@@ -90,16 +102,8 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    disableCSRFCheck: env.NODE_ENV === "development",
+    disableCSRFCheck: env.NODE_ENV === "development", // for postman
   },
   trustedOrigins: [env.WEB_URL],
   plugins: [openAPI()],
 });
-
-//  Better Auth automatically:
-// 1. Reads session token from cookie
-// 2. Decrypts/verifies token using BETTER_AUTH_SECRET
-// 3. If cookieCache valid (< 5 min) → use cached data
-// 4. Else → query database for session
-// 5. Check if session expired (> 30 days old)
-// 6. If active recently (< 24hrs) → extend expiry
