@@ -7,14 +7,17 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:clean": "docker-compose down -v",
-    "db:push": "turbo run db:push --filter=@workspace/db",
-    "db:generate": "turbo run db:generate --filter=@workspace/db",
-    "db:migrate": "turbo run db:migrate --filter=@workspace/db",
-    "db:studio": "turbo run db:studio --filter=@workspace/db"
+    "db:push": "turbo run db:push --filter=api",
+    "db:generate": "turbo run db:generate --filter=api",
+    "db:migrate": "turbo run db:migrate --filter=api",
+    "db:studio": "turbo run db:studio --filter=api",
+    "db:reset:schema": "turbo run db:reset --filter=api",
+    "db:reset": "pnpm docker:clean && pnpm docker:up && pnpm db:migrate"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
@@ -31,5 +34,8 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
   }
 }

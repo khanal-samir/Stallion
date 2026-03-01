@@ -1,36 +1,21 @@
 import { Hono } from "hono";
-import { logger } from "hono/logger";
-import { cors } from "hono/cors";
-import { auth } from "./lib/auth.js";
-import { userRoutes } from "./routes/users.js";
+import { env } from "./config/env.js";
+import { corsMiddleware } from "./lib/cors.js";
+import { notFoundHandler, onErrorHandler } from "./lib/http-handlers.js";
+import { requestLogger } from "./middlewares/request-logger.js";
+import { registerRoutes } from "./routes/index.js";
 
 const app = new Hono();
 
-app.use("*", logger());
+app.use("*", requestLogger); // Logs route, method, status code, and duration for all requests
+app.use("*", corsMiddleware);
 
-app.use(
-  "*",
-  cors({
-    origin: process.env.WEB_URL!,
-    credentials: true,
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  }),
-);
+registerRoutes(app);
 
-app.on(["POST", "GET"], "/api/auth/**", (c) => {
-  return auth.handler(c.req.raw);
-});
-
-app.get("/health", (c) => c.json({ status: "ok" }));
-
-app.route("/users", userRoutes);
-
-const port = Number(process.env.PORT!);
-
-console.log(`API running on ${port}`);
+app.notFound(notFoundHandler);
+app.onError(onErrorHandler);
 
 export default {
-  port,
+  port: env.PORT,
   fetch: app.fetch,
 };

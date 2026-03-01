@@ -16,16 +16,16 @@ To add components to your app, run the following command at the root of your `we
 pnpm dlx shadcn@latest add button -c apps/web
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+This will place the ui components in the `apps/web/components/ui` directory.
 
 ## Tailwind
 
-Your `tailwind.config.ts` and `globals.css` are already set up to use the components from the `ui` package.
+Your `globals.css` is already set up to use the components in the `web` app.
 
 ## Using components
 
-To use the components in your app, import them from the `ui` package.
+To use the components in your app, import them from the local `web` aliases.
 
 ```tsx
-import { Button } from "@workspace/ui/components/button"
+import { Button } from "@/components/ui/button";
 ```

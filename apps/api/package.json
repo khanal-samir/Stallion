@@ -8,19 +8,29 @@
     "build": "tsc",
     "start": "bun run src/server.ts",
     "check-types": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:reset": "drizzle-kit push --force"
   },
   "dependencies": {
-    "@workspace/db": "workspace:*",
+    "@hono/zod-validator": "^0.7.6",
     "@workspace/validators": "workspace:*",
     "better-auth": "^1.2.8",
+    "drizzle-orm": "^0.44.2",
     "hono": "^4.7.4",
-    "resend": "^4.5.2"
+    "postgres": "^3.4.7",
+    "resend": "^4.5.2",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/bun": "^1.2.14",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "dotenv": "^17.3.1",
+    "drizzle-kit": "^0.31.1",
     "eslint": "^9.39.2",
     "typescript": "5.9.3"
   }

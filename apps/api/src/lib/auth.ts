@@ -1,9 +1,33 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@workspace/db/client";
-import * as schema from "@workspace/db/schema";
-import { sendEmail } from "./email.js";
 import { openAPI } from "better-auth/plugins";
+import { db } from "../db/client.js";
+import * as schema from "../db/schema/index.js";
+import { env } from "../config/env.js";
+import { sendEmail } from "./email.js";
+import { logger } from "../config/logger.js";
+
+function getTokenFromAuthUrl(url: string): string | null {
+  try {
+    const parsedUrl = new URL(url);
+    const queryToken = parsedUrl.searchParams.get("token");
+    if (queryToken) {
+      return queryToken;
+    }
+
+    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+    return pathParts.at(-1) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const authSchema = {
+  user: schema.user,
+  session: schema.session,
+  account: schema.account,
+  verification: schema.verification,
+};
 
 export const auth = betterAuth({
   rateLimit: {
@@ -13,48 +37,73 @@ export const auth = betterAuth({
   },
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema,
+    schema: authSchema,
   }),
-  baseURL: process.env.BETTER_AUTH_URL!,
-  secret: process.env.BETTER_AUTH_SECRET!,
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    minPasswordLength:6,
-    autoSignIn:false,
+    minPasswordLength: 6,
+    autoSignIn: false,
+    // always return success response to prevent email enumeration attacks
     sendResetPassword: async ({ user, url }) => {
+      const token = getTokenFromAuthUrl(url);
+      const resetUrl = token
+        ? `${env.WEB_URL}/reset-password?token=${encodeURIComponent(token)}`
+        : `${env.WEB_URL}/reset-password`;
+
+      const isVerified = await db.query.user.findFirst({
+        where: (userTable, { eq }) => eq(userTable.id, user.id),
+        columns: { emailVerified: true },
+      });
+
+      if (!isVerified?.emailVerified) {
+        logger.warn(`Attempt to send reset password email to unverified user: ${user.email}`);
+        return;
+      }
+
       void sendEmail({
         to: user.email,
         subject: "Reset your password",
-        html: `<p>Click the link below to reset your password:</p><a href="${url}">${url}</a>`,
+        html: `<p>Click the link below to reset your password:</p><a href="${resetUrl}">${resetUrl}</a>`,
       });
     },
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     },
   },
   emailVerification: {
     sendOnSignUp: true,
-    autoSignInAfterVerification:true,
+    autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
+      const token = getTokenFromAuthUrl(url);
+      const verifyUrl = token
+        ? `${env.WEB_URL}/verify-email?token=${encodeURIComponent(token)}`
+        : `${env.WEB_URL}/verify-email`;
+
       void sendEmail({
         to: user.email,
         subject: "Verify your email address",
-        html: `<p>Click the link below to verify your email address:</p><a href="${url}">${url}</a>`,
+        html: `<p>Click the link below to verify your email address:</p><a href="${verifyUrl}">${verifyUrl}</a>`,
       });
     },
   },
   session: {
-  expiresIn: 60 * 60 * 24 * 30, // session lasts 30 days
-  updateAge: 60 * 60 * 24, // extend session expiry once per day if user is active
-  cookieCache: {
-    enabled: true,
-    maxAge: 60 * 5, // trust cookie for 5 min before re-checking DB — reduces DB load
+    expiresIn: 60 * 60 * 24 * 30, //session expires in 30 days
+    updateAge: 60 * 60 * 24, // session is updated every 24 hours if the user is active
+    cookieCache: {
+      // enables cookie caching for 5 minutes to reduce database lookups
+      enabled: true,
+      maxAge: 60 * 5,
+    },
   },
-},
-  trustedOrigins: [process.env.WEB_URL!],
+  advanced: {
+    disableCSRFCheck: env.NODE_ENV === "development", // for postman
+  },
+  trustedOrigins: [env.WEB_URL],
   plugins: [openAPI()],
 });

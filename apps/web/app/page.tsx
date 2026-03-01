@@ -1,15 +1,25 @@
-import { Button } from "@workspace/ui/components/button"
+import { Navbar } from "@/components/landing/navbar";
+import { HeroSection } from "@/components/landing/hero-section";
+import { LogoStrip } from "@/components/landing/logo-strip";
+import { FeaturesSection } from "@/components/landing/features-section";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { TestimonialsSection } from "@/components/landing/testimonials-section";
+import { CtaSection } from "@/components/landing/cta-section";
+import { Footer } from "@/components/landing/footer";
 
 export default function Page() {
   return (
-    <div className="flex items-center justify-center min-h-svh">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Hello World</h1>
-        <div className="flex gap-2">
-          <Button>Button</Button>
-          <Button variant="outline">Outline</Button>
-        </div>
-      </div>
+    <div className="min-h-screen">
+      <Navbar />
+      <main id="main-content">
+        <HeroSection />
+        <LogoStrip />
+        <FeaturesSection />
+        <HowItWorks />
+        <TestimonialsSection />
+        <CtaSection />
+      </main>
+      <Footer />
     </div>
-  )
+  );
 }
