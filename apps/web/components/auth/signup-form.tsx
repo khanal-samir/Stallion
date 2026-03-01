@@ -28,7 +28,7 @@ import { sileo } from "sileo";
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
   const { initiateGoogleLogin } = useGoogleAuth();
-  const [isPending, startTransition] = useTransition();
+  const [isNavigating, startTransition] = useTransition();
 
   const form = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -49,11 +49,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     if (error) {
       sileo.error({
         title: "Error creating account",
-        description: (
-          <h1 className="text-center font-bold">
-            {error.statusText}: {error.message}
-          </h1>
-        ),
+        description: `${error.message}`,
       });
       return;
     }
@@ -64,9 +60,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     startTransition(() => router.push("/verify-email?message=check-email"));
   };
 
+  const isSubmitting = form.formState.isSubmitting;
+  const isPending = isSubmitting || isNavigating;
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="hover:shadow-sm transition-shadow duration-200">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
           <CardDescription>Sign up with your Google account or email</CardDescription>
@@ -135,14 +134,14 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
               />
 
               <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? "Creating account..." : "Sign Up"}
+                {isSubmitting ? "Creating account..." : isNavigating ? "Redirecting..." : "Sign Up"}
               </Button>
 
               <FormDescription className="text-center text-sm">
                 Already have an account?{" "}
                 <Link
                   href="/login"
-                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                  className="font-medium text-foreground underline-offset-4 hover:underline cursor-pointer"
                 >
                   Sign in
                 </Link>
@@ -153,11 +152,17 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
       </Card>
       <p className="px-2 text-center text-xs text-muted-foreground">
         By clicking continue, you agree to our{" "}
-        <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
+        <Link
+          href="/terms"
+          className="underline underline-offset-4 hover:text-foreground cursor-pointer"
+        >
           Terms of Service
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
+        <Link
+          href="/privacy"
+          className="underline underline-offset-4 hover:text-foreground cursor-pointer"
+        >
           Privacy Policy
         </Link>
         .

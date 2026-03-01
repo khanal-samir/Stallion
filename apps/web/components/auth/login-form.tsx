@@ -48,11 +48,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     if (error) {
       sileo.error({
         title: "Error",
-        description: (
-          <h1 className="text-center font-bold">
-            {error.statusText}: {error.message}
-          </h1>
-        ),
+        description: `${error.message}`,
       });
       return;
     }
@@ -68,7 +64,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="hover:shadow-sm transition-shadow duration-200">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>Login with your Google account or email</CardDescription>
@@ -119,7 +115,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                       <FormLabel>Password</FormLabel>
                       <Link
                         href="/forgot-password"
-                        className="ml-auto text-xs text-muted-foreground underline-offset-4 hover:underline font-medium"
+                        className="ml-auto text-xs text-muted-foreground underline-offset-4 hover:underline font-medium cursor-pointer"
                       >
                         Forgot your password?
                       </Link>
@@ -140,7 +136,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/signup"
-                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                  className="font-medium text-foreground underline-offset-4 hover:underline cursor-pointer"
                 >
                   Sign up
                 </Link>
@@ -152,11 +148,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
       <p className="px-2 text-center text-xs text-muted-foreground">
         By clicking continue, you agree to our{" "}
-        <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
+        <Link
+          href="/terms"
+          className="underline underline-offset-4 hover:text-foreground cursor-pointer"
+        >
           Terms of Service
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
+        <Link
+          href="/privacy"
+          className="underline underline-offset-4 hover:text-foreground cursor-pointer"
+        >
           Privacy Policy
         </Link>
         .

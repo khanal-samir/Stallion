@@ -58,11 +58,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
     if (error) {
       sileo.error({
         title: "Error",
-        description: (
-          <h1 className="text-center font-bold">
-            {error.statusText}: {error.message}
-          </h1>
-        ),
+        description: `${error.message}`,
       });
       return;
     }
@@ -76,7 +72,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="hover:shadow-sm transition-shadow duration-200">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-2xl font-bold">Reset password</CardTitle>
           <CardDescription>Enter your new password below</CardDescription>
@@ -129,7 +125,10 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
           </Form>
         </CardContent>
         <CardFooter className="justify-center">
-          <Link href="/login" className="text-muted-foreground hover:text-foreground text-sm">
+          <Link
+            href="/login"
+            className="text-muted-foreground hover:text-foreground text-sm cursor-pointer"
+          >
             Back to sign in
           </Link>
         </CardFooter>
