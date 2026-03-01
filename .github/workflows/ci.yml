@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint, Type Check & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── pnpm ────────────────────────────────────────────────────
+      # Version is inferred from the `packageManager` field in package.json
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      # ── Node.js ─────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      # ── Dependencies ────────────────────────────────────────────
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Lint ────────────────────────────────────────────────────
+      - name: Lint
+        run: pnpm lint
+
+      # ── Type Check ──────────────────────────────────────────────
+      - name: Type check
+        run: pnpm check-types
+
+      # ── Build ───────────────────────────────────────────────────
+      - name: Build
+        run: pnpm build
