@@ -13,22 +13,29 @@ const publicRoutes = [
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (publicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
-    return NextResponse.next();
-  }
-
+  // Skip static files and API routes
   if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
   const sessionCookie = getSessionCookie(request);
+  const isPublicRoute = publicRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
 
-  if (!sessionCookie) {
+  // Authenticated user trying to access public route → redirect to dashboard
+  if (sessionCookie && isPublicRoute) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // Unauthenticated user trying to access protected route → redirect to login
+  if (!sessionCookie && !isPublicRoute) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  // Allow all other cases
   return NextResponse.next();
 }
 
