@@ -15,9 +15,8 @@ export const requestPasswordResetSchema = z.object({
   email: z.string().email("Enter a valid email address"),
 });
 
-export const resetPasswordSchema = z
+export const resetPasswordFormSchema = z
   .object({
-    token: z.string().min(1, "Reset token is required"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
   })
@@ -77,7 +76,8 @@ export const sessionResponseSchema = z.union([
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>;
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof requestPasswordResetSchema>;
+export type ResetPasswordFormInput = z.infer<typeof resetPasswordFormSchema>;
 export type TokenQueryInput = z.infer<typeof tokenQuerySchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
