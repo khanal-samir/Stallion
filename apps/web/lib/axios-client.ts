@@ -1,6 +1,5 @@
 import axios from "axios";
 import type { AxiosError } from "axios";
-import { env } from "@/config/env";
 
 export type ApiError = {
   message: string;
@@ -8,7 +7,7 @@ export type ApiError = {
 };
 
 export const apiClient = axios.create({
-  baseURL: env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL!,
   withCredentials: true,
 });
 
