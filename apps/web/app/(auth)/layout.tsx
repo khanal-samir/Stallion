@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/ui/logo";
 
 export const metadata: Metadata = {
   title: "Authentication — Verio",
@@ -22,8 +23,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         />
 
         <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <span className="text-xl font-bold tracking-tight">Verio</span>
+          <Link
+            href="/"
+            className="cursor-pointer transition-opacity duration-200 hover:opacity-80"
+          >
+            <Logo size="lg" className="text-foreground" />
           </Link>
         </div>
 

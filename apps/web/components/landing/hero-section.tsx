@@ -1,16 +1,14 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+const columns = [
+  { label: "New Lead", count: 12, color: "bg-muted-foreground/20" },
+  { label: "Contacted", count: 8, color: "bg-muted-foreground/30" },
+  { label: "Meeting Set", count: 5, color: "bg-muted-foreground/20" },
+  { label: "Proposal", count: 3, color: "bg-muted-foreground/15" },
+  { label: "Closed Won", count: 7, color: "bg-muted-foreground/25" },
+];
 function DashboardMockup() {
-  const columns = [
-    { label: "New Lead", count: 12, color: "bg-muted-foreground/20" },
-    { label: "Contacted", count: 8, color: "bg-muted-foreground/30" },
-    { label: "Meeting Set", count: 5, color: "bg-muted-foreground/20" },
-    { label: "Proposal", count: 3, color: "bg-muted-foreground/15" },
-    { label: "Closed Won", count: 7, color: "bg-muted-foreground/25" },
-  ];
-
   return (
     <div className="max-w-5xl mx-auto mt-16 relative">
       <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
@@ -67,7 +65,7 @@ function DashboardMockup() {
       </div>
 
       {/* Subtle gradient fade at bottom */}
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background to-transparent pointer-events-none" />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/ui/logo";
 
 interface FooterLinkGroup {
   title: string;
@@ -43,9 +44,9 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link
               href="/"
-              className="text-xl font-bold text-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             >
-              Verio
+              <Logo size="lg" className="text-foreground" />
             </Link>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
               The modern CRM built for outbound sales teams. Manage contacts, automate sequences,

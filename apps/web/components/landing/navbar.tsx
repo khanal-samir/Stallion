@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Logo } from "@/components/ui/logo";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -49,9 +50,9 @@ export function Navbar() {
             {/* Left: Logo */}
             <Link
               href="/"
-              className="text-xl font-bold text-foreground cursor-pointer transition-opacity duration-200 hover:opacity-80"
+              className="cursor-pointer transition-opacity duration-200 hover:opacity-80"
             >
-              Verio
+              <Logo size="lg" className="text-foreground" />
             </Link>
 
             {/* Center: Nav Links (Desktop) */}
