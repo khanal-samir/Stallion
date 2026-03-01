@@ -56,7 +56,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
             position="top-center"
             options={{
               fill: "#171717",
-              styles: { description: "text-white/75!" },
+              duration: 5000,
+              roundness: 16,
+              styles: {
+                title: "text-white!",
+                description: "text-white/75!",
+              },
             }}
             theme="system"
           />
