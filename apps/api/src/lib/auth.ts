@@ -102,6 +102,9 @@ export const auth = betterAuth({
     },
   },
   advanced: {
+    database: {
+      generateId: "uuid",
+    },
     disableCSRFCheck: env.NODE_ENV === "development", // for postman
   },
   trustedOrigins: [env.WEB_URL],
