@@ -7,7 +7,7 @@ import * as schema from "@/db/schema/index.js";
 import { env } from "@/config/env.js";
 import { sendEmail } from "./email.js";
 import { logger } from "@/config/logger.js";
-import { getTokenFromAuthUrl } from "@/utils/get-token-from-url.js";
+import { getTokenFromAuthUrl } from "@/helpers/get-token-from-url.js";
 
 const authSchema = {
   user: schema.user,

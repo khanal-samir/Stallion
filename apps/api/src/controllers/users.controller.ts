@@ -4,7 +4,7 @@ import type {
   UpdateUser as UpdateUserInput,
 } from "@workspace/validators";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { sendSuccess } from "@/utils/api-response.js";
+import { sendSuccess } from "@/helpers/api-response.js";
 
 export async function listUsers(c: Context) {
   return sendSuccess(c, { users: [] }, STATUS_CODES.OK);

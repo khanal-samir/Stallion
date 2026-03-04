@@ -3,8 +3,8 @@ import { HTTPException } from "hono/http-exception";
 import type { StatusCode } from "@/constants/status-codes.js";
 import { logger } from "@/config/logger.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { AppError } from "@/utils/app-error.js";
-import { sendError } from "@/utils/api-response.js";
+import { AppError } from "@/helpers/app-error.js";
+import { sendError } from "@/helpers/api-response.js";
 
 export const notFoundHandler: NotFoundHandler = (c) => {
   return sendError(c, `Route ${c.req.method} ${c.req.path} not found`, STATUS_CODES.NOT_FOUND);
