@@ -1,5 +1,5 @@
 {
-  "id": "c0282c43-2aad-435e-a5be-58c4c226f3f8",
+  "id": "0b0f8253-48dd-46dc-bc5f-42ea654416e8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -165,6 +165,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "active_organization_id": {
+          "name": "active_organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "token": {
           "name": "token",
@@ -1020,7 +1026,7 @@
           "name": "token",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "status": {
           "name": "status",
@@ -1087,6 +1093,36 @@
           "method": "btree",
           "with": {}
         },
+        "workspace_invites_status_idx": {
+          "name": "workspace_invites_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "workspace_invites_expires_at_idx": {
+          "name": "workspace_invites_expires_at_idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "workspace_invites_created_by_idx": {
           "name": "workspace_invites_created_by_idx",
           "columns": [
@@ -1138,14 +1174,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "token"
-          ]
-        },
-        "workspace_invites_workspace_email_unique": {
-          "name": "workspace_invites_workspace_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "workspace_id",
-            "email"
           ]
         }
       },
@@ -1294,6 +1322,19 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "logo": {
+          "name": "logo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::jsonb"
         },
         "created_at": {
           "name": "created_at",

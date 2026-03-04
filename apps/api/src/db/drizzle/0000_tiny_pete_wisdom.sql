@@ -17,6 +17,7 @@ CREATE TABLE "account" (
 CREATE TABLE "session" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
+	"active_organization_id" uuid,
 	"token" text NOT NULL,
 	"expires_at" timestamp NOT NULL,
 	"ip_address" text,
@@ -99,14 +100,13 @@ CREATE TABLE "workspace_invites" (
 	"workspace_id" uuid NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"role" text DEFAULT 'member' NOT NULL,
-	"token" varchar(255) NOT NULL,
+	"token" varchar(255),
 	"status" text DEFAULT 'pending' NOT NULL,
 	"expires_at" timestamp NOT NULL,
 	"created_by" uuid,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "workspace_invites_token_unique" UNIQUE("token"),
-	CONSTRAINT "workspace_invites_workspace_email_unique" UNIQUE("workspace_id","email")
+	CONSTRAINT "workspace_invites_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
 CREATE TABLE "workspace_members" (
@@ -123,6 +123,8 @@ CREATE TABLE "workspaces" (
 	"name" varchar(255) NOT NULL,
 	"owner_id" uuid NOT NULL,
 	"slug" varchar(255) NOT NULL,
+	"logo" text,
+	"metadata" jsonb DEFAULT '{}'::jsonb,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "workspaces_slug_unique" UNIQUE("slug")
@@ -162,6 +164,8 @@ CREATE INDEX "people_email_idx" ON "people" USING btree ("email");--> statement-
 CREATE INDEX "people_status_idx" ON "people" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "workspace_invites_workspace_id_idx" ON "workspace_invites" USING btree ("workspace_id");--> statement-breakpoint
 CREATE INDEX "workspace_invites_email_idx" ON "workspace_invites" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "workspace_invites_status_idx" ON "workspace_invites" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "workspace_invites_expires_at_idx" ON "workspace_invites" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "workspace_invites_created_by_idx" ON "workspace_invites" USING btree ("created_by");--> statement-breakpoint
 CREATE INDEX "workspace_members_workspace_id_idx" ON "workspace_members" USING btree ("workspace_id");--> statement-breakpoint
 CREATE INDEX "workspace_members_user_id_idx" ON "workspace_members" USING btree ("user_id");--> statement-breakpoint

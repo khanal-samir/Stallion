@@ -27,6 +27,7 @@ export const session = pgTable(
     userId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    activeOrganizationId: uuid(),
     token: text().notNull().unique(),
     expiresAt: timestamp().notNull(),
     ipAddress: text(),
