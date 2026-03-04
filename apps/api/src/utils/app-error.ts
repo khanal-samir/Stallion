@@ -1,4 +1,4 @@
-import { STATUS_CODES, type StatusCode } from "../constants/status-codes.js";
+import { STATUS_CODES, type StatusCode } from "@/constants/status-codes.js";
 
 export class AppError extends Error {
   readonly statusCode: StatusCode;

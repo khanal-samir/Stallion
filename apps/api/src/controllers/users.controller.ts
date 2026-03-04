@@ -3,8 +3,8 @@ import type {
   CreateUser as CreateUserInput,
   UpdateUser as UpdateUserInput,
 } from "@workspace/validators";
-import { STATUS_CODES } from "../constants/status-codes.js";
-import { sendSuccess } from "../utils/api-response.js";
+import { STATUS_CODES } from "@/constants/status-codes.js";
+import { sendSuccess } from "@/utils/api-response.js";
 
 export async function listUsers(c: Context) {
   return sendSuccess(c, { users: [] }, STATUS_CODES.OK);

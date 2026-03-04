@@ -2,26 +2,12 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
 import { organization } from "better-auth/plugins/organization";
-import { db } from "../db/client.js";
-import * as schema from "../db/schema/index.js";
-import { env } from "../config/env.js";
+import { db } from "@/db/client.js";
+import * as schema from "@/db/schema/index.js";
+import { env } from "@/config/env.js";
 import { sendEmail } from "./email.js";
-import { logger } from "../config/logger.js";
-
-function getTokenFromAuthUrl(url: string): string | null {
-  try {
-    const parsedUrl = new URL(url);
-    const queryToken = parsedUrl.searchParams.get("token");
-    if (queryToken) {
-      return queryToken;
-    }
-
-    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
-    return pathParts.at(-1) ?? null;
-  } catch {
-    return null;
-  }
-}
+import { logger } from "@/config/logger.js";
+import { getTokenFromAuthUrl } from "@/utils/get-token-from-url.js";
 
 const authSchema = {
   user: schema.user,
