@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { dateLikeSchema, idSchema } from "./common.js";
 
 export const signInSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -34,11 +35,9 @@ export const verifyEmailSchema = z.object({
   token: z.string().min(1, "Verification token is required"),
 });
 
-const dateLikeSchema = z.union([z.string(), z.date()]);
-
 export const authUserSchema = z
   .object({
-    id: z.string().min(1),
+    id: idSchema,
     email: z.string().email(),
     name: z.string().nullable().optional(),
     emailVerified: z.boolean().optional(),
@@ -50,8 +49,8 @@ export const authUserSchema = z
 
 export const authSessionSchema = z
   .object({
-    id: z.string().min(1),
-    userId: z.string().min(1),
+    id: idSchema,
+    userId: idSchema,
     expiresAt: dateLikeSchema.optional(),
     createdAt: dateLikeSchema.optional(),
     updatedAt: dateLikeSchema.optional(),

@@ -1,8 +1,8 @@
 import type { ValidationTargets } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { STATUS_CODES } from "../constants/status-codes.js";
-import { VALIDATION_TARGET } from "../constants/validation-targets.js";
-import { AppError } from "../utils/app-error.js";
+import { STATUS_CODES } from "@/constants/status-codes.js";
+import { VALIDATION_TARGET } from "@/constants/validation-targets.js";
+import { AppError } from "@/helpers/app-error.js";
 
 type ValidationSchema = {
   safeParse: (value: unknown) => unknown;

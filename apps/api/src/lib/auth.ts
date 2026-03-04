@@ -1,32 +1,22 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI } from "better-auth/plugins";
-import { db } from "../db/client.js";
-import * as schema from "../db/schema/index.js";
-import { env } from "../config/env.js";
+import { organization } from "better-auth/plugins/organization";
+import { db } from "@/db/client.js";
+import * as schema from "@/db/schema/index.js";
+import { env } from "@/config/env.js";
 import { sendEmail } from "./email.js";
-import { logger } from "../config/logger.js";
-
-function getTokenFromAuthUrl(url: string): string | null {
-  try {
-    const parsedUrl = new URL(url);
-    const queryToken = parsedUrl.searchParams.get("token");
-    if (queryToken) {
-      return queryToken;
-    }
-
-    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
-    return pathParts.at(-1) ?? null;
-  } catch {
-    return null;
-  }
-}
+import { logger } from "@/config/logger.js";
+import { getTokenFromAuthUrl } from "@/helpers/get-token-from-url.js";
 
 const authSchema = {
   user: schema.user,
   session: schema.session,
   account: schema.account,
   verification: schema.verification,
+  workspaces: schema.workspaces,
+  workspaceMembers: schema.workspaceMembers,
+  workspaceInvites: schema.workspaceInvites,
 };
 
 export const auth = betterAuth({
@@ -102,8 +92,74 @@ export const auth = betterAuth({
     },
   },
   advanced: {
+    database: {
+      generateId: "uuid",
+    },
     disableCSRFCheck: env.NODE_ENV === "development", // for postman
   },
   trustedOrigins: [env.WEB_URL],
-  plugins: [openAPI()],
+  plugins: [
+    organization({
+      organizationLimit: 2,
+      membershipLimit: 10,
+      creatorRole: "admin",
+      invitationExpiresIn: 60 * 60 * 24 * 7, // invitations expire in 7 days
+      cancelPendingInvitationsOnReInvite: true,
+      requireEmailVerificationOnInvitation: true, // user email needs to be verified
+      schema: {
+        session: {
+          fields: {
+            activeOrganizationId: "activeOrganizationId",
+          },
+        },
+        organization: {
+          modelName: "workspaces",
+          additionalFields: {
+            ownerId: {
+              type: "string",
+              required: false,
+              input: false, // ownerId is set automatically in the beforeCreateOrganization hook
+              references: {
+                model: "user",
+                field: "id",
+              },
+            },
+          },
+        },
+        member: {
+          modelName: "workspaceMembers",
+          fields: {
+            organizationId: "workspaceId",
+            createdAt: "joinedAt",
+          },
+        },
+        invitation: {
+          modelName: "workspaceInvites",
+          fields: {
+            organizationId: "workspaceId",
+            inviterId: "createdBy",
+          },
+        },
+      },
+      organizationHooks: {
+        beforeCreateOrganization: async ({ organization, user }) => ({
+          data: {
+            ...organization,
+            ownerId: user.id,
+          },
+        }),
+      },
+      sendInvitationEmail: async ({ id, email, role, organization, inviter }) => {
+        const invitationUrl = `${env.WEB_URL}/accept-invitation?id=${encodeURIComponent(id)}`;
+        const inviterName = inviter.user.name || inviter.user.email;
+
+        await sendEmail({
+          to: email,
+          subject: `Invitation to join ${organization.name}`,
+          html: `<p>${inviterName} invited you to join ${organization.name} as ${role}.</p><p>Accept your invitation:</p><a href="${invitationUrl}">${invitationUrl}</a>`,
+        });
+      },
+    }),
+    openAPI(),
+  ],
 });

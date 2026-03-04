@@ -9,11 +9,11 @@
     "start": "bun run src/server.ts",
     "check-types": "tsc --noEmit",
     "lint": "eslint .",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "pnpm build && drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "db:reset": "drizzle-kit push --force"
+    "db:push": "pnpm build && drizzle-kit push",
+    "db:studio": "pnpm build && drizzle-kit studio",
+    "db:reset": "pnpm build && drizzle-kit push --force"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",

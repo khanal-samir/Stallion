@@ -6,5 +6,7 @@ export const paginationSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
 });
+export const dateLikeSchema = z.union([z.string(), z.date()]);
+export const nullableUuidSchema = z.string().uuid().nullable().optional();
 
 export type Pagination = z.infer<typeof paginationSchema>;
