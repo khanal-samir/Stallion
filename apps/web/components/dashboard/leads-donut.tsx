@@ -33,7 +33,7 @@ export function LeadsDonut() {
         <CardTitle>Leads by Source</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center">
-        <ChartContainer config={chartConfig} className="h-[180px] w-full">
+        <ChartContainer config={chartConfig} className="h-45 w-full">
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent />} />
             <Pie

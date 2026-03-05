@@ -2,6 +2,7 @@
 
 import { Download, Workflow, Send, MailOpen, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { EmailChart } from "@/components/dashboard/email-chart";
 import { LeadsDonut } from "@/components/dashboard/leads-donut";
@@ -12,19 +13,16 @@ import { ActivityFeed } from "@/components/dashboard/activity-feed";
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
-      {/* ── Header ──────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">Feb 26 &ndash; Mar 4, 2026</span>
+      <PageHeader
+        title="Dashboard"
+        actions={
           <Button variant="outline" size="sm">
             <Download className="w-4 h-4 mr-1.5" />
             Export
           </Button>
-        </div>
-      </div>
+        }
+      />
 
-      {/* ── Stat Cards ──────────────────────────────── */}
       <div className="grid grid-cols-4 gap-4">
         <StatCard
           label="Active Enrollments"
@@ -58,19 +56,16 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* ── Charts Row ──────────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">
         <EmailChart />
         <LeadsDonut />
       </div>
 
-      {/* ── Pipeline + Tasks ────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">
         <PipelineOverview />
         <TasksToday />
       </div>
 
-      {/* ── Activity Feed ───────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">
         <ActivityFeed />
       </div>

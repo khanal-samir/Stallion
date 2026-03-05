@@ -9,7 +9,7 @@ export function PipelineOverview() {
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Pipeline Overview</CardTitle>
+        <CardTitle>Deals Overview</CardTitle>
         <Button variant="link" size="sm" asChild>
           <Link href="/deals">View Deals &rarr;</Link>
         </Button>

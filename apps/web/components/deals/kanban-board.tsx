@@ -37,7 +37,7 @@ export function KanbanBoardView() {
           <KanbanColumn
             key={stage}
             value={stage}
-            className="w-[340px] shrink-0 bg-card rounded-xl border shadow-sm flex flex-col h-fit"
+            className="w-85 shrink-0 bg-card rounded-xl border shadow-sm flex flex-col h-fit"
           >
             {/* Column header */}
             <div className="bg-muted/50 rounded-t-lg border-b px-4 py-3 flex items-center justify-between">
@@ -55,7 +55,7 @@ export function KanbanBoardView() {
             {/* Column content */}
             <KanbanColumnContent
               value={stage}
-              className="bg-muted/30 rounded-lg mx-2 p-3 flex flex-col gap-2 flex-1 min-h-[150px]"
+              className="bg-muted/30 rounded-lg mx-2 p-3 flex flex-col gap-2 flex-1 min-h-37.5"
             >
               {(columns[stage] ?? []).map((deal) => (
                 <KanbanItem key={deal.id} value={deal.id} asChild>
@@ -77,7 +77,7 @@ export function KanbanBoardView() {
       </KanbanBoard>
 
       <KanbanOverlay>
-        <div className="bg-card border border-primary/50 rounded-lg opacity-80 rotate-1 shadow-xl w-[324px] h-[120px]" />
+        <div className="bg-card border border-primary/50 rounded-lg opacity-80 rotate-1 shadow-xl w-81 h-30" />
       </KanbanOverlay>
     </Kanban>
   );
