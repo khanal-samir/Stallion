@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, dateLikeSchema } from "./common.validator.js";
+import { idSchema, dateLikeSchema, workspaceRoleSchema } from "./common.validator.js";
 
 export const workspaceSlugSchema = z
   .string()
@@ -25,6 +25,13 @@ export const createWorkspaceSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
 });
 
+export const inviteSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+  role: z.enum([workspaceRoleSchema.Enum.admin, workspaceRoleSchema.Enum.member], {
+    message: "Role must be either 'admin' or 'member'",
+  }),
+});
+
 export const updateWorkspaceSchema = createWorkspaceSchema.partial();
 export const workspaceParamsSchema = z.object({ id: idSchema });
 
@@ -32,3 +39,4 @@ export type Workspace = z.infer<typeof workspaceSchema>;
 export type CreateWorkspace = z.infer<typeof createWorkspaceSchema>;
 export type UpdateWorkspace = z.infer<typeof updateWorkspaceSchema>;
 export type WorkspaceParams = z.infer<typeof workspaceParamsSchema>;
+export type InviteForm = z.infer<typeof inviteSchema>;

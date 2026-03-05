@@ -9,4 +9,6 @@ export const paginationSchema = z.object({
 export const dateLikeSchema = z.union([z.string(), z.date()]);
 export const nullableUuidSchema = z.string().uuid().nullable().optional();
 
+export const workspaceRoleSchema = z.enum(["admin", "member", "owner"] as const);
+export type WorkspaceRole = z.infer<typeof workspaceRoleSchema>;
 export type Pagination = z.infer<typeof paginationSchema>;
