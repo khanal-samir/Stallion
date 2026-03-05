@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { dateLikeSchema, idSchema } from "./common.js";
+import { dateLikeSchema, idSchema } from "./common.validator.js";
 
 export const signInSchema = z.object({
   email: z.string().email("Enter a valid email address"),

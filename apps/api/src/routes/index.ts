@@ -1,10 +1,10 @@
 import type { Hono } from "hono";
-import { authRoutes } from "./auth.js";
-import { dealRoutes } from "./deals.js";
-import { healthRoutes } from "./health.js";
-import { orgRoutes } from "./orgs.js";
-import { peopleRoutes } from "./people.js";
-import { userRoutes } from "./users.js";
+import { authRoutes } from "./auth.route.js";
+import { dealRoutes } from "./deals.route.js";
+import { healthRoutes } from "./health.route.js";
+import { orgRoutes } from "./orgs.route.js";
+import { peopleRoutes } from "./people.route.js";
+import { userRoutes } from "./users.route.js";
 
 export function registerRoutes(app: Hono) {
   app.route("/api/auth", authRoutes);

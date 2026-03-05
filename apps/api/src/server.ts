@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { env } from "./config/env.js";
-import { corsMiddleware } from "./lib/cors.js";
-import { notFoundHandler, onErrorHandler } from "./lib/http-handlers.js";
 import { requestLogger } from "./middlewares/request-logger.js";
+import { corsMiddleware } from "./lib/cors.js";
 import { registerRoutes } from "./routes/index.js";
+import { notFoundHandler, onErrorHandler } from "./lib/http-handlers.js";
+import { env } from "./config/env.config.js";
 
 const app = new Hono();
 
