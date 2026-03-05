@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { logger } from "@/config/logger.js";
+import { logger } from "@/config/logger.config.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { AppError } from "@/helpers/app-error.js";
 

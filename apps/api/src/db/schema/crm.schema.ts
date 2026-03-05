@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import { jsonb, pgTable, text, timestamp, uuid, unique, varchar, index } from "drizzle-orm/pg-core";
-import { id, timestamps } from "./common.js";
-import { user } from "./auth.js";
-import { workspaces } from "./workspaces.js";
+import { id, timestamps } from "./common.schema.js";
+import { user } from "./auth.schema.js";
+import { workspaces } from "./workspace.schema.js";
 
 export const orgs = pgTable(
   "orgs",

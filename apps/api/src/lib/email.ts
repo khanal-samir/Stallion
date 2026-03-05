@@ -1,6 +1,6 @@
 import { Resend } from "resend";
-import { env } from "@/config/env.js";
-import { logger } from "@/config/logger.js";
+import { env } from "@/config/env.config.js";
+import { logger } from "@/config/logger.config.js";
 
 const resend = new Resend(env.RESEND_API_KEY);
 export async function sendEmail({

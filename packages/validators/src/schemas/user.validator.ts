@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema } from "./common.js";
+import { idSchema } from "./common.validator.js";
 
 export const createUserSchema = z.object({
   name: z.string().min(1).max(100),

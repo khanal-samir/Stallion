@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { dateLikeSchema, idSchema, nullableUuidSchema } from "./common.js";
+import { dateLikeSchema, idSchema, nullableUuidSchema } from "./common.validator.js";
 
 export const createOrgSchema = z.object({
   workspaceId: idSchema,

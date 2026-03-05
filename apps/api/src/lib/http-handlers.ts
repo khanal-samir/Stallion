@@ -1,7 +1,7 @@
 import type { ErrorHandler, NotFoundHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import type { StatusCode } from "@/constants/status-codes.js";
-import { logger } from "@/config/logger.js";
+import { logger } from "@/config/logger.config.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { AppError } from "@/helpers/app-error.js";
 import { sendError } from "@/helpers/api-response.js";

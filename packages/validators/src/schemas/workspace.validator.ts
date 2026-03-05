@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, dateLikeSchema } from "./common.js";
+import { idSchema, dateLikeSchema } from "./common.validator.js";
 
 export const workspaceSlugSchema = z
   .string()

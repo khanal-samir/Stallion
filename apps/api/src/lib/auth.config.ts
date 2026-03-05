@@ -4,9 +4,9 @@ import { openAPI } from "better-auth/plugins";
 import { organization } from "better-auth/plugins/organization";
 import { db } from "@/db/client.js";
 import * as schema from "@/db/schema/index.js";
-import { env } from "@/config/env.js";
+import { env } from "@/config/env.config.js";
 import { sendEmail } from "./email.js";
-import { logger } from "@/config/logger.js";
+import { logger } from "@/config/logger.config.js";
 import { getTokenFromAuthUrl } from "@/helpers/get-token-from-url.js";
 
 const authSchema = {

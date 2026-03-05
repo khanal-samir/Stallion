@@ -1,3 +1,3 @@
-export * from "./auth.js";
-export * from "./workspaces.js";
-export * from "./crm.js";
+export * from "./auth.schema.js";
+export * from "./workspace.schema.js";
+export * from "./crm.schema.js";
