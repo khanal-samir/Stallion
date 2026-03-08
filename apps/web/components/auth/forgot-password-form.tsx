@@ -21,14 +21,15 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { requestPasswordResetSchema, type RequestPasswordResetInput } from "@workspace/validators";
-import { requestPasswordReset } from "@/lib/auth-client";
+import { useRequestPasswordReset } from "@/hooks/queries/use-auth";
 import Link from "next/link";
 import { useTransition } from "react";
-import { sileo } from "sileo";
 import { useRouter } from "next/navigation";
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const { mutate: requestPasswordResetMutation, isPending: isRequestPasswordResetPending } =
+    useRequestPasswordReset();
   const [isPending, startTransition] = useTransition();
   const form = useForm<RequestPasswordResetInput>({
     resolver: zodResolver(requestPasswordResetSchema),
@@ -37,23 +38,15 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     },
   });
 
-  const onSubmit = async (data: RequestPasswordResetInput) => {
-    const { error } = await requestPasswordReset({
-      email: data.email,
+  const onSubmit = (data: RequestPasswordResetInput) => {
+    requestPasswordResetMutation(data, {
+      onSuccess: () => {
+        startTransition(() => router.push("/login"));
+      },
     });
-    if (error) {
-      sileo.error({
-        title: "Failed to send reset link",
-        description: `${error.message}`,
-      });
-      return;
-    }
-    sileo.success({
-      title: "Reset link sent",
-      description: "Please check your email for the reset link.",
-    });
-    startTransition(() => router.push("/login"));
   };
+
+  const isFormPending = isRequestPasswordResetPending || isPending;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -76,7 +69,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                         type="email"
                         placeholder="m@example.com"
                         {...field}
-                        disabled={isPending}
+                        disabled={isFormPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -84,8 +77,12 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? "Sending..." : "Send reset link"}
+              <Button type="submit" className="w-full" disabled={isFormPending}>
+                {isRequestPasswordResetPending
+                  ? "Sending..."
+                  : isPending
+                    ? "Redirecting..."
+                    : "Send reset link"}
               </Button>
             </form>
           </Form>

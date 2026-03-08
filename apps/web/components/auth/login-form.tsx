@@ -17,17 +17,16 @@ import { FieldSeparator } from "@/components/ui/field-separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type SignInInput } from "@workspace/validators";
-import { signIn } from "@/lib/auth-client";
-import { useGoogleAuth } from "@/hooks/use-auth";
+import { useEmailSignIn, useGoogleAuth } from "@/hooks/queries/use-auth";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import Link from "next/link";
-import { sileo } from "sileo";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
   const { initiateGoogleLogin } = useGoogleAuth();
+  const { mutate: signInMutation, isPending: isSignInPending } = useEmailSignIn();
   const [isNavigating, startTransition] = useTransition();
 
   const form = useForm<SignInInput>({
@@ -38,29 +37,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     },
   });
 
-  const onSubmit = async (data: SignInInput) => {
-    const { error } = await signIn.email({
-      email: data.email,
-      password: data.password,
-      rememberMe: true,
-    });
-
-    if (error) {
-      sileo.error({
-        title: "Error",
-        description: `${error.message}`,
-      });
-      return;
-    }
-
-    sileo.success({ title: "Signed in", description: "You have successfully signed in." });
-    startTransition(() => {
-      router.push("/dashboard");
+  const onSubmit = (data: SignInInput) => {
+    signInMutation(data, {
+      onSuccess: () => {
+        startTransition(() => {
+          router.push("/dashboard");
+        });
+      },
     });
   };
 
-  const isSubmitting = form.formState.isSubmitting;
-  const isPending = isSubmitting || isNavigating;
+  const isPending = isSignInPending || isNavigating;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -129,7 +116,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               />
 
               <Button type="submit" className="w-full" disabled={isPending}>
-                {isSubmitting ? "Signing in..." : isNavigating ? "Redirecting..." : "Sign In"}
+                {isSignInPending ? "Signing in..." : isNavigating ? "Redirecting..." : "Sign In"}
               </Button>
 
               <FormDescription className="text-center text-sm">
