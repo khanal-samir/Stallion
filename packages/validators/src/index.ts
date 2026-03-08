@@ -5,3 +5,4 @@ export * from "./schemas/crm.validator.js";
 export * from "./schemas/workspace.validator.js";
 export * from "./schemas/user.validator.js";
 export * from "./types/auth.types.js";
+export * from "./types/workspace.types.js";

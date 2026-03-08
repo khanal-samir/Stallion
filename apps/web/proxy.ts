@@ -8,6 +8,7 @@ const publicRoutes = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/accept-invitation",
 ];
 
 export function proxy(request: NextRequest) {
@@ -22,11 +23,6 @@ export function proxy(request: NextRequest) {
   const isPublicRoute = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
-
-  // Authenticated user trying to access public route → redirect to dashboard
-  if (sessionCookie && isPublicRoute) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
 
   // Unauthenticated user trying to access protected route → redirect to login
   if (!sessionCookie && !isPublicRoute) {
