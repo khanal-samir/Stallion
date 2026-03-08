@@ -84,14 +84,3 @@ export function useGoogleAuth(redirectTo = "/dashboard") {
 
   return { initiateGoogleLogin };
 }
-
-export function useSignOut(redirectTo = "/login") {
-  const router = useRouter();
-
-  const handleSignOut = useCallback(async () => {
-    await signOut();
-    router.push(redirectTo);
-  }, [router, redirectTo]);
-
-  return { signOut: handleSignOut };
-}
