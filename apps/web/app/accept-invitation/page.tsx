@@ -6,13 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/shared/loading-state";
 import { NotFoundState } from "@/components/shared/not-found-state";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import {
   useInvitation,
   useAcceptInvitation,
   useRejectInvitation,
   useSetActiveWorkspace,
 } from "@/hooks/queries/use-workspace";
-import { useSession } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
 import { Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -23,7 +23,7 @@ function AcceptInvitationContent() {
   const router = useRouter();
   const invitationId = searchParams.get("id");
 
-  const { data: session, isPending: sessionPending } = useSession();
+  const { data: session, isPending: sessionPending } = useAuthSession();
   const { data: invitation, isPending, isError } = useInvitation(invitationId);
   const acceptInvitation = useAcceptInvitation();
   const rejectInvitation = useRejectInvitation();

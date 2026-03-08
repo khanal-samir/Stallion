@@ -7,8 +7,8 @@ import { ErrorState } from "@/components/shared/error-state";
 import { GeneralSettings } from "@/components/workspace/settings/general-settings";
 import { MembersSettings } from "@/components/workspace/settings/members-settings";
 import { InvitationsSettings } from "@/components/workspace/settings/invitations-settings";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
-import { useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -21,7 +21,7 @@ const NAV_ITEMS = [
 type SettingsTab = (typeof NAV_ITEMS)[number]["id"];
 
 export default function SettingsPage() {
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
   const { data: workspace, isPending, isError, refetch } = useActiveWorkspace();
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
 

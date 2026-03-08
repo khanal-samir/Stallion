@@ -39,8 +39,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useSession, signOut } from "@/lib/auth-client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthSession, useSignOut } from "@/hooks/queries/use-auth";
 
 const mainNav = [
   {
@@ -99,7 +99,8 @@ const workspaceNav = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, isPending: sessionPending } = useSession();
+  const { data: session, isPending: sessionPending } = useAuthSession();
+  const signOutMutation = useSignOut();
 
   const user = session?.user;
   const userInitials = user?.name
@@ -111,9 +112,10 @@ export function AppSidebar() {
         .toUpperCase()
     : "?";
 
-  async function handleSignOut() {
-    await signOut();
-    router.push("/login");
+  function handleSignOut() {
+    signOutMutation.mutate(undefined, {
+      onSuccess: () => router.push("/login"),
+    });
   }
 
   return (
@@ -255,9 +257,13 @@ export function AppSidebar() {
                 Profile
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleSignOut}>
+              <DropdownMenuItem
+                className="text-destructive cursor-pointer"
+                disabled={signOutMutation.isPending}
+                onClick={handleSignOut}
+              >
                 <LogOut className="w-4 h-4 mr-2" />
-                Log out
+                {signOutMutation.isPending ? "Logging out..." : "Log out"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

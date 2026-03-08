@@ -22,14 +22,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useRemoveMember, useUpdateMemberRole } from "@/hooks/queries/use-workspace";
-import { useSession } from "@/lib/auth-client";
 import type { WorkspaceRole } from "@workspace/validators";
+import { getInitials } from "@/lib/utils";
+import { workspaceRoleSchema } from "@workspace/validators";
 
 interface Member {
   id: string;
   userId: string;
-  role: string;
+  role: WorkspaceRole;
   createdAt: string | Date;
   user: {
     id: string;
@@ -45,23 +47,19 @@ interface MembersSettingsProps {
   ownerId?: string;
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-const roleBadgeVariant: Record<string, "default" | "secondary" | "outline"> = {
+const roleBadgeVariant: Record<
+  | typeof workspaceRoleSchema.enum.admin
+  | typeof workspaceRoleSchema.enum.member
+  | typeof workspaceRoleSchema.enum.owner,
+  "default" | "secondary" | "outline"
+> = {
   owner: "default",
   admin: "secondary",
   member: "outline",
 };
 
 export function MembersSettings({ members, organizationId, ownerId }: MembersSettingsProps) {
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
   const removeMember = useRemoveMember(organizationId);
   const updateRole = useUpdateMemberRole(organizationId);
 

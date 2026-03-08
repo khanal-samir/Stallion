@@ -15,64 +15,70 @@ import {
   updateMemberRole,
   updateWorkspace,
 } from "@/services/workspace.service";
-import { useSession } from "@/lib/auth-client";
 import {
   CreateWorkspace,
   InviteMemberInput,
   UpdateWorkspace,
   WorkspaceRole,
 } from "@workspace/validators";
-import { workspaceKeys } from "@/lib/query-keys";
+import { QUERY_KEYS } from "@/lib/query-keys";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import { sileo } from "sileo";
 
+const workspacesQueryKey = [QUERY_KEYS.WORKSPACES] as const;
+const authQueryKey = [QUERY_KEYS.AUTH] as const;
+
 export function useWorkspaces() {
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
+
   return useQuery({
-    queryKey: workspaceKeys.lists(),
+    queryKey: workspacesQueryKey,
     queryFn: listWorkspaces,
     enabled: !!session?.user,
-    staleTime: 60 * 5000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 export function useWorkspace(opts: { organizationId?: string; organizationSlug?: string } = {}) {
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
   const key = opts.organizationId ?? opts.organizationSlug ?? "active";
+
   return useQuery({
-    queryKey: workspaceKeys.detail(key),
+    queryKey: [QUERY_KEYS.WORKSPACES, QUERY_KEYS.WORKSPACE, key],
     queryFn: () => getFullWorkspace(opts),
     enabled: !!session?.user,
   });
 }
 
 export function useActiveWorkspace() {
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
 
   return useQuery({
-    queryKey: workspaceKeys.active(),
+    queryKey: [QUERY_KEYS.WORKSPACES, QUERY_KEYS.ACTIVE_WORKSPACE],
     queryFn: () => getFullWorkspace(),
     enabled: !!session?.user,
-    // placeholderData keeps previous data while refetching
     placeholderData: (prev) => prev,
   });
 }
 
 export function useInvitation(invitationId: string | null) {
   return useQuery({
-    queryKey: workspaceKeys.invitation(invitationId ?? ""),
+    queryKey: [QUERY_KEYS.WORKSPACES, QUERY_KEYS.WORKSPACE_INVITATION, invitationId ?? ""],
     queryFn: () => getInvitation(invitationId!),
     enabled: !!invitationId,
-    staleTime: 5 * 60 * 1000, // 5 min
+    staleTime: 5 * 60 * 1000,
     retry: false,
   });
 }
 
 export function useCreateWorkspace() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (input: CreateWorkspace) => createWorkspace(input),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.lists() });
+      qc.invalidateQueries({ queryKey: authQueryKey });
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({ title: "Workspace created", description: "Your new workspace is ready." });
     },
   });
@@ -80,12 +86,11 @@ export function useCreateWorkspace() {
 
 export function useUpdateWorkspace(organizationId: string) {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (input: UpdateWorkspace) => updateWorkspace(organizationId, input),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.lists() });
-      qc.invalidateQueries({ queryKey: workspaceKeys.detail(organizationId) });
-      qc.invalidateQueries({ queryKey: workspaceKeys.active() });
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Workspace updated",
         description: "Your workspace has been updated.",
@@ -96,22 +101,29 @@ export function useUpdateWorkspace(organizationId: string) {
 
 export function useDeleteWorkspace() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (organizationId: string) => deleteWorkspace(organizationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.all });
-      sileo.success({ title: "Workspace deleted", description: "The workspace has been deleted." });
+      qc.invalidateQueries({ queryKey: authQueryKey });
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
+      sileo.success({
+        title: "Workspace deleted",
+        description: "The workspace has been deleted.",
+      });
     },
   });
 }
 
 export function useSetActiveWorkspace() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (opts: { organizationId?: string | null; organizationSlug?: string }) =>
       setActiveWorkspace(opts),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.active() });
+      qc.invalidateQueries({ queryKey: authQueryKey });
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Workspace set as active",
         description: "Your active workspace has been updated.",
@@ -122,22 +134,20 @@ export function useSetActiveWorkspace() {
 
 export function useInviteMember() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (input: InviteMemberInput) => inviteMember(input),
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({
-        queryKey: workspaceKeys.invitations(variables.organizationId),
-      });
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: workspacesQueryKey }),
   });
 }
 
 export function useCancelInvitation() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (invitationId: string) => cancelInvitation(invitationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.invitations() });
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Invitation canceled",
         description: "The invitation has been canceled.",
@@ -148,11 +158,12 @@ export function useCancelInvitation() {
 
 export function useAcceptInvitation() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (invitationId: string) => acceptInvitation(invitationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.lists() });
-      qc.invalidateQueries({ queryKey: workspaceKeys.active() });
+      qc.invalidateQueries({ queryKey: authQueryKey });
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Invitation accepted",
         description: "You have joined the workspace.",
@@ -162,9 +173,12 @@ export function useAcceptInvitation() {
 }
 
 export function useRejectInvitation() {
+  const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (invitationId: string) => rejectInvitation(invitationId),
     onSuccess: () => {
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Invitation rejected",
         description: "You have rejected the invitation.",
@@ -175,13 +189,11 @@ export function useRejectInvitation() {
 
 export function useRemoveMember(organizationId?: string) {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (memberIdOrEmail: string) => removeMember(memberIdOrEmail, organizationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.active() });
-      if (organizationId) {
-        qc.invalidateQueries({ queryKey: workspaceKeys.detail(organizationId) });
-      }
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Member removed",
         description: "The member has been removed from the workspace.",
@@ -192,14 +204,12 @@ export function useRemoveMember(organizationId?: string) {
 
 export function useUpdateMemberRole(organizationId?: string) {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: ({ memberId, role }: { memberId: string; role: WorkspaceRole }) =>
       updateMemberRole(memberId, role, organizationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.active() });
-      if (organizationId) {
-        qc.invalidateQueries({ queryKey: workspaceKeys.detail(organizationId) });
-      }
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Member role updated",
         description: "The member's role has been updated.",
@@ -210,11 +220,12 @@ export function useUpdateMemberRole(organizationId?: string) {
 
 export function useLeaveWorkspace() {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: (organizationId: string) => leaveWorkspace(organizationId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: workspaceKeys.lists() });
-      qc.invalidateQueries({ queryKey: workspaceKeys.active() });
+      qc.invalidateQueries({ queryKey: authQueryKey });
+      qc.invalidateQueries({ queryKey: workspacesQueryKey });
       sileo.success({
         title: "Left workspace",
         description: "You have left the workspace.",

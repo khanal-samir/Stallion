@@ -25,7 +25,7 @@ import Link from "next/link";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const { initiateGoogleLogin } = useGoogleAuth();
+  const { initiateGoogleLogin, isPending: isGooglePending } = useGoogleAuth();
   const { mutate: signUpMutation, isPending: isSignUpPending } = useEmailSignUp();
   const [isNavigating, startTransition] = useTransition();
 
@@ -46,7 +46,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     });
   };
 
-  const isPending = isSignUpPending || isNavigating;
+  const isPending = isSignUpPending || isNavigating || isGooglePending;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

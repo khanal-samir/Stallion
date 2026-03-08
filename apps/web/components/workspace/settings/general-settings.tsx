@@ -24,7 +24,7 @@ import {
   useLeaveWorkspace,
   useUpdateWorkspace,
 } from "@/hooks/queries/use-workspace";
-import { useSession } from "@/lib/auth-client";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import { Logo } from "@/components/ui/logo";
 
 interface GeneralSettingsProps {
@@ -40,7 +40,7 @@ interface GeneralSettingsProps {
 
 export function GeneralSettings({ workspace }: GeneralSettingsProps) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session } = useAuthSession();
   const updateWorkspace = useUpdateWorkspace(workspace.id);
   const deleteWorkspace = useDeleteWorkspace();
   const leaveWorkspace = useLeaveWorkspace();
