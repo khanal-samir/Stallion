@@ -28,7 +28,8 @@ function ThemedToaster() {
         duration: 5000,
         roundness: 16,
         styles: {
-          // Let sileo render state-colour titles (green ✓, red ✗, etc.)
+          // text-foreground = near-black on light, near-white on dark — no neon clash
+          title: "text-foreground!",
           // Description text: white on dark-purple, muted-dark on light-purple
           description: isDark ? "text-white/75!" : "text-foreground/70!",
         },
