@@ -22,7 +22,7 @@ export const auth = betterAuth({
   rateLimit: {
     enabled: true,
     window: 60, // reset every 60 seconds
-    max: 5, // max requests in the window
+    max: 100, // max requests in the window
   },
   database: drizzleAdapter(db, {
     provider: "pg",
