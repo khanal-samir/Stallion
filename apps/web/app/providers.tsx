@@ -5,8 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Toaster } from "sileo";
-import type { AxiosError } from "axios";
-import type { ApiErrorResponse } from "@workspace/validators";
+import { isHandledAppError } from "@/lib/error";
 import { useError } from "@/hooks/useError";
 import { useErrorStore } from "@/store/error.store";
 
@@ -31,9 +30,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
           mutations: {
             retry: 1,
-            onError: (error: Error) => {
-              if ("isAxiosError" in error && error.isAxiosError) {
-                setError(error as AxiosError<ApiErrorResponse>);
+            onError: (error: unknown) => {
+              if (isHandledAppError(error)) {
+                setError(error);
               }
             },
           },

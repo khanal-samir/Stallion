@@ -1,12 +1,12 @@
-import type { ApiErrorResponse } from "@workspace/validators";
-import type { AxiosError } from "axios";
+import type { AppErrorInput } from "@/lib/error";
 import { create } from "zustand";
+
 type ErrorState = {
-  error: AxiosError<ApiErrorResponse> | null;
+  error: AppErrorInput | null;
 };
 
 type ErrorActions = {
-  setError: (error: AxiosError<ApiErrorResponse>) => void;
+  setError: (error: AppErrorInput) => void;
   clearError: () => void;
 };
 
