@@ -3,17 +3,21 @@ import { cn } from "@/lib/utils";
 
 interface PageHeaderProps {
   title: string;
+  description?: string;
   count?: number;
   actions?: React.ReactNode;
   className?: string;
 }
 
-export function PageHeader({ title, count, actions, className }: PageHeaderProps) {
+export function PageHeader({ title, description, count, actions, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex items-center justify-between", className)}>
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        {count !== undefined && <Badge variant="secondary">{count}</Badge>}
+    <div className={cn("flex items-start justify-between gap-4", className)}>
+      <div className="space-y-1">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          {count !== undefined && <Badge variant="secondary">{count}</Badge>}
+        </div>
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

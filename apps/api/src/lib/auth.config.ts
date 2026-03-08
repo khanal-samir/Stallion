@@ -1,13 +1,12 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { openAPI } from "better-auth/plugins";
-import { organization } from "better-auth/plugins/organization";
 import { db } from "@/db/client.js";
 import * as schema from "@/db/schema/index.js";
 import { env } from "@/config/env.config.js";
 import { sendEmail } from "./email.js";
 import { logger } from "@/config/logger.config.js";
 import { getTokenFromAuthUrl } from "@/helpers/get-token-from-url.js";
+import { plugins } from "./auth-plugins.js";
 
 const authSchema = {
   user: schema.user,
@@ -23,7 +22,7 @@ export const auth = betterAuth({
   rateLimit: {
     enabled: true,
     window: 60, // reset every 60 seconds
-    max: 5, // max requests in the window
+    max: 100, // max requests in the window
   },
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -98,68 +97,5 @@ export const auth = betterAuth({
     disableCSRFCheck: env.NODE_ENV === "development", // for postman
   },
   trustedOrigins: [env.WEB_URL],
-  plugins: [
-    organization({
-      organizationLimit: 2,
-      membershipLimit: 10,
-      creatorRole: "admin",
-      invitationExpiresIn: 60 * 60 * 24 * 7, // invitations expire in 7 days
-      cancelPendingInvitationsOnReInvite: true,
-      requireEmailVerificationOnInvitation: true, // user email needs to be verified
-      schema: {
-        session: {
-          fields: {
-            activeOrganizationId: "activeOrganizationId",
-          },
-        },
-        organization: {
-          modelName: "workspaces",
-          additionalFields: {
-            ownerId: {
-              type: "string",
-              required: false,
-              input: false, // ownerId is set automatically in the beforeCreateOrganization hook
-              references: {
-                model: "user",
-                field: "id",
-              },
-            },
-          },
-        },
-        member: {
-          modelName: "workspaceMembers",
-          fields: {
-            organizationId: "workspaceId",
-            createdAt: "joinedAt",
-          },
-        },
-        invitation: {
-          modelName: "workspaceInvites",
-          fields: {
-            organizationId: "workspaceId",
-            inviterId: "createdBy",
-          },
-        },
-      },
-      organizationHooks: {
-        beforeCreateOrganization: async ({ organization, user }) => ({
-          data: {
-            ...organization,
-            ownerId: user.id,
-          },
-        }),
-      },
-      sendInvitationEmail: async ({ id, email, role, organization, inviter }) => {
-        const invitationUrl = `${env.WEB_URL}/accept-invitation?id=${encodeURIComponent(id)}`;
-        const inviterName = inviter.user.name || inviter.user.email;
-
-        await sendEmail({
-          to: email,
-          subject: `Invitation to join ${organization.name}`,
-          html: `<p>${inviterName} invited you to join ${organization.name} as ${role}.</p><p>Accept your invitation:</p><a href="${invitationUrl}">${invitationUrl}</a>`,
-        });
-      },
-    }),
-    openAPI(),
-  ],
+  plugins,
 });

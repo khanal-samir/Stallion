@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { dateLikeSchema, idSchema } from "./common.validator.js";
 
 export const signInSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -26,59 +25,8 @@ export const resetPasswordFormSchema = z
     message: "Passwords do not match",
   });
 
-export const tokenQuerySchema = z.object({
-  token: z.string().optional(),
-  message: z.string().optional(),
-});
-
-export const verifyEmailSchema = z.object({
-  token: z.string().min(1, "Verification token is required"),
-});
-
-export const authUserSchema = z
-  .object({
-    id: idSchema,
-    email: z.string().email(),
-    name: z.string().nullable().optional(),
-    emailVerified: z.boolean().optional(),
-    image: z.string().nullable().optional(),
-    createdAt: dateLikeSchema.optional(),
-    updatedAt: dateLikeSchema.optional(),
-  })
-  .passthrough();
-
-export const authSessionSchema = z
-  .object({
-    id: idSchema,
-    userId: idSchema,
-    expiresAt: dateLikeSchema.optional(),
-    createdAt: dateLikeSchema.optional(),
-    updatedAt: dateLikeSchema.optional(),
-    token: z.string().optional(),
-    ipAddress: z.string().nullable().optional(),
-    userAgent: z.string().nullable().optional(),
-  })
-  .passthrough();
-
-export const sessionResponseSchema = z.union([
-  z.object({
-    user: authUserSchema,
-    session: authSessionSchema,
-  }),
-  z.object({
-    user: z.null(),
-    session: z.null(),
-  }),
-  z.null(),
-]);
-
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>;
 export type ResetPasswordInput = z.infer<typeof requestPasswordResetSchema>;
 export type ResetPasswordFormInput = z.infer<typeof resetPasswordFormSchema>;
-export type TokenQueryInput = z.infer<typeof tokenQuerySchema>;
-export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
-export type AuthUser = z.infer<typeof authUserSchema>;
-export type AuthSession = z.infer<typeof authSessionSchema>;
-export type SessionResponse = z.infer<typeof sessionResponseSchema>;

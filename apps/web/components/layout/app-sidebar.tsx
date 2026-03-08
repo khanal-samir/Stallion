@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -16,11 +16,10 @@ import {
   ChevronDown,
   LogOut,
   UserCircle,
-  ArrowLeftRight,
 } from "lucide-react";
 import { TeamSwitcher } from "@/components/layout/team-switcher";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sidebar,
   SidebarHeader,
@@ -40,6 +39,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthSession, useSignOut } from "@/hooks/queries/use-auth";
 
 const mainNav = [
   {
@@ -51,8 +52,6 @@ const mainNav = [
     label: "People",
     href: "/people",
     icon: Users,
-    badge: "3",
-    badgeClass: "bg-primary/10 text-primary text-xs",
   },
   {
     label: "Organizations",
@@ -63,8 +62,6 @@ const mainNav = [
     label: "Deals",
     href: "/deals",
     icon: Kanban,
-    badge: "7",
-    badgeClass: "bg-primary/10 text-primary text-xs",
   },
   {
     label: "Sequences",
@@ -99,32 +96,36 @@ const workspaceNav = [
   { label: "Billing", href: "/billing", icon: CreditCard },
 ];
 
-const workspaces = [
-  {
-    name: "Acme Inc",
-    plan: "Enterprise",
-  },
-  {
-    name: "Acme Corp.",
-    plan: "Startup",
-  },
-  {
-    name: "Personal",
-    plan: "Free",
-  },
-];
-
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, isPending: sessionPending } = useAuthSession();
+  const signOutMutation = useSignOut();
+
+  const user = session?.user;
+  const userInitials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "?";
+
+  function handleSignOut() {
+    signOutMutation.mutate(undefined, {
+      onSuccess: () => router.push("/login"),
+    });
+  }
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      {/* ── Header ─────────────────────────────────────── */}
+      {/* Header */}
       <SidebarHeader>
-        <TeamSwitcher teams={workspaces} />
+        <TeamSwitcher />
       </SidebarHeader>
 
-      {/* ── Content ────────────────────────────────────── */}
+      {/* Content */}
       <SidebarContent className="px-2">
         {/* Main Group */}
         <SidebarGroup>
@@ -146,11 +147,6 @@ export function AppSidebar() {
                     <Link href={item.href}>
                       <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
-                      {item.badge && (
-                        <Badge variant="secondary" className={cn("ml-auto", item.badgeClass)}>
-                          {item.badge}
-                        </Badge>
-                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -178,7 +174,7 @@ export function AppSidebar() {
                     )}
                   >
                     <Link href={item.href}>
-                      <item.icon className={cn("w-4 h-4", isActive && "text-sidebar-primary ")} />
+                      <item.icon className={cn("w-4 h-4", isActive && "text-sidebar-primary")} />
                       <span>{item.label}</span>
                       {item.badge && (
                         <Badge variant="default" className={cn("ml-auto", item.badgeClass)}>
@@ -226,37 +222,52 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* ── Footer ─────────────────────────────────────── */}
+      {/* Footer */}
       <SidebarFooter className="px-3 py-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 w-full rounded-md p-2 hover:bg-sidebar-accent transition-colors">
-              <Avatar className="w-8 h-8 bg-sidebar-accent">
-                <AvatarFallback className="text-xs">AK</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 text-left group-data-[collapsible=icon]:hidden">
-                <p className="text-sm font-medium text-sidebar-foreground">Alex Kim</p>
-                <p className="text-xs text-muted-foreground">alex@verio.app</p>
-              </div>
-              <ChevronDown className="w-3 h-3 text-muted-foreground group-data-[collapsible=icon]:hidden" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" side="top" className="w-48">
-            <DropdownMenuItem>
-              <UserCircle className="w-4 h-4 mr-2" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <ArrowLeftRight className="w-4 h-4 mr-2" />
-              Switch Workspace
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <LogOut className="w-4 h-4 mr-2" />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {sessionPending ? (
+          <div className="flex items-center gap-2 p-2">
+            <Skeleton className="size-8 rounded-full" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-3.5 w-24" />
+              <Skeleton className="h-2.5 w-32" />
+            </div>
+          </div>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 w-full rounded-md p-2 hover:bg-sidebar-accent transition-colors cursor-pointer">
+                <Avatar className="size-8">
+                  {user?.image && <AvatarImage src={user.image} alt={user.name ?? ""} />}
+                  <AvatarFallback className="text-xs bg-sidebar-accent">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left group-data-[collapsible=icon]:hidden">
+                  <p className="text-sm font-medium text-sidebar-foreground truncate">
+                    {user?.name ?? "User"}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{user?.email ?? ""}</p>
+                </div>
+                <ChevronDown className="w-3 h-3 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="top" className="w-48">
+              <DropdownMenuItem className="cursor-pointer">
+                <UserCircle className="w-4 h-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive cursor-pointer"
+                disabled={signOutMutation.isPending}
+                onClick={handleSignOut}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                {signOutMutation.isPending ? "Logging out..." : "Log out"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </SidebarFooter>
     </Sidebar>
   );

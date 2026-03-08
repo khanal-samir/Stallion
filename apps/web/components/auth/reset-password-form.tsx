@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordFormSchema, type ResetPasswordFormInput } from "@workspace/validators";
-import { resetPassword } from "@/lib/auth-client";
+import { useResetPassword } from "@/hooks/queries/use-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import Link from "next/link";
@@ -31,6 +31,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
+  const { mutate: resetPasswordMutation, isPending: isResetPasswordPending } = useResetPassword();
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<ResetPasswordFormInput>({
@@ -41,7 +42,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
     },
   });
 
-  const onSubmit = async (data: ResetPasswordFormInput) => {
+  const onSubmit = (data: ResetPasswordFormInput) => {
     if (!token) {
       sileo.error({
         title: "Invalid Token",
@@ -50,25 +51,20 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
       return;
     }
 
-    const { error } = await resetPassword({
-      newPassword: data.password,
-      token,
-    });
-
-    if (error) {
-      sileo.error({
-        title: "Error",
-        description: `${error.message}`,
-      });
-      return;
-    }
-
-    sileo.success({
-      title: "Password reset",
-      description: "Your password has been successfully reset.",
-    });
-    startTransition(() => router.push("/login"));
+    resetPasswordMutation(
+      {
+        password: data.password,
+        token,
+      },
+      {
+        onSuccess: () => {
+          startTransition(() => router.push("/login"));
+        },
+      },
+    );
   };
+
+  const isFormPending = isResetPasswordPending || isPending;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -91,7 +87,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                         type="password"
                         placeholder="Enter new password"
                         {...field}
-                        disabled={isPending}
+                        disabled={isFormPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -110,7 +106,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                         type="password"
                         placeholder="Confirm new password"
                         {...field}
-                        disabled={isPending}
+                        disabled={isFormPending}
                       />
                     </FormControl>
                     <FormMessage />
@@ -118,8 +114,12 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? "Resetting..." : "Reset password"}
+              <Button type="submit" className="w-full" disabled={isFormPending}>
+                {isResetPasswordPending
+                  ? "Resetting..."
+                  : isPending
+                    ? "Redirecting..."
+                    : "Reset password"}
               </Button>
             </form>
           </Form>

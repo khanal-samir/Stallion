@@ -17,17 +17,16 @@ import { FieldSeparator } from "@/components/ui/field-separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, type SignUpInput } from "@workspace/validators";
-import { signUp } from "@/lib/auth-client";
-import { useGoogleAuth } from "@/hooks/use-auth";
+import { useEmailSignUp, useGoogleAuth } from "@/hooks/queries/use-auth";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import Link from "next/link";
-import { sileo } from "sileo";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const { initiateGoogleLogin } = useGoogleAuth();
+  const { initiateGoogleLogin, isPending: isGooglePending } = useGoogleAuth();
+  const { mutate: signUpMutation, isPending: isSignUpPending } = useEmailSignUp();
   const [isNavigating, startTransition] = useTransition();
 
   const form = useForm<SignUpInput>({
@@ -39,29 +38,15 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     },
   });
 
-  const onSubmit = async (data: SignUpInput) => {
-    const { error } = await signUp.email({
-      name: data.name,
-      email: data.email,
-      password: data.password,
+  const onSubmit = (data: SignUpInput) => {
+    signUpMutation(data, {
+      onSuccess: () => {
+        startTransition(() => router.push("/verify-email?message=check-email"));
+      },
     });
-
-    if (error) {
-      sileo.error({
-        title: "Error creating account",
-        description: `${error.message}`,
-      });
-      return;
-    }
-    sileo.success({
-      title: "Account created",
-      description: "Please check your email to verify your account.",
-    });
-    startTransition(() => router.push("/verify-email?message=check-email"));
   };
 
-  const isSubmitting = form.formState.isSubmitting;
-  const isPending = isSubmitting || isNavigating;
+  const isPending = isSignUpPending || isNavigating || isGooglePending;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -134,7 +119,11 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
               />
 
               <Button type="submit" className="w-full" disabled={isPending}>
-                {isSubmitting ? "Creating account..." : isNavigating ? "Redirecting..." : "Sign Up"}
+                {isSignUpPending
+                  ? "Creating account..."
+                  : isNavigating
+                    ? "Redirecting..."
+                    : "Sign Up"}
               </Button>
 
               <FormDescription className="text-center text-sm">

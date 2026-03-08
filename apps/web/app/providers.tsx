@@ -3,16 +3,40 @@ import * as React from "react";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import { Toaster } from "sileo";
-import type { AxiosError } from "axios";
-import type { ApiErrorResponse } from "@workspace/validators";
+import { isHandledAppError } from "@/lib/error";
 import { useError } from "@/hooks/useError";
 import { useErrorStore } from "@/store/error.store";
 
 function ErrorProvider({ children }: { children: React.ReactNode }) {
   useError();
   return <>{children}</>;
+}
+
+function ThemedToaster() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  return (
+    <Toaster
+      position="top-center"
+      options={{
+        // Light: soft lavender matching --secondary/--accent (oklch 0.962 0.018 272)
+        // Dark:  deep purple matching the app's dark card palette
+        fill: isDark ? "#1e1535" : "#ede8f8",
+        duration: 5000,
+        roundness: 16,
+        styles: {
+          // text-foreground = near-black on light, near-white on dark — no neon clash
+          title: "text-foreground!",
+          // Description text: white on dark-purple, muted-dark on light-purple
+          description: isDark ? "text-white/75!" : "text-foreground/70!",
+        },
+      }}
+      theme="system"
+    />
+  );
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -23,7 +47,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 2 * 60 * 1000,
+            staleTime: 2 * 60 * 1000, // 2 minutes
             gcTime: 15 * 60 * 1000,
             refetchOnWindowFocus: false,
             refetchOnReconnect: true,
@@ -31,9 +55,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           },
           mutations: {
             retry: 1,
-            onError: (error: Error) => {
-              if ("isAxiosError" in error && error.isAxiosError) {
-                setError(error as AxiosError<ApiErrorResponse>);
+            onError: (error: unknown) => {
+              if (isHandledAppError(error)) {
+                setError(error);
               }
             },
           },
@@ -52,19 +76,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           enableColorScheme
         >
           {children}
-          <Toaster
-            position="top-center"
-            options={{
-              fill: "#171717",
-              duration: 5000,
-              roundness: 16,
-              styles: {
-                title: "text-white!",
-                description: "text-white/75!",
-              },
-            }}
-            theme="system"
-          />
+          <ThemedToaster />
         </NextThemesProvider>
         <ReactQueryDevtools initialIsOpen={false} />
       </ErrorProvider>

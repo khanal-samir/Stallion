@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import type { CreateOrg, UpdateOrg } from "@workspace/validators";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { orgs, people } from "@/db/schema/index.js";
+import { orgs } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/helpers/api-response.js";
 import { AppError } from "@/helpers/app-error.js";

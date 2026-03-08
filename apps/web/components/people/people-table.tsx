@@ -37,16 +37,7 @@ import {
 } from "@/components/ui/pagination";
 import { BulkActionBar } from "@/components/people/bulk-action-bar";
 import { MOCK_PEOPLE, type Person, type PersonStatus } from "@/types/crm";
-import { cn } from "@/lib/utils";
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
+import { cn, getInitials } from "@/lib/utils";
 
 function relativeDate(dateStr?: string): string {
   if (!dateStr) return "Never";

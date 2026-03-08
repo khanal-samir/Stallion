@@ -2,39 +2,30 @@
 
 import { cn } from "@/lib/utils";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { verifyEmail } from "@/lib/auth-client";
+import { useVerifyEmail } from "@/hooks/queries/use-auth";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import { sileo } from "sileo";
 
 export function VerifyEmailCard({ className, ...props }: React.ComponentProps<"div">) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { mutate: verifyEmail } = useVerifyEmail();
   const token = searchParams.get("token");
   const message = searchParams.get("message");
 
   useEffect(() => {
     if (!token) return;
-    async function verify() {
-      const { error } = await verifyEmail({ query: { token: token! } });
-      if (error) {
-        sileo.error({
-          title: "Verification failed",
-          description: `${error.message}`,
-        });
-        router.push("/signup");
-        return;
-      }
-      sileo.success({
-        title: "Email verified",
-        description: "Your email has been verified successfully.",
-      });
-      router.push("/login");
-    }
 
-    verify();
-  }, [token, router]);
+    verifyEmail(token, {
+      onSuccess: () => {
+        router.push("/login");
+      },
+      onError: () => {
+        router.push("/signup");
+      },
+    });
+  }, [token, router, verifyEmail]);
 
   const title = message === "check-email" ? "Check your email" : "Email verified";
 
