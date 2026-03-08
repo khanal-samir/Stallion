@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   acceptInvitation,
@@ -232,4 +233,23 @@ export function useLeaveWorkspace() {
       });
     },
   });
+}
+
+export function useRestoreActiveWorkspace() {
+  const { data: session } = useAuthSession();
+  const { data: workspaces } = useWorkspaces();
+  const setActive = useSetActiveWorkspace();
+
+  useEffect(() => {
+    const firstWorkspace = workspaces?.[0];
+    if (
+      session?.user &&
+      session.session &&
+      !session.session.activeOrganizationId &&
+      firstWorkspace &&
+      !setActive.isPending
+    ) {
+      setActive.mutate({ organizationId: firstWorkspace.id }, { onSuccess: () => {} });
+    }
+  }, [session, workspaces, setActive, setActive.isPending]);
 }

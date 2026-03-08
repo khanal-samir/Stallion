@@ -22,10 +22,12 @@ import {
   useWorkspaces,
   useActiveWorkspace,
   useSetActiveWorkspace,
+  useRestoreActiveWorkspace,
 } from "@/hooks/queries/use-workspace";
 import { Logo } from "../ui/logo";
 
 export function TeamSwitcher() {
+  useRestoreActiveWorkspace();
   const { isMobile } = useSidebar();
   const { data: workspaces, isPending: workspacesLoading } = useWorkspaces();
   const { data: activeWorkspace, isPending: activeLoading } = useActiveWorkspace();
