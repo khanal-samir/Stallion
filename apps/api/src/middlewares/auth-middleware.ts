@@ -1,7 +1,7 @@
 import type { Context, Next } from "hono";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { auth } from "@/lib/auth.config.js";
-import { sendError } from "@/helpers/api-response.js";
+import { sendError } from "@/lib/api-response.js";
 import { logger } from "@/config/logger.config.js";
 type AuthSession = typeof auth.$Infer.Session;
 

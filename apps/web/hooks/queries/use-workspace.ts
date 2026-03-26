@@ -17,12 +17,8 @@ import {
   updateMemberRole,
   updateWorkspace,
 } from "@/services/workspace.service";
-import {
-  CreateWorkspace,
-  InviteMemberInput,
-  UpdateWorkspace,
-  WorkspaceRole,
-} from "@workspace/validators";
+import type { InviteMemberInput, WorkspaceRole } from "@workspace/validators/types/workspace";
+import type { CreateWorkspace, UpdateWorkspace } from "@workspace/validators/schemas/workspace";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 

@@ -1,5 +1,9 @@
 import { Hono } from "hono";
-import { createDealSchema, dealParamsSchema, updateDealSchema } from "@workspace/validators";
+import {
+  createDealSchema,
+  dealParamsSchema,
+  updateDealSchema,
+} from "@workspace/validators/schemas/crm";
 import {
   createDeal,
   deleteDeal,

@@ -20,7 +20,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { resetPasswordFormSchema, type ResetPasswordFormInput } from "@workspace/validators";
+import {
+  resetPasswordFormSchema,
+  type ResetPasswordFormInput,
+} from "@workspace/validators/schemas/auth";
 import { useResetPassword } from "@/hooks/queries/use-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";

@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { FieldSeparator } from "@/components/ui/field-separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUpSchema, type SignUpInput } from "@workspace/validators";
+import { signUpSchema, type SignUpInput } from "@workspace/validators/schemas/auth";
 import { useEmailSignUp, useGoogleAuth } from "@/hooks/queries/use-auth";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { useRouter } from "next/navigation";

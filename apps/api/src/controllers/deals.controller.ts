@@ -1,13 +1,13 @@
 import type { Context } from "hono";
-import type { CreateDeal, UpdateDeal } from "@workspace/validators";
+import type { CreateDeal, UpdateDeal } from "@workspace/validators/schemas/crm";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client.js";
 import { deals } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { sendSuccess } from "@/helpers/api-response.js";
-import { AppError } from "@/helpers/app-error.js";
-import { toDate } from "@/helpers/date.js";
-import { getSessionWorkspaceId } from "@/helpers/workspace.js";
+import { sendSuccess } from "@/lib/api-response.js";
+import { AppError } from "@/lib/app-error.js";
+import { toDate } from "@/lib/date.js";
+import { getSessionWorkspaceId } from "@/lib/workspace.js";
 
 export async function listDeals(c: Context) {
   const workspaceId = getSessionWorkspaceId(c);

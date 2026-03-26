@@ -1,12 +1,12 @@
 import type { Context } from "hono";
-import type { CreateOrg, UpdateOrg } from "@workspace/validators";
+import type { CreateOrg, UpdateOrg } from "@workspace/validators/schemas/crm";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client.js";
 import { orgs } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { sendSuccess } from "@/helpers/api-response.js";
-import { AppError } from "@/helpers/app-error.js";
-import { getSessionWorkspaceId } from "@/helpers/workspace.js";
+import { sendSuccess } from "@/lib/api-response.js";
+import { AppError } from "@/lib/app-error.js";
+import { getSessionWorkspaceId } from "@/lib/workspace.js";
 
 export async function listOrgs(c: Context) {
   const workspaceId = getSessionWorkspaceId(c);

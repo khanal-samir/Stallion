@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { AppError } from "@/helpers/app-error.js";
+import { AppError } from "@/lib/app-error.js";
 
 export function getSessionWorkspaceId(c: Context) {
   const workspaceId = c.get("session")?.activeOrganizationId;

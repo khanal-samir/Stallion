@@ -1,4 +1,8 @@
-import type { RequestPasswordResetInput, SignInInput, SignUpInput } from "@workspace/validators";
+import type {
+  RequestPasswordResetInput,
+  SignInInput,
+  SignUpInput,
+} from "@workspace/validators/schemas/auth";
 import { authClient, type AuthSession } from "@/lib/auth-client";
 import { toBetterAuthError } from "@/lib/error";
 

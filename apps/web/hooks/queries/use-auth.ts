@@ -3,7 +3,11 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { toBetterAuthError } from "@/lib/error";
 import { QUERY_KEYS } from "@/lib/query-keys";
-import type { RequestPasswordResetInput, SignInInput, SignUpInput } from "@workspace/validators";
+import type {
+  RequestPasswordResetInput,
+  SignInInput,
+  SignUpInput,
+} from "@workspace/validators/schemas/auth";
 import {
   getAuthSession,
   requestPasswordResetLink,

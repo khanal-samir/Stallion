@@ -1,4 +1,4 @@
-import { apiEnvSchema } from "@workspace/validators";
+import { apiEnvSchema } from "@workspace/validators/schemas/env";
 
 const rawEnv = {
   NODE_ENV: process.env.NODE_ENV,

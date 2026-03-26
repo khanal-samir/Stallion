@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { LogOut as LogOutIcon, Pencil, Trash2 } from "lucide-react";
-import { updateWorkspaceSchema, type UpdateWorkspace } from "@workspace/validators";
+import {
+  updateWorkspaceSchema,
+  type UpdateWorkspace,
+} from "@workspace/validators/schemas/workspace";
 import {
   Form,
   FormControl,

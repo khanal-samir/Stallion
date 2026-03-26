@@ -3,7 +3,7 @@ import { zValidator } from "@hono/zod-validator";
 import { ZodError } from "zod";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { VALIDATION_TARGET } from "@/constants/validation-targets.js";
-import { AppError } from "@/helpers/app-error.js";
+import { AppError } from "@/lib/app-error.js";
 
 type ValidationSchema = {
   safeParse: (value: unknown) => unknown;

@@ -4,9 +4,33 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "./schemas/common": {
+      "types": "./src/schemas/common.validator.ts",
+      "import": "./dist/schemas/common.validator.js"
+    },
+    "./schemas/auth": {
+      "types": "./src/schemas/auth.validator.ts",
+      "import": "./dist/schemas/auth.validator.js"
+    },
+    "./schemas/env": {
+      "types": "./src/schemas/env.validator.ts",
+      "import": "./dist/schemas/env.validator.js"
+    },
+    "./schemas/crm": {
+      "types": "./src/schemas/crm.validator.ts",
+      "import": "./dist/schemas/crm.validator.js"
+    },
+    "./schemas/workspace": {
+      "types": "./src/schemas/workspace.validator.ts",
+      "import": "./dist/schemas/workspace.validator.js"
+    },
+    "./types/auth": {
+      "types": "./src/types/auth.types.ts",
+      "import": "./dist/types/auth.types.js"
+    },
+    "./types/workspace": {
+      "types": "./src/types/workspace.types.ts",
+      "import": "./dist/types/workspace.types.js"
     }
   },
   "scripts": {

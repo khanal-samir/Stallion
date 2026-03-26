@@ -5,7 +5,7 @@ import * as schema from "@/db/schema/index.js";
 import { env } from "@/config/env.config.js";
 import { sendEmail } from "./email.js";
 import { logger } from "@/config/logger.config.js";
-import { getTokenFromAuthUrl } from "@/helpers/get-token-from-url.js";
+import { getTokenFromAuthUrl } from "@/lib/get-token-from-url.js";
 import { plugins } from "./auth-plugins.js";
 
 const authSchema = {
