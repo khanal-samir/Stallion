@@ -11,9 +11,7 @@ type ValidationSchema = {
 
 export function validateRequest(target: keyof ValidationTargets, schema: ValidationSchema) {
   return zValidator(target, schema as never, (result) => {
-    if (result.success) {
-      return;
-    }
+    if (result.success) return;
 
     const statusCode =
       target === VALIDATION_TARGET.JSON

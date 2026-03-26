@@ -8,7 +8,12 @@ import { sendSuccess } from "@/helpers/api-response.js";
 import { AppError } from "@/helpers/app-error.js";
 
 export async function listOrgs(c: Context) {
-  const results = await db.select().from(orgs);
+  const workspaceId = c.get("session")?.activeOrganizationId;
+  if (!workspaceId) {
+    throw new AppError("Workspace not found in session", STATUS_CODES.BAD_REQUEST);
+  }
+
+  const results = await db.select().from(orgs).where(eq(orgs.workspaceId, workspaceId));
 
   return sendSuccess(c, { orgs: results }, STATUS_CODES.OK);
 }

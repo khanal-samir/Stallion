@@ -9,7 +9,12 @@ import { AppError } from "@/helpers/app-error.js";
 import { toDate } from "@/helpers/date.js";
 
 export async function listPeople(c: Context) {
-  const results = await db.select().from(people);
+  const workspaceId = c.get("session")?.activeOrganizationId;
+  if (!workspaceId) {
+    throw new AppError("Workspace not found in session", STATUS_CODES.BAD_REQUEST);
+  }
+
+  const results = await db.select().from(people).where(eq(people.workspaceId, workspaceId));
 
   return sendSuccess(c, { people: results }, STATUS_CODES.OK);
 }
