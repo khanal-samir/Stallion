@@ -11,48 +11,42 @@ export const notFoundHandler: NotFoundHandler = (c) => {
 };
 
 export const onErrorHandler: ErrorHandler = (err, c) => {
-  if (err instanceof AppError) {
-    logger.warn(
-      {
-        method: c.req.method,
-        path: c.req.path,
-        statusCode: err.statusCode,
-        errorMessage: err.message,
-        details: err.details,
-      },
-      "Operational error",
-    );
-
-    return sendError(c, err.message, err.statusCode, err.details);
+  if (err instanceof HTTPException && c.req.path.startsWith("/api/auth")) {
+    return err.getResponse(); // let betterauth handle auth errors
   }
 
-  if (err instanceof HTTPException) {
-    logger.warn(
+  const statusCode: StatusCode =
+    err instanceof AppError
+      ? err.statusCode
+      : err instanceof HTTPException
+        ? (err.status as StatusCode)
+        : STATUS_CODES.INTERNAL_SERVER_ERROR;
+
+  const errorMessage = err instanceof Error ? err.message : "Unknown error";
+  const details = err instanceof AppError ? err.details : undefined;
+
+  // 5xx errors
+  if (statusCode >= STATUS_CODES.INTERNAL_SERVER_ERROR) {
+    logger.error(
       {
-        method: c.req.method,
-        path: c.req.path,
-        statusCode: err.status,
-        errorMessage: err.message,
+        statusCode,
+        errorMessage,
+        stack: err instanceof Error ? err.stack : undefined,
       },
-      "HTTP exception",
+      "Unhandled error",
     );
-
-    if (c.req.path.startsWith("/api/auth")) {
-      return err.getResponse();
-    }
-
-    return sendError(c, err.message, err.status as StatusCode);
+    return sendError(c, "Internal Server Error", statusCode);
   }
 
-  logger.error(
+  //4xx errors
+  logger.warn(
     {
-      method: c.req.method,
-      path: c.req.path,
-      errorMessage: err instanceof Error ? err.message : "Unknown error",
-      stack: err instanceof Error ? err.stack : undefined,
+      statusCode,
+      errorMessage,
+      details,
     },
-    "Unhandled error",
+    "Request error",
   );
 
-  return sendError(c, "Internal Server Error", STATUS_CODES.INTERNAL_SERVER_ERROR);
+  return sendError(c, errorMessage, statusCode, details);
 };

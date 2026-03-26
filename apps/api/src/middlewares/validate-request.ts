@@ -1,5 +1,6 @@
 import type { ValidationTargets } from "hono";
 import { zValidator } from "@hono/zod-validator";
+import { ZodError } from "zod";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { VALIDATION_TARGET } from "@/constants/validation-targets.js";
 import { AppError } from "@/helpers/app-error.js";
@@ -19,6 +20,17 @@ export function validateRequest(target: keyof ValidationTargets, schema: Validat
         ? STATUS_CODES.UNPROCESSABLE_ENTITY
         : STATUS_CODES.BAD_REQUEST;
 
-    throw new AppError("Validation failed", statusCode, result.error);
+    const validationError = (result as { error?: unknown }).error;
+    const details =
+      validationError instanceof ZodError
+        ? validationError.issues
+            .map((issue) => {
+              const path = issue.path.length > 0 ? issue.path.join(".") : target;
+              return `${path}: ${issue.message}`;
+            })
+            .join(", ")
+        : "Invalid request payload";
+
+    throw new AppError("Validation failed", statusCode, details);
   });
 }
