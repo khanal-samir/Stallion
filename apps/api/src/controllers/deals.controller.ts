@@ -1,26 +1,25 @@
 import type { Context } from "hono";
 import type { CreateDeal, UpdateDeal } from "@workspace/validators";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client.js";
 import { deals } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/helpers/api-response.js";
 import { AppError } from "@/helpers/app-error.js";
 import { toDate } from "@/helpers/date.js";
+import { getSessionWorkspaceId } from "@/helpers/workspace.js";
 
 export async function listDeals(c: Context) {
-  const workspaceId = c.get("session")?.activeOrganizationId;
-  if (!workspaceId) {
-    throw new AppError("Workspace not found in session", STATUS_CODES.BAD_REQUEST);
-  }
+  const workspaceId = getSessionWorkspaceId(c);
   const results = await db.select().from(deals).where(eq(deals.workspaceId, workspaceId));
 
   return sendSuccess(c, { deals: results }, STATUS_CODES.OK);
 }
 
 export async function getDeal(c: Context, id: string) {
+  const workspaceId = getSessionWorkspaceId(c);
   const deal = await db.query.deals.findFirst({
-    where: eq(deals.id, id),
+    where: and(eq(deals.id, id), eq(deals.workspaceId, workspaceId)),
     with: {
       org: {
         columns: {
@@ -44,10 +43,12 @@ export async function getDeal(c: Context, id: string) {
 }
 
 export async function createDeal(c: Context, payload: CreateDeal) {
+  const workspaceId = getSessionWorkspaceId(c);
   const [deal] = await db
     .insert(deals)
     .values({
       ...payload,
+      workspaceId,
       closeDate: toDate(payload.closeDate),
     })
     .returning();
@@ -56,6 +57,7 @@ export async function createDeal(c: Context, payload: CreateDeal) {
 }
 
 export async function updateDeal(c: Context, id: string, payload: UpdateDeal) {
+  const workspaceId = getSessionWorkspaceId(c);
   const [deal] = await db
     .update(deals)
     .set({
@@ -63,7 +65,7 @@ export async function updateDeal(c: Context, id: string, payload: UpdateDeal) {
       closeDate: toDate(payload.closeDate),
       updatedAt: new Date(),
     })
-    .where(eq(deals.id, id))
+    .where(and(eq(deals.id, id), eq(deals.workspaceId, workspaceId)))
     .returning();
 
   if (!deal) {
@@ -74,7 +76,11 @@ export async function updateDeal(c: Context, id: string, payload: UpdateDeal) {
 }
 
 export async function deleteDeal(c: Context, id: string) {
-  const [deal] = await db.delete(deals).where(eq(deals.id, id)).returning();
+  const workspaceId = getSessionWorkspaceId(c);
+  const [deal] = await db
+    .delete(deals)
+    .where(and(eq(deals.id, id), eq(deals.workspaceId, workspaceId)))
+    .returning();
   if (!deal) {
     throw new AppError("Deal not found", STATUS_CODES.NOT_FOUND);
   }
