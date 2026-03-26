@@ -25,7 +25,7 @@ import { useResetPassword } from "@/hooks/queries/use-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import Link from "next/link";
-import { sileo } from "sileo";
+import { toast } from "sonner";
 
 export function ResetPasswordForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
@@ -44,8 +44,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
 
   const onSubmit = (data: ResetPasswordFormInput) => {
     if (!token) {
-      sileo.error({
-        title: "Invalid Token",
+      toast.error("Invalid Token", {
         description: "The password reset token is missing or invalid.",
       });
       return;
