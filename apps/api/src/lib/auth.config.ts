@@ -48,7 +48,13 @@ export const auth = betterAuth({
       });
 
       if (!isVerified?.emailVerified) {
-        logger.warn(`Attempt to send reset password email to unverified user: ${user.email}`);
+        logger.warn(
+          {
+            email: user.email,
+            userId: user.id,
+          },
+          "Attempt to send reset password email to unverified user",
+        );
         return;
       }
 

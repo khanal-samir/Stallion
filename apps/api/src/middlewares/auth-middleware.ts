@@ -24,7 +24,15 @@ export async function authMiddleware(c: Context, next: Next) {
 
   c.set("user", session.user);
   c.set("session", session.session);
-  logger.info("User authenticated", { user: session.user });
+  logger.info(
+    {
+      userId: session.user.id,
+      email: session.user.email,
+      sessionId: session.session.id,
+      path: c.req.path,
+    },
+    "User authenticated",
+  );
 
   return next();
 }

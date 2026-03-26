@@ -23,6 +23,14 @@ export async function requestLogger(c: Context, next: Next) {
             ? STATUS_CODES.INTERNAL_SERVER_ERROR
             : c.res.status;
 
-    logger.info(`${c.req.method} ${c.req.url} - ${statusCode} - ${durationMs}ms`);
+    logger.info(
+      {
+        method: c.req.method,
+        path: c.req.path,
+        statusCode,
+        durationMs,
+      },
+      "HTTP request completed",
+    );
   }
 }

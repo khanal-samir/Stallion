@@ -12,24 +12,30 @@ export const notFoundHandler: NotFoundHandler = (c) => {
 
 export const onErrorHandler: ErrorHandler = (err, c) => {
   if (err instanceof AppError) {
-    logger.warn("Operational error", {
-      method: c.req.method,
-      path: c.req.path,
-      statusCode: err.statusCode,
-      message: err.message,
-      details: err.details,
-    });
+    logger.warn(
+      {
+        method: c.req.method,
+        path: c.req.path,
+        statusCode: err.statusCode,
+        errorMessage: err.message,
+        details: err.details,
+      },
+      "Operational error",
+    );
 
     return sendError(c, err.message, err.statusCode, err.details);
   }
 
   if (err instanceof HTTPException) {
-    logger.warn("HTTP exception", {
-      method: c.req.method,
-      path: c.req.path,
-      statusCode: err.status,
-      message: err.message,
-    });
+    logger.warn(
+      {
+        method: c.req.method,
+        path: c.req.path,
+        statusCode: err.status,
+        errorMessage: err.message,
+      },
+      "HTTP exception",
+    );
 
     if (c.req.path.startsWith("/api/auth")) {
       return err.getResponse();
@@ -38,12 +44,15 @@ export const onErrorHandler: ErrorHandler = (err, c) => {
     return sendError(c, err.message, err.status as StatusCode);
   }
 
-  logger.error("Unhandled error", {
-    method: c.req.method,
-    path: c.req.path,
-    message: err instanceof Error ? err.message : "Unknown error",
-    stack: err instanceof Error ? err.stack : undefined,
-  });
+  logger.error(
+    {
+      method: c.req.method,
+      path: c.req.path,
+      errorMessage: err instanceof Error ? err.message : "Unknown error",
+      stack: err instanceof Error ? err.stack : undefined,
+    },
+    "Unhandled error",
+  );
 
   return sendError(c, "Internal Server Error", STATUS_CODES.INTERNAL_SERVER_ERROR);
 };
