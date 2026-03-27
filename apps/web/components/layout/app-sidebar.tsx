@@ -37,11 +37,6 @@ import { useAuthSession, useSignOut } from "@/hooks/queries/use-auth";
 
 const mainNav = [
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
     label: "People",
     href: "/people",
     icon: Users,
