@@ -9,15 +9,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
-import { OrganizationsTable } from "@/components/organizations/organizations-table";
-import { MOCK_ORGANIZATIONS } from "@/types/crm";
 
 export default function OrganizationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
         title="Organizations"
-        count={MOCK_ORGANIZATIONS.length}
+        count={2}
         actions={
           <>
             <div className="relative">
@@ -62,9 +60,6 @@ export default function OrganizationsPage() {
           </>
         }
       />
-
-      {/* ── Table ───────────────────────────────────── */}
-      <OrganizationsTable />
     </div>
   );
 }

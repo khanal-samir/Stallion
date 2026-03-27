@@ -3,8 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { PageHeader } from "@/components/layout/page-header";
-import { KanbanBoardView } from "@/components/deals/kanban-board";
-import { NewDealDialog } from "@/components/deals/new-deal-dialog";
 
 export default function DealsPage() {
   return (
@@ -21,7 +19,6 @@ export default function DealsPage() {
               <Filter className="w-4 h-4 mr-1.5" />
               Filter
             </Button>
-            <NewDealDialog />
             <ToggleGroup type="single" defaultValue="board" size="sm">
               <ToggleGroupItem value="board" aria-label="Board view">
                 <LayoutGrid className="w-4 h-4" />
@@ -33,8 +30,6 @@ export default function DealsPage() {
           </>
         }
       />
-
-      <KanbanBoardView />
     </div>
   );
 }

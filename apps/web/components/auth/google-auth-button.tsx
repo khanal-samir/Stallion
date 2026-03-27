@@ -2,27 +2,28 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useGoogleAuth } from "@/hooks/queries/use-auth";
 
 interface GoogleAuthButtonProps {
   text?: string;
-  onClick: () => void;
   disabled?: boolean;
   className?: string;
 }
 
 export function GoogleAuthButton({
   text = "Continue with Google",
-  onClick,
   disabled,
   className,
 }: GoogleAuthButtonProps) {
+  const { initiateGoogleLogin, isPending } = useGoogleAuth();
+
   return (
     <Button
       type="button"
       variant="outline"
       className={cn("w-full", className)}
-      onClick={onClick}
-      disabled={disabled}
+      onClick={() => initiateGoogleLogin()}
+      disabled={disabled || isPending}
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="mr-2 size-4">
         <path

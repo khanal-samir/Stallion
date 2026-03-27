@@ -17,7 +17,7 @@ import { FieldSeparator } from "@/components/ui/field-separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type SignInInput } from "@workspace/validators/schemas/auth";
-import { useEmailSignIn, useGoogleAuth } from "@/hooks/queries/use-auth";
+import { useEmailSignIn } from "@/hooks/queries/use-auth";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -25,7 +25,6 @@ import Link from "next/link";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const { initiateGoogleLogin, isPending: isGooglePending } = useGoogleAuth();
   const { mutate: signInMutation, isPending: isSignInPending } = useEmailSignIn();
   const [isNavigating, startTransition] = useTransition();
 
@@ -47,7 +46,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     });
   };
 
-  const isPending = isSignInPending || isNavigating || isGooglePending;
+  const isPending = isSignInPending || isNavigating;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -60,11 +59,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <GoogleAuthButton
-                text="Login with Google"
-                onClick={initiateGoogleLogin}
-                disabled={isPending}
-              />
+              <GoogleAuthButton text="Login with Google" disabled={isPending} />
 
               <FieldSeparator>Or continue with</FieldSeparator>
 

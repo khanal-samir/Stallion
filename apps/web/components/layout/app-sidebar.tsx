@@ -7,18 +7,12 @@ import {
   Users,
   Building2,
   Kanban,
-  Workflow,
-  ActivitySquare,
-  Sparkles,
-  Mail,
   Settings,
   CreditCard,
   ChevronDown,
   LogOut,
-  UserCircle,
 } from "lucide-react";
 import { TeamSwitcher } from "@/components/layout/team-switcher";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Sidebar,
@@ -36,7 +30,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -62,32 +55,6 @@ const mainNav = [
     label: "Deals",
     href: "/deals",
     icon: Kanban,
-  },
-  {
-    label: "Sequences",
-    href: "/sequences",
-    icon: Workflow,
-  },
-  {
-    label: "Activities",
-    href: "/activities",
-    icon: ActivitySquare,
-  },
-];
-
-const toolsNav = [
-  {
-    label: "AI Assistant",
-    href: "/ai",
-    icon: Sparkles,
-    badge: "New",
-    badgeClass: "bg-primary text-primary-foreground text-xs",
-  },
-  {
-    label: "Email",
-    href: "/email",
-    icon: Mail,
-    showDot: true,
   },
 ];
 
@@ -155,44 +122,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Tools Group */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Tools</SidebarGroupLabel>
-          <SidebarMenu className="gap-1">
-            {toolsNav.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive}
-                    tooltip={item.label}
-                    className={cn(
-                      "bg-transparent! border-0",
-                      isActive &&
-                        "bg-sidebar-accent text-sidebar-accent-foreground rounded-md border-l-2 border-sidebar-primary",
-                    )}
-                  >
-                    <Link href={item.href}>
-                      <item.icon className={cn("w-4 h-4", isActive && "text-sidebar-primary")} />
-                      <span>{item.label}</span>
-                      {item.badge && (
-                        <Badge variant="default" className={cn("ml-auto", item.badgeClass)}>
-                          {item.badge}
-                        </Badge>
-                      )}
-                      {item.showDot && (
-                        <span className="ml-auto w-2 h-2 rounded-full bg-amber-400" />
-                      )}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* Workspace Group */}
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarMenu className="gap-1">
@@ -251,12 +180,7 @@ export function AppSidebar() {
                 <ChevronDown className="w-3 h-3 text-muted-foreground group-data-[collapsible=icon]:hidden" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="top" className="w-48">
-              <DropdownMenuItem className="cursor-pointer">
-                <UserCircle className="w-4 h-4 mr-2" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+            <DropdownMenuContent align="end" side="top">
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
                 disabled={signOutMutation.isPending}

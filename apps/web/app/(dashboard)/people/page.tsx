@@ -9,15 +9,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
-import { PeopleTable } from "@/components/people/people-table";
-import { MOCK_PEOPLE } from "@/types/crm";
 
 export default function PeoplePage() {
   return (
     <div className="space-y-6">
       <PageHeader
         title="People"
-        count={MOCK_PEOPLE.length}
+        count={2}
         actions={
           <>
             <div className="relative">
@@ -69,8 +67,6 @@ export default function PeoplePage() {
           </>
         }
       />
-
-      <PeopleTable />
     </div>
   );
 }

@@ -1,7 +1,5 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SequenceCard } from "@/components/sequences/sequence-card";
-import { MOCK_SEQUENCES } from "@/types/crm";
 
 export default function SequencesPage() {
   return (
@@ -13,12 +11,6 @@ export default function SequencesPage() {
           New Sequence
         </Button>
       </header>
-
-      <div className="grid grid-cols-3 gap-4">
-        {MOCK_SEQUENCES.map((seq) => (
-          <SequenceCard key={seq.id} sequence={seq} />
-        ))}
-      </div>
     </div>
   );
 }
