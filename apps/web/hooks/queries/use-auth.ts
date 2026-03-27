@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { toBetterAuthError } from "@/lib/error";
 import { QUERY_KEYS } from "@/lib/query-keys";
-import type { RequestPasswordResetInput, SignInInput, SignUpInput } from "@workspace/validators";
-import { sileo } from "sileo";
+import type {
+  RequestPasswordResetInput,
+  SignInInput,
+  SignUpInput,
+} from "@workspace/validators/schemas/auth";
 import {
   getAuthSession,
   requestPasswordResetLink,
@@ -41,7 +45,7 @@ export function useEmailSignIn() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authQueryKey });
       queryClient.invalidateQueries({ queryKey: workspacesQueryKey });
-      sileo.success({ title: "Signed in", description: "You have successfully signed in." });
+      toast.success("Signed in", { description: "You have successfully signed in." });
     },
   });
 }
@@ -54,8 +58,7 @@ export function useEmailSignUp() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authQueryKey });
       queryClient.invalidateQueries({ queryKey: workspacesQueryKey });
-      sileo.success({
-        title: "Account created",
+      toast.success("Account created", {
         description: "Please check your email to verify your account.",
       });
     },
@@ -66,8 +69,7 @@ export function useRequestPasswordReset() {
   return useMutation({
     mutationFn: (input: RequestPasswordResetInput) => requestPasswordResetLink(input),
     onSuccess: () => {
-      sileo.success({
-        title: "Reset link sent",
+      toast.success("Reset link sent", {
         description: "Please check your email for the reset link.",
       });
     },
@@ -78,8 +80,7 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: (input: ResetPasswordWithTokenInput) => resetPasswordWithToken(input),
     onSuccess: () => {
-      sileo.success({
-        title: "Password reset",
+      toast.success("Password reset", {
         description: "Your password has been successfully reset.",
       });
     },
@@ -93,8 +94,7 @@ export function useVerifyEmail() {
     mutationFn: (token: string) => verifyEmailToken(token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authQueryKey });
-      sileo.success({
-        title: "Email verified",
+      toast.success("Email verified", {
         description: "Your email has been verified successfully.",
       });
     },
@@ -129,7 +129,7 @@ export function useSignOut() {
       queryClient.cancelQueries({ queryKey: workspacesQueryKey });
       queryClient.setQueryData(authSessionQueryKey, null);
       queryClient.removeQueries({ queryKey: workspacesQueryKey });
-      sileo.success({ title: "Signed out", description: "You have been logged out." });
+      toast.success("Signed out", { description: "You have been logged out." });
     },
   });
 }

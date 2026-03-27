@@ -3,47 +3,50 @@ import { HTTPException } from "hono/http-exception";
 import type { StatusCode } from "@/constants/status-codes.js";
 import { logger } from "@/config/logger.config.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { AppError } from "@/helpers/app-error.js";
-import { sendError } from "@/helpers/api-response.js";
+import { AppError } from "@/lib/app-error.js";
+import { sendError } from "@/lib/api-response.js";
 
 export const notFoundHandler: NotFoundHandler = (c) => {
   return sendError(c, `Route ${c.req.method} ${c.req.path} not found`, STATUS_CODES.NOT_FOUND);
 };
 
 export const onErrorHandler: ErrorHandler = (err, c) => {
-  if (err instanceof AppError) {
-    logger.warn("Operational error", {
-      method: c.req.method,
-      path: c.req.path,
-      statusCode: err.statusCode,
-      message: err.message,
-      details: err.details,
-    });
-
-    return sendError(c, err.message, err.statusCode, err.details);
+  if (err instanceof HTTPException && c.req.path.startsWith("/api/auth")) {
+    return err.getResponse(); // let betterauth handle auth errors
   }
 
-  if (err instanceof HTTPException) {
-    logger.warn("HTTP exception", {
-      method: c.req.method,
-      path: c.req.path,
-      statusCode: err.status,
-      message: err.message,
-    });
+  const statusCode: StatusCode =
+    err instanceof AppError
+      ? err.statusCode
+      : err instanceof HTTPException
+        ? (err.status as StatusCode)
+        : STATUS_CODES.INTERNAL_SERVER_ERROR;
 
-    if (c.req.path.startsWith("/api/auth")) {
-      return err.getResponse();
-    }
+  const errorMessage = err instanceof Error ? err.message : "Unknown error";
+  const details = err instanceof AppError ? err.details : undefined;
 
-    return sendError(c, err.message, err.status as StatusCode);
+  // 5xx errors
+  if (statusCode >= STATUS_CODES.INTERNAL_SERVER_ERROR) {
+    logger.error(
+      {
+        statusCode,
+        errorMessage,
+        stack: err instanceof Error ? err.stack : undefined,
+      },
+      "Unhandled error",
+    );
+    return sendError(c, "Internal Server Error", statusCode);
   }
 
-  logger.error("Unhandled error", {
-    method: c.req.method,
-    path: c.req.path,
-    message: err instanceof Error ? err.message : "Unknown error",
-    stack: err instanceof Error ? err.stack : undefined,
-  });
+  //4xx errors
+  logger.warn(
+    {
+      statusCode,
+      errorMessage,
+      details,
+    },
+    "Request error",
+  );
 
-  return sendError(c, "Internal Server Error", STATUS_CODES.INTERNAL_SERVER_ERROR);
+  return sendError(c, errorMessage, statusCode, details);
 };

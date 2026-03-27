@@ -1,21 +1,24 @@
 import type { Context } from "hono";
-import type { CreateOrg, UpdateOrg } from "@workspace/validators";
-import { eq } from "drizzle-orm";
+import type { CreateOrg, UpdateOrg } from "@workspace/validators/schemas/crm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client.js";
 import { orgs } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { sendSuccess } from "@/helpers/api-response.js";
-import { AppError } from "@/helpers/app-error.js";
+import { sendSuccess } from "@/lib/api-response.js";
+import { AppError } from "@/lib/app-error.js";
+import { getSessionWorkspaceId } from "@/lib/workspace.js";
 
 export async function listOrgs(c: Context) {
-  const results = await db.select().from(orgs);
+  const workspaceId = getSessionWorkspaceId(c);
+  const results = await db.select().from(orgs).where(eq(orgs.workspaceId, workspaceId));
 
   return sendSuccess(c, { orgs: results }, STATUS_CODES.OK);
 }
 
 export async function getOrg(c: Context, id: string) {
+  const workspaceId = getSessionWorkspaceId(c);
   const org = await db.query.orgs.findFirst({
-    where: eq(orgs.id, id),
+    where: and(eq(orgs.id, id), eq(orgs.workspaceId, workspaceId)),
     with: {
       people: {
         columns: {
@@ -34,19 +37,27 @@ export async function getOrg(c: Context, id: string) {
 }
 
 export async function createOrg(c: Context, payload: CreateOrg) {
-  const [org] = await db.insert(orgs).values(payload).returning();
+  const workspaceId = getSessionWorkspaceId(c);
+  const [org] = await db
+    .insert(orgs)
+    .values({
+      ...payload,
+      workspaceId,
+    })
+    .returning();
 
   return sendSuccess(c, { org }, STATUS_CODES.CREATED);
 }
 
 export async function updateOrg(c: Context, id: string, payload: UpdateOrg) {
+  const workspaceId = getSessionWorkspaceId(c);
   const [org] = await db
     .update(orgs)
     .set({
       ...payload,
       updatedAt: new Date(),
     })
-    .where(eq(orgs.id, id))
+    .where(and(eq(orgs.id, id), eq(orgs.workspaceId, workspaceId)))
     .returning();
 
   if (!org) {
@@ -57,7 +68,11 @@ export async function updateOrg(c: Context, id: string, payload: UpdateOrg) {
 }
 
 export async function deleteOrg(c: Context, id: string) {
-  const [org] = await db.delete(orgs).where(eq(orgs.id, id)).returning();
+  const workspaceId = getSessionWorkspaceId(c);
+  const [org] = await db
+    .delete(orgs)
+    .where(and(eq(orgs.id, id), eq(orgs.workspaceId, workspaceId)))
+    .returning();
 
   if (!org) {
     throw new AppError("Organization not found", STATUS_CODES.NOT_FOUND);

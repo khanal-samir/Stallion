@@ -1,5 +1,9 @@
 import { Hono } from "hono";
-import { createOrgSchema, orgParamsSchema, updateOrgSchema } from "@workspace/validators";
+import {
+  createOrgSchema,
+  orgParamsSchema,
+  updateOrgSchema,
+} from "@workspace/validators/schemas/crm";
 import {
   createOrg,
   deleteOrg,

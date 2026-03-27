@@ -1,7 +1,7 @@
 import type { Context, Next } from "hono";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { auth } from "@/lib/auth.config.js";
-import { sendError } from "@/helpers/api-response.js";
+import { sendError } from "@/lib/api-response.js";
 import { logger } from "@/config/logger.config.js";
 type AuthSession = typeof auth.$Infer.Session;
 
@@ -24,7 +24,15 @@ export async function authMiddleware(c: Context, next: Next) {
 
   c.set("user", session.user);
   c.set("session", session.session);
-  logger.info("User authenticated", { user: session.user });
+  logger.info(
+    {
+      userId: session.user.id,
+      email: session.user.email,
+      sessionId: session.session.id,
+      path: c.req.path,
+    },
+    "User authenticated",
+  );
 
   return next();
 }

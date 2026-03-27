@@ -1,4 +1,4 @@
-import type { ApiErrorResponse } from "@workspace/validators";
+import type { ApiErrorResponse } from "@workspace/validators/types/auth";
 import axios from "axios";
 import type { AxiosError } from "axios";
 

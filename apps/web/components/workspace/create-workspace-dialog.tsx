@@ -2,7 +2,10 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createWorkspaceSchema, type CreateWorkspace } from "@workspace/validators";
+import {
+  createWorkspaceSchema,
+  type CreateWorkspace,
+} from "@workspace/validators/schemas/workspace";
 import {
   Form,
   FormControl,

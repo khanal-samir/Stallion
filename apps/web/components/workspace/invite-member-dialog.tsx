@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { inviteSchema, type InviteForm } from "@workspace/validators";
+import { inviteSchema, type InviteForm } from "@workspace/validators/schemas/workspace";
 import {
   Form,
   FormControl,

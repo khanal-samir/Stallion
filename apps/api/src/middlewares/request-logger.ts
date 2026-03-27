@@ -2,7 +2,7 @@ import type { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "@/config/logger.config.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
-import { AppError } from "@/helpers/app-error.js";
+import { AppError } from "@/lib/app-error.js";
 
 export async function requestLogger(c: Context, next: Next) {
   const start = Date.now();
@@ -23,6 +23,14 @@ export async function requestLogger(c: Context, next: Next) {
             ? STATUS_CODES.INTERNAL_SERVER_ERROR
             : c.res.status;
 
-    logger.info(`${c.req.method} ${c.req.url} - ${statusCode} - ${durationMs}ms`);
+    logger.info(
+      {
+        method: c.req.method,
+        path: c.req.path,
+        statusCode,
+        durationMs,
+      },
+      "HTTP request completed",
+    );
   }
 }

@@ -24,9 +24,9 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useRemoveMember, useUpdateMemberRole } from "@/hooks/queries/use-workspace";
-import type { WorkspaceRole } from "@workspace/validators";
+import type { WorkspaceRole } from "@workspace/validators/types/workspace";
 import { getInitials } from "@/lib/utils";
-import { workspaceRoleSchema } from "@workspace/validators";
+import { workspaceRoleSchema } from "@workspace/validators/schemas/common";
 
 interface Member {
   id: string;

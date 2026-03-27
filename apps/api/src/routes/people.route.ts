@@ -1,5 +1,9 @@
 import { Hono } from "hono";
-import { createPersonSchema, personParamsSchema, updatePersonSchema } from "@workspace/validators";
+import {
+  createPersonSchema,
+  personParamsSchema,
+  updatePersonSchema,
+} from "@workspace/validators/schemas/crm";
 import {
   createPerson,
   deletePerson,

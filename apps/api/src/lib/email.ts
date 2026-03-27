@@ -12,7 +12,7 @@ export async function sendEmail({
   subject: string;
   html: string;
 }) {
-  logger.info("Sending email", { to, subject });
+  logger.info({ to, subject }, "Sending email");
   const { error } = await resend.emails.send({
     from: env.RESEND_FROM_EMAIL,
     to,
@@ -21,11 +21,14 @@ export async function sendEmail({
   });
 
   if (error) {
-    logger.error("Failed to send email", {
-      to,
-      subject,
-      error,
-    });
+    logger.error(
+      {
+        to,
+        subject,
+        error,
+      },
+      "Failed to send email",
+    );
     throw new Error(`Failed to send email: ${error.message}`);
   }
 }

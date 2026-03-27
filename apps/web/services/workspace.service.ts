@@ -1,12 +1,8 @@
 import { authClient } from "@/lib/auth-client";
 import { toBetterAuthError } from "@/lib/error";
 import { slugify } from "@/lib/utils";
-import {
-  CreateWorkspace,
-  InviteMemberInput,
-  UpdateWorkspace,
-  WorkspaceRole,
-} from "@workspace/validators";
+import type { InviteMemberInput, WorkspaceRole } from "@workspace/validators/types/workspace";
+import type { CreateWorkspace, UpdateWorkspace } from "@workspace/validators/schemas/workspace";
 
 export async function createWorkspace(input: CreateWorkspace) {
   const { data, error } = await authClient.organization.create({

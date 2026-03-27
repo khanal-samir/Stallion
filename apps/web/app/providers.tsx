@@ -4,7 +4,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
-import { Toaster } from "sileo";
+import { Toaster } from "sonner";
 import { isHandledAppError } from "@/lib/error";
 import { useError } from "@/hooks/useError";
 import { useErrorStore } from "@/store/error.store";
@@ -21,20 +21,15 @@ function ThemedToaster() {
   return (
     <Toaster
       position="top-center"
-      options={{
-        // Light: soft lavender matching --secondary/--accent (oklch 0.962 0.018 272)
-        // Dark:  deep purple matching the app's dark card palette
-        fill: isDark ? "#1e1535" : "#ede8f8",
-        duration: 5000,
-        roundness: 16,
-        styles: {
-          // text-foreground = near-black on light, near-white on dark — no neon clash
-          title: "text-foreground!",
-          // Description text: white on dark-purple, muted-dark on light-purple
-          description: isDark ? "text-white/75!" : "text-foreground/70!",
+      duration={5000}
+      theme={isDark ? "dark" : "light"}
+      richColors
+      toastOptions={{
+        style: {
+          background: isDark ? "#1e1535" : "#ede8f8",
+          color: isDark ? "#fff" : "#000",
         },
       }}
-      theme="system"
     />
   );
 }

@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { STATUS_CODES, type StatusCode } from "@/constants/status-codes.js";
-import { ApiErrorResponse, ApiSuccessResponse } from "@workspace/validators";
+import type { ApiErrorResponse, ApiSuccessResponse } from "@workspace/validators/types/auth";
 
 export function sendSuccess<T>(
   c: Context,

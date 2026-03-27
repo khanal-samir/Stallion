@@ -2,7 +2,6 @@ import { z } from "zod";
 import { dateLikeSchema, idSchema, nullableUuidSchema } from "./common.validator.js";
 
 export const createOrgSchema = z.object({
-  workspaceId: idSchema,
   name: z.string().min(1).max(255),
   domain: z.string().max(255).optional(),
   industry: z.string().max(100).optional(),
@@ -11,11 +10,10 @@ export const createOrgSchema = z.object({
   customFields: z.record(z.unknown()).optional(),
 });
 
-export const updateOrgSchema = createOrgSchema.omit({ workspaceId: true }).partial();
+export const updateOrgSchema = createOrgSchema.partial();
 export const orgParamsSchema = z.object({ id: idSchema });
 
 export const createPersonSchema = z.object({
-  workspaceId: idSchema,
   name: z.string().min(1).max(255),
   orgId: nullableUuidSchema,
   ownerId: nullableUuidSchema,
@@ -29,11 +27,10 @@ export const createPersonSchema = z.object({
   customFields: z.record(z.unknown()).optional(),
 });
 
-export const updatePersonSchema = createPersonSchema.omit({ workspaceId: true }).partial();
+export const updatePersonSchema = createPersonSchema.partial();
 export const personParamsSchema = z.object({ id: idSchema });
 
 export const createDealSchema = z.object({
-  workspaceId: idSchema,
   title: z.string().min(1).max(255),
   personId: nullableUuidSchema,
   orgId: nullableUuidSchema,
@@ -44,7 +41,7 @@ export const createDealSchema = z.object({
   closeDate: dateLikeSchema.optional(),
 });
 
-export const updateDealSchema = createDealSchema.omit({ workspaceId: true }).partial();
+export const updateDealSchema = createDealSchema.partial();
 export const dealParamsSchema = z.object({ id: idSchema });
 
 export type CreateOrg = z.infer<typeof createOrgSchema>;

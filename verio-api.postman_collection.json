@@ -26,75 +26,316 @@
       ]
     },
     {
-      "name": "Users",
+      "name": "CRM",
       "item": [
         {
-          "name": "List Users",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"]
+          "name": "Orgs",
+          "item": [
+            {
+              "name": "List Orgs",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orgs",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orgs"]
+                },
+                "description": "Protected route. Sign in first so Postman sends auth cookies."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Org",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orgs/{{orgId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orgs", "{{orgId}}"]
+                },
+                "description": "Protected route. orgId must be a UUID."
+              },
+              "response": []
+            },
+            {
+              "name": "Create Org",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workspaceId\": \"{{workspaceId}}\",\n  \"name\": \"Acme Inc\",\n  \"domain\": \"acme.com\",\n  \"industry\": \"SaaS\",\n  \"size\": \"51-200\",\n  \"location\": \"San Francisco\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orgs",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orgs"]
+                },
+                "description": "Protected route. Requires valid workspaceId."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Org",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Acme Incorporated\",\n  \"industry\": \"FinTech\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orgs/{{orgId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orgs", "{{orgId}}"]
+                },
+                "description": "Protected route. orgId must be a UUID."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Org",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orgs/{{orgId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orgs", "{{orgId}}"]
+                },
+                "description": "Protected route. orgId must be a UUID."
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
         },
         {
-          "name": "Create User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Postman User\",\n  \"email\": \"postman.user@example.com\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+          "name": "People",
+          "item": [
+            {
+              "name": "List People",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/people",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["people"]
+                },
+                "description": "Protected route. Sign in first so Postman sends auth cookies."
+              },
+              "response": []
             },
-            "url": {
-              "raw": "{{baseUrl}}/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["users"]
+            {
+              "name": "Get Person",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/people/{{personId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["people", "{{personId}}"]
+                },
+                "description": "Protected route. personId must be a UUID."
+              },
+              "response": []
+            },
+            {
+              "name": "Create Person",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workspaceId\": \"{{workspaceId}}\",\n  \"name\": \"John Doe\",\n  \"orgId\": \"{{orgId}}\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1-555-0101\",\n  \"jobTitle\": \"Head of Sales\",\n  \"status\": \"prospect\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/people",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["people"]
+                },
+                "description": "Protected route. Requires valid workspaceId."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Person",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jobTitle\": \"VP Sales\",\n  \"status\": \"qualified\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/people/{{personId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["people", "{{personId}}"]
+                },
+                "description": "Protected route. personId must be a UUID."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Person",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/people/{{personId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["people", "{{personId}}"]
+                },
+                "description": "Protected route. personId must be a UUID."
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
         },
         {
-          "name": "Update User",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Name\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+          "name": "Deals",
+          "item": [
+            {
+              "name": "List Deals",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/deals",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["deals"]
+                },
+                "description": "Protected route. Sign in first so Postman sends auth cookies."
+              },
+              "response": []
             },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "{{userId}}"]
+            {
+              "name": "Get Deal",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/deals/{{dealId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["deals", "{{dealId}}"]
+                },
+                "description": "Protected route. dealId must be a UUID."
+              },
+              "response": []
             },
-            "description": "userId must be a UUID."
-          },
-          "response": []
+            {
+              "name": "Create Deal",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"workspaceId\": \"{{workspaceId}}\",\n  \"title\": \"Q2 Expansion\",\n  \"personId\": \"{{personId}}\",\n  \"orgId\": \"{{orgId}}\",\n  \"value\": \"25000\",\n  \"currency\": \"USD\",\n  \"stage\": \"new\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/deals",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["deals"]
+                },
+                "description": "Protected route. Requires valid workspaceId."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Deal",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"stage\": \"proposal\",\n  \"value\": \"30000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/deals/{{dealId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["deals", "{{dealId}}"]
+                },
+                "description": "Protected route. dealId must be a UUID."
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Deal",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/deals/{{dealId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["deals", "{{dealId}}"]
+                },
+                "description": "Protected route. dealId must be a UUID."
+              },
+              "response": []
+            }
+          ]
         }
       ]
     },
@@ -600,8 +841,20 @@
       "value": "newPassword1234"
     },
     {
-      "key": "userId",
-      "value": "11111111-1111-1111-1111-111111111111"
+      "key": "workspaceId",
+      "value": "replace-with-workspace-id"
+    },
+    {
+      "key": "orgId",
+      "value": "replace-with-org-id"
+    },
+    {
+      "key": "personId",
+      "value": "replace-with-person-id"
+    },
+    {
+      "key": "dealId",
+      "value": "replace-with-deal-id"
     },
     {
       "key": "verifyToken",
