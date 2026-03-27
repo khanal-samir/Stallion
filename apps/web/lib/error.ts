@@ -12,6 +12,7 @@ export type BetterAuthClientError = {
 export type AppError = {
   code?: string;
   message: string;
+  details?: string;
   status?: number;
 };
 
@@ -23,7 +24,6 @@ export function isBetterAuthError(error: unknown): error is BetterAuthClientErro
   }
 
   const candidate = error as Record<string, unknown>;
-
   return (
     typeof candidate.message === "string" ||
     typeof candidate.status === "number" ||
@@ -44,14 +44,17 @@ export function toBetterAuthError(
 
 export function normalizeAppError(error: unknown): AppError {
   if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError<{ message?: string; error?: { message?: string } }>;
+    const axiosError = error as AxiosError<ApiErrorResponse | { message?: string }>;
+    const responseData = axiosError.response?.data;
+    const nestedError = responseData && "error" in responseData ? responseData.error : undefined;
     const message =
-      axiosError.response?.data?.error?.message ??
-      axiosError.response?.data?.message ??
+      nestedError?.message ??
+      (responseData && "message" in responseData ? responseData.message : undefined) ??
       axiosError.message ??
       "Request failed";
 
     return {
+      details: nestedError?.details as string | undefined,
       message,
       status: axiosError.response?.status,
     };
