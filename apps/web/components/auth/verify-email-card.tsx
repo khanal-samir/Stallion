@@ -27,7 +27,7 @@ export function VerifyEmailCard({ className, ...props }: React.ComponentProps<"d
     });
   }, [token, router, verifyEmail]);
 
-  const title = message === "check-email" ? "Check your email" : "Email verified";
+  const title = message === "check-email" ? "Check your email" : "Email verified"; // from signup from
 
   const description =
     message === "check-email"
