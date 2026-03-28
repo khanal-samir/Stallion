@@ -13,7 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { TeamSwitcher } from "@/components/layout/team-switcher";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/ui/avatar";
 import {
   Sidebar,
   SidebarHeader,
@@ -24,15 +24,15 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
-} from "@/components/ui/sidebar";
+} from "@workspace/ui/components/ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@workspace/ui/components/ui/dropdown-menu";
+import { cn } from "@workspace/ui/lib/utils";
+import { Skeleton } from "@workspace/ui/components/ui/skeleton";
 import { useAuthSession, useSignOut } from "@/hooks/queries/use-auth";
 
 const mainNav = [

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/ui/logo";
+import { Logo } from "@workspace/ui/components/ui/logo";
 
 interface FooterLinkGroup {
   title: string;

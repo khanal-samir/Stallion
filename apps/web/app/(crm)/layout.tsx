@@ -1,7 +1,7 @@
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@workspace/ui/components/ui/sidebar";
+import { TooltipProvider } from "@workspace/ui/components/ui/tooltip";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeToggle } from "@workspace/ui/components/ui/theme-toggle";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

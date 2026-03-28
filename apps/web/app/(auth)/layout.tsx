@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Logo } from "@/components/ui/logo";
+import { Logo } from "@workspace/ui/components/ui/logo";
 
 export const metadata: Metadata = {
   title: "Authentication — Verio",

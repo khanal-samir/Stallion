@@ -34,8 +34,5 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
-  },
-  "dependencies": {
-    "zod": "^3.25.76"
   }
 }

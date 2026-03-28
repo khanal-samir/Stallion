@@ -7,8 +7,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+} from "@workspace/ui/components/ui/dialog";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface SharedDialogProps {
   open: boolean;

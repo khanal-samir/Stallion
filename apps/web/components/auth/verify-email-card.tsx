@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@workspace/ui/lib/utils";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@workspace/ui/components/ui/card";
 import { useVerifyEmail } from "@/hooks/queries/use-auth";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";

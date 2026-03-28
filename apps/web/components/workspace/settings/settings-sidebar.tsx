@@ -1,8 +1,8 @@
 "use client";
 
 import { Mail, Settings2, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@workspace/ui/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/ui/tooltip";
 
 export const NAV_ITEMS = [
   { id: "general", label: "General", icon: Settings2 },

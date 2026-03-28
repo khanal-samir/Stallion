@@ -2,8 +2,8 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/ui/card";
+import { Button } from "@workspace/ui/components/ui/button";
 import { LoadingState } from "@/components/shared/loading-state";
 import { NotFoundState } from "@/components/shared/not-found-state";
 import { useAuthSession } from "@/hooks/queries/use-auth";
@@ -13,10 +13,10 @@ import {
   useRejectInvitation,
   useSetActiveWorkspace,
 } from "@/hooks/queries/use-workspace";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@workspace/ui/components/ui/badge";
 import { Mail, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Logo } from "@/components/ui/logo";
+import { Logo } from "@workspace/ui/components/ui/logo";
 
 function AcceptInvitationContent() {
   const searchParams = useSearchParams();

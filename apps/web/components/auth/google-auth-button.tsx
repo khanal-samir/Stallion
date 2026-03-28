@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@workspace/ui/components/ui/button";
+import { cn } from "@workspace/ui/lib/utils";
 import { useGoogleAuth } from "@/hooks/queries/use-auth";
 
 interface GoogleAuthButtonProps {

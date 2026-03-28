@@ -1,13 +1,13 @@
 import { Search, Upload, Plus } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@workspace/ui/components/ui/input";
+import { Button } from "@workspace/ui/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@workspace/ui/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
 
 export default function PeoplePage() {

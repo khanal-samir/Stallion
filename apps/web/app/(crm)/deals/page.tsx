@@ -1,7 +1,7 @@
 import { Search, Filter, LayoutGrid, List } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Input } from "@workspace/ui/components/ui/input";
+import { Button } from "@workspace/ui/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@workspace/ui/components/ui/toggle-group";
 import { PageHeader } from "@/components/layout/page-header";
 
 export default function DealsPage() {
