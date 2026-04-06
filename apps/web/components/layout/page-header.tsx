@@ -11,11 +11,15 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, count, actions, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex items-start justify-between gap-4", className)}>
+    <div className={cn("flex items-start justify-between gap-4 mb-8", className)}>
       <div className="space-y-1">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          {count !== undefined && <Badge variant="secondary">{count}</Badge>}
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">{title}</h1>
+          {count !== undefined && (
+            <Badge variant="secondary" className="text-xs font-medium">
+              {count}
+            </Badge>
+          )}
         </div>
         {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>

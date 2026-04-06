@@ -52,11 +52,11 @@ export default function SettingsPage() {
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex h-12 shrink-0 items-center border-b px-6">
-          <h1 className="text-sm font-medium">{activeItem.label}</h1>
+        <div className="flex h-14 shrink-0 items-center border-b border-border/50 px-6 bg-background">
+          <h1 className="text-sm font-semibold">{activeItem.label}</h1>
         </div>
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-8">
           {activeTab === "general" && (
             <GeneralSettings
               workspace={{

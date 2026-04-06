@@ -9,11 +9,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex items-center justify-between h-12 px-4 border-b border-border shrink-0">
+          <header className="flex items-center justify-between h-14 px-6 border-b border-border/50 shrink-0 bg-background">
             <SidebarTrigger className="-ml-1" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-auto p-6">{children}</main>
+          <main className="flex-1 overflow-auto p-8">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

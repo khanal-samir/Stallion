@@ -100,15 +100,14 @@ export function AppSidebar() {
                     asChild
                     isActive={isActive}
                     tooltip={item.label}
-                    className={cn(
-                      "bg-transparent! border-0",
-                      isActive &&
-                        "bg-sidebar-accent text-sidebar-accent-foreground rounded-md border-l-2 border-sidebar-primary",
-                    )}
+                    className={cn("relative", isActive && "text-sidebar-foreground font-medium")}
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} className="relative">
                       <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -128,15 +127,14 @@ export function AppSidebar() {
                     asChild
                     isActive={isActive}
                     tooltip={item.label}
-                    className={cn(
-                      "bg-transparent! border-0",
-                      isActive &&
-                        "bg-sidebar-accent text-sidebar-accent-foreground rounded-md border-l-2 border-sidebar-primary",
-                    )}
+                    className={cn("relative", isActive && "text-sidebar-foreground font-medium")}
                   >
-                    <Link href={item.href}>
+                    <Link href={item.href} className="relative">
                       <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -11,7 +11,7 @@ interface BulkActionBarProps {
 
 export function BulkActionBar({ count, onClear }: BulkActionBarProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg px-6 py-3 flex items-center gap-3 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-card shadow-xl border-t border-border/50 px-6 py-3 flex items-center gap-3 z-50">
       <span className="text-sm font-medium">{count} people selected</span>
       <Separator orientation="vertical" className="h-5" />
       <Button variant="outline" size="sm">
