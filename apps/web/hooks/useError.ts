@@ -7,9 +7,9 @@ export const useError = () => {
   useEffect(() => {
     const unsubscribe = useErrorStore.subscribe((state, prevState) => {
       if (state.error !== prevState.error && state.error !== null) {
-        const { message } = normalizeAppError(state.error);
+        const { message, details } = normalizeAppError(state.error);
 
-        toast.error(message);
+        toast.error(message, details ? { description: details } : undefined);
         useErrorStore.getState().clearError();
       }
     });

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Logo } from "@/components/ui/logo";
-import { Button } from "@/components/ui/button";
+import { Logo } from "@workspace/ui/components/ui/logo";
+import { Button } from "@workspace/ui/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -33,11 +33,10 @@ export default function NotFound() {
           </div>
 
           {/* Text content */}
-          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-3">
-            Page not found
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground mb-3">Page not found</h1>
           <p className="text-muted-foreground text-base mb-8 leading-relaxed">
-            Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved, deleted, or never existed.
+            Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved,
+            deleted, or never existed.
           </p>
 
           {/* Actions */}
@@ -52,9 +51,7 @@ export default function NotFound() {
 
           {/* Helpful links */}
           <div className="mt-12 pt-8 border-t border-border">
-            <p className="text-sm text-muted-foreground mb-4">
-              Popular pages
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Popular pages</p>
             <div className="flex flex-wrap justify-center gap-2">
               <Link
                 href="/dashboard"
@@ -90,11 +87,8 @@ export default function NotFound() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-muted-foreground">
             Need help? Contact{" "}
-            <a
-              href="mailto:support@verio.com"
-              className="text-primary hover:underline"
-            >
-              support@verio.com
+            <a href="mailto:support@stallioncrm.com" className="text-primary hover:underline">
+              support@stallioncrm.com
             </a>
           </p>
         </div>

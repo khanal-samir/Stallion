@@ -1,5 +1,5 @@
 {
-  "name": "verio",
+  "name": "stallion",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -34,8 +34,5 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
-  },
-  "dependencies": {
-    "zod": "^3.25.76"
   }
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/ui/card";
 import {
   Form,
   FormControl,
@@ -11,13 +11,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { FieldSeparator } from "@/components/ui/field-separator";
+} from "@workspace/ui/components/ui/form";
+import { Input } from "@workspace/ui/components/ui/input";
+import { FieldSeparator } from "@workspace/ui/components/ui/field-separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema, type SignUpInput } from "@workspace/validators/schemas/auth";
-import { useEmailSignUp, useGoogleAuth } from "@/hooks/queries/use-auth";
+import { useEmailSignUp } from "@/hooks/queries/use-auth";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -25,7 +25,6 @@ import Link from "next/link";
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const { initiateGoogleLogin, isPending: isGooglePending } = useGoogleAuth();
   const { mutate: signUpMutation, isPending: isSignUpPending } = useEmailSignUp();
   const [isNavigating, startTransition] = useTransition();
 
@@ -46,7 +45,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     });
   };
 
-  const isPending = isSignUpPending || isNavigating || isGooglePending;
+  const isPending = isSignUpPending || isNavigating;
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -58,11 +57,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <GoogleAuthButton
-                text="Sign up with Google"
-                onClick={initiateGoogleLogin}
-                disabled={isPending}
-              />
+              <GoogleAuthButton text="Sign up with Google" disabled={isPending} />
 
               <FieldSeparator>Or continue with</FieldSeparator>
 

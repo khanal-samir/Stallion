@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Logo } from "@/components/ui/logo";
+import { Logo } from "@workspace/ui/components/ui/logo";
 
 export const metadata: Metadata = {
-  title: "Authentication — Verio",
-  description: "Sign in to your Verio account",
+  title: "Authentication — Stallion",
+  description: "Sign in to your Stallion account",
 };
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -44,7 +44,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="border-t border-border pt-6">
             <blockquote className="space-y-3">
               <p className="text-sm leading-relaxed italic text-muted-foreground">
-                &ldquo;Verio replaced three tools we were juggling. Sequences alone saved us 10
+                &ldquo;Stallion replaced three tools we were juggling. Sequences alone saved us 10
                 hours a week.&rdquo;
               </p>
               <footer className="text-sm">

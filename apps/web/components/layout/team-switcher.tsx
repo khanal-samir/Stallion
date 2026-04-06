@@ -9,14 +9,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@workspace/ui/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@workspace/ui/components/ui/sidebar";
+import { Skeleton } from "@workspace/ui/components/ui/skeleton";
 import { CreateWorkspaceDialog } from "@/components/workspace/create-workspace-dialog";
 import {
   useWorkspaces,
@@ -24,7 +24,7 @@ import {
   useSetActiveWorkspace,
   useRestoreActiveWorkspace,
 } from "@/hooks/queries/use-workspace";
-import { Logo } from "../ui/logo";
+import { Logo } from "@workspace/ui/components/ui/logo";
 
 export function TeamSwitcher() {
   useRestoreActiveWorkspace();

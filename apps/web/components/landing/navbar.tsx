@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Logo } from "@/components/ui/logo";
+import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/ui/button";
+import { ThemeToggle } from "@workspace/ui/components/ui/theme-toggle";
+import { Logo } from "@workspace/ui/components/ui/logo";
 
 const navLinks = [
   { label: "Features", href: "#features" },

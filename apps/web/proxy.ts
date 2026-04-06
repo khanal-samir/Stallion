@@ -24,14 +24,11 @@ export function proxy(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  // Unauthenticated user trying to access protected route → redirect to login
-  if (!sessionCookie && !isPublicRoute) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  if (!sessionCookie && !isPublicRoute)
+    return NextResponse.redirect(new URL("/login", request.url));
 
-  // Allow all other cases
+  if (sessionCookie && isPublicRoute) return NextResponse.redirect(new URL("/people", request.url));
+
   return NextResponse.next();
 }
 

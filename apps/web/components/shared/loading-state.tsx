@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { Skeleton } from "@workspace/ui/components/ui/skeleton";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface LoadingStateProps {
   variant?: "page" | "section" | "inline";

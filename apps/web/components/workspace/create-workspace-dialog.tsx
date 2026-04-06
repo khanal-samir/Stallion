@@ -14,9 +14,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+} from "@workspace/ui/components/ui/form";
+import { Input } from "@workspace/ui/components/ui/input";
+import { Button } from "@workspace/ui/components/ui/button";
 import { SharedDialog } from "@/components/shared/shared-dialog";
 import { useCreateWorkspace, useSetActiveWorkspace } from "@/hooks/queries/use-workspace";
 import { slugify } from "@/lib/utils";

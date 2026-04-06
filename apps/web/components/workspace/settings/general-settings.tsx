@@ -17,10 +17,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+} from "@workspace/ui/components/ui/form";
+import { Input } from "@workspace/ui/components/ui/input";
+import { Button } from "@workspace/ui/components/ui/button";
+import { Separator } from "@workspace/ui/components/ui/separator";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   useDeleteWorkspace,
@@ -28,7 +28,7 @@ import {
   useUpdateWorkspace,
 } from "@/hooks/queries/use-workspace";
 import { useAuthSession } from "@/hooks/queries/use-auth";
-import { Logo } from "@/components/ui/logo";
+import { Logo } from "@workspace/ui/components/ui/logo";
 
 interface GeneralSettingsProps {
   workspace: {
@@ -94,7 +94,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-sm font-medium">Workspace profile</h2>
-            <p className="text-sm text-muted-foreground">Name and URL shown across Verio.</p>
+            <p className="text-sm text-muted-foreground">Name and URL shown across Stallion.</p>
           </div>
           {!isEditing && (
             <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>

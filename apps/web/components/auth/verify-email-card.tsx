@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@workspace/ui/lib/utils";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@workspace/ui/components/ui/card";
 import { useVerifyEmail } from "@/hooks/queries/use-auth";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -27,7 +27,7 @@ export function VerifyEmailCard({ className, ...props }: React.ComponentProps<"d
     });
   }, [token, router, verifyEmail]);
 
-  const title = message === "check-email" ? "Check your email" : "Email verified";
+  const title = message === "check-email" ? "Check your email" : "Email verified"; // from signup from
 
   const description =
     message === "check-email"

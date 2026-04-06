@@ -1,8 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@workspace/ui/components/ui/button";
+import { Separator } from "@workspace/ui/components/ui/separator";
 
 interface BulkActionBarProps {
   count: number;

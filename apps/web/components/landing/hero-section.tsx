@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/ui/components/ui/button";
 const columns = [
   { label: "New Lead", count: 12, color: "bg-muted-foreground/20" },
   { label: "Contacted", count: 8, color: "bg-muted-foreground/30" },
