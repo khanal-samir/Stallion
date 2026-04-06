@@ -2,7 +2,7 @@ const logos = ["Acme Corp", "TechFlow", "Salesify", "Growthbase", "Revenio", "Pi
 
 export function LogoStrip() {
   return (
-    <section aria-label="Companies that trust Verio" className="py-16 border-t border-border/50">
+    <section aria-label="Companies that trust Stallion" className="py-16 border-t border-border/50">
       <div className="max-w-6xl mx-auto px-4">
         <p className="text-sm text-muted-foreground text-center mb-8">
           Trusted by 500+ sales teams worldwide

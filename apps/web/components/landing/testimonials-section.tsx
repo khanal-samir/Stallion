@@ -9,7 +9,8 @@ interface Testimonial {
 
 const testimonials: Testimonial[] = [
   {
-    quote: "Verio replaced three tools we were juggling. Sequences alone saved us 10 hours a week.",
+    quote:
+      "Stallion replaced three tools we were juggling. Sequences alone saved us 10 hours a week.",
     name: "Sarah Chen",
     title: "Head of Sales at TechFlow",
     initials: "SC",
@@ -40,7 +41,7 @@ export function TestimonialsSection() {
             Loved by sales teams
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            See why hundreds of teams have made the switch to Verio.
+            See why hundreds of teams have made the switch to Stallion.
           </p>
         </div>
 

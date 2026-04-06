@@ -77,7 +77,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground text-center">
-            &copy; 2026 Verio. All rights reserved.
+            &copy; 2026 Stallion. All rights reserved.
           </p>
         </div>
       </div>

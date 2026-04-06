@@ -15,8 +15,8 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Verio — CRM for Outbound Sales Teams",
-    template: "%s — Verio",
+    default: "Stallion — CRM for Outbound Sales Teams",
+    template: "%s — Stallion",
   },
   description:
     "The modern CRM built for outbound sales teams. Manage contacts, automate sequences, and close more deals.",

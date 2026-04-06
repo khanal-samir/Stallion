@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "d9e7102d-b57d-44ce-8a6d-e3ec3fd5d650",
-    "name": "Verio API (No Google OAuth)",
-    "description": "Postman collection for Verio API endpoints excluding Google OAuth/social sign-in routes.",
+    "name": "Stallion API (No Google OAuth)",
+    "description": "Postman collection for Stallion API endpoints excluding Google OAuth/social sign-in routes.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [

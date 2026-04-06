@@ -94,7 +94,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-sm font-medium">Workspace profile</h2>
-            <p className="text-sm text-muted-foreground">Name and URL shown across Verio.</p>
+            <p className="text-sm text-muted-foreground">Name and URL shown across Stallion.</p>
           </div>
           {!isEditing && (
             <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
