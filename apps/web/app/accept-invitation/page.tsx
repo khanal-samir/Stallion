@@ -2,7 +2,13 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/ui/card";
 import { Button } from "@workspace/ui/components/ui/button";
 import { LoadingState } from "@/components/shared/loading-state";
 import { NotFoundState } from "@/components/shared/not-found-state";
@@ -25,9 +31,10 @@ function AcceptInvitationContent() {
 
   const { data: session, isPending: sessionPending } = useAuthSession();
   const { data: invitation, isPending, isError } = useInvitation(invitationId);
-  const acceptInvitation = useAcceptInvitation();
-  const rejectInvitation = useRejectInvitation();
-  const setActiveWorkspace = useSetActiveWorkspace();
+  const { mutate: acceptInvitationMutation, isPending: isAcceptPending } = useAcceptInvitation();
+  const { mutate: rejectInvitationMutation, isPending: isRejectPending } = useRejectInvitation();
+  const { mutate: setActiveWorkspaceMutation, isPending: isSetActivePending } =
+    useSetActiveWorkspace();
 
   // No invitation ID in URL
   if (!invitationId) {
@@ -91,14 +98,14 @@ function AcceptInvitationContent() {
     );
   }
 
-  const isAccepting = acceptInvitation.isPending || setActiveWorkspace.isPending;
+  const isAccepting = isAcceptPending || isSetActivePending;
   const invitationOrganizationId = invitation.organizationId;
 
   function handleAccept() {
-    acceptInvitation.mutate(invitationId!, {
+    acceptInvitationMutation(invitationId!, {
       onSuccess: () => {
         if (invitationOrganizationId) {
-          setActiveWorkspace.mutate(
+          setActiveWorkspaceMutation(
             { organizationId: invitationOrganizationId },
             {
               onSuccess: () => router.push("/dashboard"),
@@ -113,7 +120,7 @@ function AcceptInvitationContent() {
   }
 
   function handleReject() {
-    rejectInvitation.mutate(invitationId!, {
+    rejectInvitationMutation(invitationId!, {
       onSuccess: () => router.push("/dashboard"),
     });
   }
@@ -144,15 +151,15 @@ function AcceptInvitationContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <Button onClick={handleAccept} disabled={isAccepting || rejectInvitation.isPending}>
+          <Button onClick={handleAccept} disabled={isAccepting || isRejectPending}>
             {isAccepting ? "Joining..." : "Accept invitation"}
           </Button>
           <Button
             variant="outline"
             onClick={handleReject}
-            disabled={isAccepting || rejectInvitation.isPending}
+            disabled={isAccepting || isRejectPending}
           >
-            {rejectInvitation.isPending ? "Declining..." : "Decline"}
+            {isRejectPending ? "Declining..." : "Decline"}
           </Button>
         </CardContent>
       </Card>

@@ -40,17 +40,18 @@ interface GeneralSettingsProps {
     metadata?: Record<string, unknown>;
   };
 }
+type DialogState = "idle" | "editing" | "delete" | "leave";
 
 export function GeneralSettings({ workspace }: GeneralSettingsProps) {
   const router = useRouter();
   const { data: session } = useAuthSession();
-  const updateWorkspace = useUpdateWorkspace(workspace.id);
-  const deleteWorkspace = useDeleteWorkspace();
-  const leaveWorkspace = useLeaveWorkspace();
+  const { mutate: updateWorkspaceMutation, isPending: isUpdatePending } = useUpdateWorkspace(
+    workspace.id,
+  );
+  const { mutate: deleteWorkspaceMutation, isPending: isDeletePending } = useDeleteWorkspace();
+  const { mutate: leaveWorkspaceMutation, isPending: isLeavePending } = useLeaveWorkspace();
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [dialogState, setDialogState] = useState<DialogState>("idle");
 
   const isOwner = session?.user?.id === workspace.ownerId;
 
@@ -64,24 +65,24 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
   });
 
   function onSubmit(data: UpdateWorkspace) {
-    updateWorkspace.mutate(data, {
-      onSuccess: () => setIsEditing(false),
+    updateWorkspaceMutation(data, {
+      onSuccess: () => setDialogState("idle"),
     });
   }
 
   function handleDelete() {
-    deleteWorkspace.mutate(workspace.id, {
+    deleteWorkspaceMutation(workspace.id, {
       onSuccess: () => {
-        setShowDeleteDialog(false);
+        setDialogState("idle");
         router.push("/onboarding");
       },
     });
   }
 
   function handleLeave() {
-    leaveWorkspace.mutate(workspace.id, {
+    leaveWorkspaceMutation(workspace.id, {
       onSuccess: () => {
-        setShowLeaveDialog(false);
+        setDialogState("idle");
         router.push("/onboarding");
       },
     });
@@ -96,15 +97,15 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
             <h2 className="text-sm font-medium">Workspace profile</h2>
             <p className="text-sm text-muted-foreground">Name and URL shown across Stallion.</p>
           </div>
-          {!isEditing && (
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+          {dialogState === "idle" && (
+            <Button variant="outline" size="sm" onClick={() => setDialogState("editing")}>
               <Pencil className="mr-1.5 size-3.5" />
               Edit
             </Button>
           )}
         </div>
 
-        {isEditing ? (
+        {dialogState === "editing" ? (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <Logo size="md" showText={false} />
@@ -117,7 +118,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
                     <FormItem>
                       <FormLabel>Workspace name</FormLabel>
                       <FormControl>
-                        <Input {...field} disabled={updateWorkspace.isPending} />
+                        <Input {...field} disabled={isUpdatePending} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -131,7 +132,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
                     <FormItem>
                       <FormLabel>URL slug</FormLabel>
                       <FormControl>
-                        <Input {...field} disabled={updateWorkspace.isPending} />
+                        <Input {...field} disabled={isUpdatePending} />
                       </FormControl>
                       <FormDescription>
                         Lowercase letters, numbers, and hyphens only.
@@ -143,8 +144,8 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" size="sm" disabled={updateWorkspace.isPending}>
-                  {updateWorkspace.isPending ? "Saving…" : "Save changes"}
+                <Button type="submit" size="sm" disabled={isUpdatePending}>
+                  {isUpdatePending ? "Saving…" : "Save changes"}
                 </Button>
                 <Button
                   type="button"
@@ -152,9 +153,9 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
                   size="sm"
                   onClick={() => {
                     form.reset();
-                    setIsEditing(false);
+                    setDialogState("idle");
                   }}
-                  disabled={updateWorkspace.isPending}
+                  disabled={isUpdatePending}
                 >
                   Cancel
                 </Button>
@@ -198,7 +199,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setShowLeaveDialog(true)}
+                onClick={() => setDialogState("leave")}
                 className="shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
                 <LogOutIcon className="mr-1.5 size-3.5" />
@@ -218,7 +219,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => setShowDeleteDialog(true)}
+                onClick={() => setDialogState("delete")}
                 className="shrink-0"
               >
                 <Trash2 className="mr-1.5 size-3.5" />
@@ -230,24 +231,24 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
       </section>
 
       <ConfirmDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
+        open={dialogState === "delete"}
+        onOpenChange={(open) => setDialogState(open ? "delete" : "idle")}
         title="Delete workspace"
         description={`This will permanently delete "${workspace.name}" and all associated data including contacts, deals, and sequences. This action cannot be undone.`}
         confirmLabel="Delete workspace"
         variant="destructive"
-        isPending={deleteWorkspace.isPending}
+        isPending={isDeletePending}
         onConfirm={handleDelete}
       />
 
       <ConfirmDialog
-        open={showLeaveDialog}
-        onOpenChange={setShowLeaveDialog}
+        open={dialogState === "leave"}
+        onOpenChange={(open) => setDialogState(open ? "leave" : "idle")}
         title="Leave workspace"
         description={`You will lose access to "${workspace.name}". You'll need a new invitation to rejoin.`}
         confirmLabel="Leave workspace"
         variant="destructive"
-        isPending={leaveWorkspace.isPending}
+        isPending={isLeavePending}
         onConfirm={handleLeave}
       />
     </div>

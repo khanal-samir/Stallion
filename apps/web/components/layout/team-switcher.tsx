@@ -31,7 +31,7 @@ export function TeamSwitcher() {
   const { isMobile } = useSidebar();
   const { data: workspaces, isPending: workspacesLoading } = useWorkspaces();
   const { data: activeWorkspace, isPending: activeLoading } = useActiveWorkspace();
-  const setActiveWorkspace = useSetActiveWorkspace();
+  const { mutate: setActiveWorkspaceMutation } = useSetActiveWorkspace();
   const [createOpen, setCreateOpen] = useState(false);
 
   const isLoading = workspacesLoading || activeLoading;
@@ -56,7 +56,7 @@ export function TeamSwitcher() {
 
   function handleSwitch(organizationId: string) {
     if (organizationId === activeWorkspace?.id) return;
-    setActiveWorkspace.mutate({ organizationId });
+    setActiveWorkspaceMutation({ organizationId });
   }
 
   return (

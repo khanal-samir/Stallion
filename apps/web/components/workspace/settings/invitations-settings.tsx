@@ -42,7 +42,7 @@ export function InvitationsSettings({
   organizationId,
   currentUserRole,
 }: InvitationsSettingsProps) {
-  const cancelInvitation = useCancelInvitation();
+  const { mutate: cancelInvitationMutation, isPending: isCancelPending } = useCancelInvitation();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<Invitation | null>(null);
@@ -53,7 +53,7 @@ export function InvitationsSettings({
   function handleCancel() {
     if (!cancelTarget) return;
 
-    cancelInvitation.mutate(cancelTarget.id, {
+    cancelInvitationMutation(cancelTarget.id, {
       onSuccess: () => setCancelTarget(null),
     });
   }
@@ -146,7 +146,7 @@ export function InvitationsSettings({
         }
         confirmLabel="Cancel invitation"
         variant="destructive"
-        isPending={cancelInvitation.isPending}
+        isPending={isCancelPending}
         onConfirm={handleCancel}
       />
     </div>

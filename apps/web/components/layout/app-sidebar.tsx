@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { getInitials } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -8,7 +9,7 @@ import {
   Building2,
   Kanban,
   Settings,
-  CreditCard,
+  // CreditCard,
   ChevronDown,
   LogOut,
 } from "lucide-react";
@@ -37,6 +38,11 @@ import { useAuthSession, useSignOut } from "@/hooks/queries/use-auth";
 
 const mainNav = [
   {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
     label: "People",
     href: "/people",
     icon: Users,
@@ -55,27 +61,20 @@ const mainNav = [
 
 const workspaceNav = [
   { label: "Settings", href: "/settings", icon: Settings },
-  { label: "Billing", href: "/billing", icon: CreditCard },
+  // { label: "Billing", href: "/billing", icon: CreditCard },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useAuthSession();
-  const signOutMutation = useSignOut();
+  const { mutate: signOutMutation, isPending: isSignOutPending } = useSignOut();
 
   const user = session?.user;
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "?";
+  const userInitials = getInitials(user?.name ?? user?.email ?? "U");
 
   function handleSignOut() {
-    signOutMutation.mutate(undefined, {
+    signOutMutation(undefined, {
       onSuccess: () => router.push("/login"),
     });
   }
@@ -176,11 +175,11 @@ export function AppSidebar() {
             <DropdownMenuContent align="end" side="top">
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
-                disabled={signOutMutation.isPending}
+                disabled={isSignOutPending}
                 onClick={handleSignOut}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                {signOutMutation.isPending ? "Logging out..." : "Log out"}
+                {isSignOutPending ? "Logging out..." : "Log out"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

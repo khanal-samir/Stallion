@@ -60,8 +60,10 @@ const roleBadgeVariant: Record<
 
 export function MembersSettings({ members, organizationId, ownerId }: MembersSettingsProps) {
   const { data: session } = useAuthSession();
-  const removeMember = useRemoveMember(organizationId);
-  const updateRole = useUpdateMemberRole(organizationId);
+  const { mutate: removeMemberMutation, isPending: isRemovePending } =
+    useRemoveMember(organizationId);
+  const { mutate: updateRoleMutation, isPending: isUpdateRolePending } =
+    useUpdateMemberRole(organizationId);
 
   const [removeTarget, setRemoveTarget] = useState<Member | null>(null);
 
@@ -70,13 +72,13 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
   const canManage = currentMember?.role === "owner" || currentMember?.role === "admin";
 
   function handleRoleChange(memberId: string, role: WorkspaceRole) {
-    updateRole.mutate({ memberId, role });
+    updateRoleMutation({ memberId, role });
   }
 
   function handleRemove() {
     if (!removeTarget) return;
 
-    removeMember.mutate(removeTarget.userId, {
+    removeMemberMutation(removeTarget.userId, {
       onSuccess: () => setRemoveTarget(null),
     });
   }
@@ -152,7 +154,7 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                         onValueChange={(value) =>
                           handleRoleChange(member.id, value as WorkspaceRole)
                         }
-                        disabled={updateRole.isPending}
+                        disabled={isUpdateRolePending}
                       >
                         <SelectTrigger className="h-7 w-24 cursor-pointer text-xs">
                           <SelectValue />
@@ -211,7 +213,7 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
         }
         confirmLabel="Remove"
         variant="destructive"
-        isPending={removeMember.isPending}
+        isPending={isRemovePending}
         onConfirm={handleRemove}
       />
     </div>

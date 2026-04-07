@@ -34,7 +34,7 @@ export function InviteMemberDialog({
   onOpenChange,
   organizationId,
 }: InviteMemberDialogProps) {
-  const inviteMember = useInviteMember();
+  const { mutate: inviteMemberMutation, isPending: isInvitePending } = useInviteMember();
 
   const form = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
@@ -45,7 +45,7 @@ export function InviteMemberDialog({
   });
 
   function onSubmit(data: InviteForm) {
-    inviteMember.mutate(
+    inviteMemberMutation(
       {
         email: data.email,
         role: data.role,
@@ -80,7 +80,7 @@ export function InviteMemberDialog({
                     type="email"
                     placeholder="colleague@company.com"
                     {...field}
-                    disabled={inviteMember.isPending}
+                    disabled={isInvitePending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -97,7 +97,7 @@ export function InviteMemberDialog({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={inviteMember.isPending}
+                  disabled={isInvitePending}
                 >
                   <FormControl>
                     <SelectTrigger className="cursor-pointer">
@@ -123,12 +123,12 @@ export function InviteMemberDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={inviteMember.isPending}
+              disabled={isInvitePending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={inviteMember.isPending}>
-              {inviteMember.isPending ? "Sending..." : "Send invitation"}
+            <Button type="submit" disabled={isInvitePending}>
+              {isInvitePending ? "Sending..." : "Send invitation"}
             </Button>
           </div>
         </form>
