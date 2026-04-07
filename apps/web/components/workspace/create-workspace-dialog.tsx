@@ -61,15 +61,9 @@ export function CreateWorkspaceDialog({ open, onOpenChange }: CreateWorkspaceDia
   function onSubmit(data: CreateWorkspace) {
     createWorkspaceMutation(data, {
       onSuccess: (workspace) => {
-        setActiveWorkspaceMutation(
-          { organizationId: workspace.id },
-          {
-            onSuccess: () => {
-              form.reset();
-              onOpenChange(false);
-            },
-          },
-        );
+        form.reset();
+        onOpenChange(false);
+        setActiveWorkspaceMutation({ organizationId: workspace.id });
       },
     });
   }

@@ -24,13 +24,19 @@ import {
   useSetActiveWorkspace,
   useRestoreActiveWorkspace,
 } from "@/hooks/queries/use-workspace";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import { Logo } from "@workspace/ui/components/ui/logo";
 
 export function TeamSwitcher() {
-  useRestoreActiveWorkspace();
   const { isMobile } = useSidebar();
+  const { data: session } = useAuthSession();
   const { data: workspaces, isPending: workspacesLoading } = useWorkspaces();
   const { data: activeWorkspace, isPending: activeLoading } = useActiveWorkspace();
+  useRestoreActiveWorkspace({
+    isSignedIn: !!session?.user,
+    activeOrganizationId: session?.session?.activeOrganizationId,
+    firstWorkspaceId: workspaces?.[0]?.id,
+  });
   const { mutate: setActiveWorkspaceMutation } = useSetActiveWorkspace();
   const [createOpen, setCreateOpen] = useState(false);
 
