@@ -57,18 +57,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex-1 overflow-auto p-8">
-          {activeTab === "general" && (
-            <GeneralSettings
-              workspace={{
-                id: workspace.id,
-                name: workspace.name,
-                slug: workspace.slug,
-                logo: workspace.logo,
-                ownerId: (workspace as Record<string, unknown>).ownerId as string | undefined,
-                metadata: workspace.metadata as Record<string, unknown> | undefined,
-              }}
-            />
-          )}
+          {activeTab === "general" && <GeneralSettings workspace={workspace} />}
           {activeTab === "members" && (
             <MembersSettings
               members={workspace.members ?? []}

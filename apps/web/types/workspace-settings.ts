@@ -40,6 +40,17 @@ export interface InvitationsSettingsProps {
   currentUserRole?: WorkspaceRole;
 }
 
+export interface GeneralSettingsProps {
+  workspace: {
+    id: string;
+    name: string;
+    slug: string;
+    logo?: string | null;
+    ownerId?: string;
+    metadata?: Record<string, unknown>;
+  };
+}
+
 export interface SettingsSidebarProps {
   activeTab: SettingsTab;
   onTabChange: (tab: SettingsTab) => void;

@@ -29,17 +29,8 @@ import {
 } from "@/hooks/queries/use-workspace";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { Logo } from "@workspace/ui/components/ui/logo";
+import type { GeneralSettingsProps } from "@/types/workspace-settings";
 
-interface GeneralSettingsProps {
-  workspace: {
-    id: string;
-    name: string;
-    slug: string;
-    logo?: string | null;
-    ownerId?: string;
-    metadata?: Record<string, unknown>;
-  };
-}
 type DialogState = "idle" | "editing" | "delete" | "leave";
 
 export function GeneralSettings({ workspace }: GeneralSettingsProps) {
