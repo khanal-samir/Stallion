@@ -1,5 +1,15 @@
-import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, uuid, unique, varchar, index, jsonb } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import {
+  check,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { id, timestamps } from "./common.schema.js";
 import { user } from "./auth.schema.js";
 
@@ -33,12 +43,13 @@ export const workspaceMembers = pgTable(
     userId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    role: text({ enum: ["admin", "member"] })
+    role: text({ enum: ["owner", "admin", "member"] })
       .notNull()
       .default("member"),
     joinedAt: timestamp().defaultNow().notNull(),
   },
   (table) => [
+    check("workspace_members_role_check", sql`${table.role} in ('owner', 'admin', 'member')`), // Ensure role is one of the allowed values
     unique("workspace_members_workspace_user_unique").on(table.workspaceId, table.userId),
     index("workspace_members_workspace_id_idx").on(table.workspaceId),
     index("workspace_members_user_id_idx").on(table.userId),
@@ -65,6 +76,7 @@ export const workspaceInvites = pgTable(
     ...timestamps,
   },
   (table) => [
+    check("workspace_invites_role_check", sql`${table.role} in ('admin', 'member')`),
     index("workspace_invites_workspace_id_idx").on(table.workspaceId),
     index("workspace_invites_email_idx").on(table.email),
     index("workspace_invites_status_idx").on(table.status),

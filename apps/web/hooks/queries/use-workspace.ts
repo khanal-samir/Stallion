@@ -17,7 +17,10 @@ import {
   updateMemberRole,
   updateWorkspace,
 } from "@/services/workspace.service";
-import type { InviteMemberInput, WorkspaceRole } from "@workspace/validators/types/workspace";
+import type {
+  AssignableWorkspaceRole,
+  InviteMemberInput,
+} from "@workspace/validators/types/workspace";
 import type { CreateWorkspace, UpdateWorkspace } from "@workspace/validators/schemas/workspace";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { useAuthSession } from "@/hooks/queries/use-auth";
@@ -197,7 +200,7 @@ export function useUpdateMemberRole(organizationId?: string) {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ memberId, role }: { memberId: string; role: WorkspaceRole }) =>
+    mutationFn: ({ memberId, role }: { memberId: string; role: AssignableWorkspaceRole }) =>
       updateMemberRole(memberId, role, organizationId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });

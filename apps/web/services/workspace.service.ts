@@ -1,7 +1,10 @@
 import { authClient } from "@/lib/auth-client";
 import { toBetterAuthError } from "@/lib/error";
 import { slugify } from "@/lib/utils";
-import type { InviteMemberInput, WorkspaceRole } from "@workspace/validators/types/workspace";
+import type {
+  AssignableWorkspaceRole,
+  InviteMemberInput,
+} from "@workspace/validators/types/workspace";
 import type { CreateWorkspace, UpdateWorkspace } from "@workspace/validators/schemas/workspace";
 
 export async function createWorkspace(input: CreateWorkspace) {
@@ -66,7 +69,7 @@ export async function removeMember(memberIdOrEmail: string, organizationId?: str
 
 export async function updateMemberRole(
   memberId: string,
-  role: WorkspaceRole,
+  role: AssignableWorkspaceRole,
   organizationId?: string,
 ) {
   const { data, error } = await authClient.organization.updateMemberRole({

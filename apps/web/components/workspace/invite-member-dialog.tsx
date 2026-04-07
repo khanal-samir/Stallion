@@ -22,6 +22,7 @@ import {
 } from "@workspace/ui/components/ui/select";
 import { SharedDialog } from "@/components/shared/shared-dialog";
 import { useInviteMember } from "@/hooks/queries/use-workspace";
+import { ASSIGNABLE_WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 
 interface InviteMemberDialogProps {
   open: boolean;
@@ -40,7 +41,7 @@ export function InviteMemberDialog({
     resolver: zodResolver(inviteSchema),
     defaultValues: {
       email: "",
-      role: "member",
+      role: ASSIGNABLE_WORKSPACE_ROLE.member,
     },
   });
 
@@ -105,10 +106,10 @@ export function InviteMemberDialog({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="member" className="cursor-pointer">
+                    <SelectItem value={ASSIGNABLE_WORKSPACE_ROLE.member} className="cursor-pointer">
                       Member
                     </SelectItem>
-                    <SelectItem value="admin" className="cursor-pointer">
+                    <SelectItem value={ASSIGNABLE_WORKSPACE_ROLE.admin} className="cursor-pointer">
                       Admin
                     </SelectItem>
                   </SelectContent>

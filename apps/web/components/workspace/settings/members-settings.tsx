@@ -24,9 +24,9 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useRemoveMember, useUpdateMemberRole } from "@/hooks/queries/use-workspace";
-import type { WorkspaceRole } from "@workspace/validators/types/workspace";
+import type { AssignableWorkspaceRole, WorkspaceRole } from "@workspace/validators/types/workspace";
 import { getInitials } from "@/lib/utils";
-import { workspaceRoleSchema } from "@workspace/validators/schemas/common";
+import { ASSIGNABLE_WORKSPACE_ROLE, WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 
 interface Member {
   id: string;
@@ -47,15 +47,10 @@ interface MembersSettingsProps {
   ownerId?: string;
 }
 
-const roleBadgeVariant: Record<
-  | typeof workspaceRoleSchema.enum.admin
-  | typeof workspaceRoleSchema.enum.member
-  | typeof workspaceRoleSchema.enum.owner,
-  "default" | "secondary" | "outline"
-> = {
-  owner: "default",
-  admin: "secondary",
-  member: "outline",
+const roleBadgeVariant: Record<WorkspaceRole, "default" | "secondary" | "outline"> = {
+  [WORKSPACE_ROLE.owner]: "default",
+  [WORKSPACE_ROLE.admin]: "secondary",
+  [WORKSPACE_ROLE.member]: "outline",
 };
 
 export function MembersSettings({ members, organizationId, ownerId }: MembersSettingsProps) {
@@ -69,9 +64,10 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
 
   const currentUserId = session?.user?.id;
   const currentMember = members.find((member) => member.userId === currentUserId);
-  const canManage = currentMember?.role === "owner" || currentMember?.role === "admin";
+  const canManage =
+    currentMember?.role === WORKSPACE_ROLE.owner || currentMember?.role === WORKSPACE_ROLE.admin;
 
-  function handleRoleChange(memberId: string, role: WorkspaceRole) {
+  function handleRoleChange(memberId: string, role: AssignableWorkspaceRole) {
     updateRoleMutation({ memberId, role });
   }
 
@@ -152,7 +148,7 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                       <Select
                         value={member.role}
                         onValueChange={(value) =>
-                          handleRoleChange(member.id, value as WorkspaceRole)
+                          handleRoleChange(member.id, value as AssignableWorkspaceRole)
                         }
                         disabled={isUpdateRolePending}
                       >
@@ -160,10 +156,16 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="member" className="cursor-pointer text-xs">
+                          <SelectItem
+                            value={ASSIGNABLE_WORKSPACE_ROLE.member}
+                            className="cursor-pointer text-xs"
+                          >
                             Member
                           </SelectItem>
-                          <SelectItem value="admin" className="cursor-pointer text-xs">
+                          <SelectItem
+                            value={ASSIGNABLE_WORKSPACE_ROLE.admin}
+                            className="cursor-pointer text-xs"
+                          >
                             Admin
                           </SelectItem>
                         </SelectContent>
