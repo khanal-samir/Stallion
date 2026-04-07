@@ -1,18 +1,9 @@
 "use client";
 
-import type { WorkspaceRole } from "@workspace/validators/types/workspace";
 import { cn } from "@workspace/ui/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/ui/tooltip";
-import { SETTINGS_NAV_ITEMS, type SettingsTab } from "@/constants/navigation";
-
-interface SettingsSidebarProps {
-  activeTab: SettingsTab;
-  onTabChange: (tab: SettingsTab) => void;
-  workspace: {
-    members?: { userId: string; role: WorkspaceRole }[];
-  };
-  pendingInvitations: { status: string }[];
-}
+import { SETTINGS_NAV_ITEMS } from "@/constants/navigation";
+import type { SettingsSidebarProps } from "@/types/workspace-settings";
 
 export function SettingsSidebar({
   activeTab,

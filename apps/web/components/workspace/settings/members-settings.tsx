@@ -25,27 +25,9 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useRemoveMember, useUpdateMemberRole } from "@/hooks/queries/use-workspace";
 import type { AssignableWorkspaceRole, WorkspaceRole } from "@workspace/validators/types/workspace";
+import type { MembersSettingsProps, WorkspaceMember } from "@/types/workspace-settings";
 import { getInitials } from "@/lib/utils";
 import { ASSIGNABLE_WORKSPACE_ROLE, WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
-
-interface Member {
-  id: string;
-  userId: string;
-  role: WorkspaceRole;
-  createdAt: string | Date;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string | null;
-  };
-}
-
-interface MembersSettingsProps {
-  members: Member[];
-  organizationId: string;
-  ownerId?: string;
-}
 
 const roleBadgeVariant: Record<WorkspaceRole, "default" | "secondary" | "outline"> = {
   [WORKSPACE_ROLE.owner]: "default",
@@ -60,7 +42,7 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
   const { mutate: updateRoleMutation, isPending: isUpdateRolePending } =
     useUpdateMemberRole(organizationId);
 
-  const [removeTarget, setRemoveTarget] = useState<Member | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<WorkspaceMember | null>(null);
 
   const currentUserId = session?.user?.id;
   const currentMember = members.find((member) => member.userId === currentUserId);

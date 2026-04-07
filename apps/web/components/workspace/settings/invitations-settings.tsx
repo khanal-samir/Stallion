@@ -16,28 +16,8 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
 import { useCancelInvitation } from "@/hooks/queries/use-workspace";
-import type { WorkspaceRole } from "@workspace/validators/types/workspace";
+import type { WorkspaceInvitation, InvitationsSettingsProps } from "@/types/workspace-settings";
 import { WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
-
-interface Invitation {
-  id: string;
-  email: string;
-  role: WorkspaceRole;
-  status: string;
-  expiresAt: string | Date;
-  inviter?: {
-    user: {
-      name: string;
-      email: string;
-    };
-  };
-}
-
-interface InvitationsSettingsProps {
-  invitations: Invitation[];
-  organizationId: string;
-  currentUserRole?: WorkspaceRole;
-}
 
 export function InvitationsSettings({
   invitations,
@@ -47,7 +27,7 @@ export function InvitationsSettings({
   const { mutate: cancelInvitationMutation, isPending: isCancelPending } = useCancelInvitation();
 
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [cancelTarget, setCancelTarget] = useState<Invitation | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<WorkspaceInvitation | null>(null);
 
   const canInvite =
     currentUserRole === WORKSPACE_ROLE.owner || currentUserRole === WORKSPACE_ROLE.admin;
