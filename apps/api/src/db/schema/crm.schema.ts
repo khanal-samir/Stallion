@@ -3,6 +3,7 @@ import { jsonb, pgTable, text, timestamp, uuid, unique, varchar, index } from "d
 import { id, timestamps } from "./common.schema.js";
 import { user } from "./auth.schema.js";
 import { workspaces } from "./workspace.schema.js";
+import { peopleStatusEnum, peopleSourceEnum, dealStageEnum } from "./enums.schema.js";
 
 export const orgs = pgTable(
   "orgs",
@@ -39,14 +40,8 @@ export const people = pgTable(
     phone: varchar("phone", { length: 50 }),
     jobTitle: varchar("job_title", { length: 255 }),
     linkedinUrl: varchar("linkedin_url", { length: 500 }),
-    status: text("status", {
-      enum: ["lead", "prospect", "qualified", "customer", "churned"],
-    })
-      .notNull()
-      .default("lead"),
-    source: text("source", { enum: ["manual", "csv", "api"] })
-      .notNull()
-      .default("manual"),
+    status: peopleStatusEnum("status").notNull().default("lead"),
+    source: peopleSourceEnum("source").notNull().default("manual"),
     lastContactedAt: timestamp("last_contacted_at"),
     customFields: jsonb("custom_fields").$type<Record<string, unknown>>().default({}),
     ...timestamps,
@@ -74,11 +69,7 @@ export const deals = pgTable(
     title: varchar("title", { length: 255 }).notNull(),
     value: text("value"),
     currency: varchar("currency", { length: 3 }).notNull().default("USD"),
-    stage: text("stage", {
-      enum: ["new", "contacted", "demo", "proposal", "won", "lost"],
-    })
-      .notNull()
-      .default("new"),
+    stage: dealStageEnum("stage").notNull().default("new"),
     closeDate: timestamp("close_date"),
     ...timestamps,
   },
