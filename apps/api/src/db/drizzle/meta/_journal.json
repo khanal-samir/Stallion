@@ -15,6 +15,13 @@
       "when": 1773000000000,
       "tag": "0001_workspace_role_validation",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775817769397,
+      "tag": "0002_smart_stepford_cuckoos",
+      "breakpoints": true
     }
   ]
 }

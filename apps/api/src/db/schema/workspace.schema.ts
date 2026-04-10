@@ -1,17 +1,12 @@
-import { relations, sql } from "drizzle-orm";
-import {
-  check,
-  index,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { index, jsonb, pgTable, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
 import { id, timestamps } from "./common.schema.js";
 import { user } from "./auth.schema.js";
+import {
+  workspaceRoleEnum,
+  workspaceInviteRoleEnum,
+  workspaceInviteStatusEnum,
+} from "./enums.schema.js";
 
 export const workspaces = pgTable(
   "workspaces",
@@ -43,13 +38,10 @@ export const workspaceMembers = pgTable(
     userId: uuid()
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    role: text({ enum: ["owner", "admin", "member"] })
-      .notNull()
-      .default("member"),
+    role: workspaceRoleEnum().notNull().default("member"),
     joinedAt: timestamp().defaultNow().notNull(),
   },
   (table) => [
-    check("workspace_members_role_check", sql`${table.role} in ('owner', 'admin', 'member')`), // Ensure role is one of the allowed values
     unique("workspace_members_workspace_user_unique").on(table.workspaceId, table.userId),
     index("workspace_members_workspace_id_idx").on(table.workspaceId),
     index("workspace_members_user_id_idx").on(table.userId),
@@ -64,19 +56,14 @@ export const workspaceInvites = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     email: varchar({ length: 255 }).notNull(),
-    role: text({ enum: ["admin", "member"] })
-      .notNull()
-      .default("member"),
+    role: workspaceInviteRoleEnum().notNull().default("member"),
     token: varchar({ length: 255 }).unique(),
-    status: text({ enum: ["pending", "accepted", "rejected", "canceled"] })
-      .notNull()
-      .default("pending"),
+    status: workspaceInviteStatusEnum().notNull().default("pending"),
     expiresAt: timestamp().notNull(),
     createdBy: uuid().references(() => user.id, { onDelete: "set null" }),
     ...timestamps,
   },
   (table) => [
-    check("workspace_invites_role_check", sql`${table.role} in ('admin', 'member')`),
     index("workspace_invites_workspace_id_idx").on(table.workspaceId),
     index("workspace_invites_email_idx").on(table.email),
     index("workspace_invites_status_idx").on(table.status),
