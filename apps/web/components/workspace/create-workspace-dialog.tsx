@@ -28,8 +28,9 @@ interface CreateWorkspaceDialogProps {
 }
 
 export function CreateWorkspaceDialog({ open, onOpenChange }: CreateWorkspaceDialogProps) {
-  const createWorkspace = useCreateWorkspace();
-  const setActiveWorkspace = useSetActiveWorkspace();
+  const { mutate: createWorkspaceMutation, isPending: isCreatePending } = useCreateWorkspace();
+  const { mutate: setActiveWorkspaceMutation, isPending: isSetActivePending } =
+    useSetActiveWorkspace();
 
   const form = useForm<CreateWorkspace>({
     resolver: zodResolver(createWorkspaceSchema),
@@ -58,22 +59,16 @@ export function CreateWorkspaceDialog({ open, onOpenChange }: CreateWorkspaceDia
   }, [watchedName]);
 
   function onSubmit(data: CreateWorkspace) {
-    createWorkspace.mutate(data, {
+    createWorkspaceMutation(data, {
       onSuccess: (workspace) => {
-        setActiveWorkspace.mutate(
-          { organizationId: workspace.id },
-          {
-            onSuccess: () => {
-              form.reset();
-              onOpenChange(false);
-            },
-          },
-        );
+        form.reset();
+        onOpenChange(false);
+        setActiveWorkspaceMutation({ organizationId: workspace.id });
       },
     });
   }
 
-  const isPending = createWorkspace.isPending || setActiveWorkspace.isPending;
+  const isPending = isCreatePending || isSetActivePending;
 
   return (
     <SharedDialog

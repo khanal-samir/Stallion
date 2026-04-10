@@ -24,59 +24,39 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useRemoveMember, useUpdateMemberRole } from "@/hooks/queries/use-workspace";
-import type { WorkspaceRole } from "@workspace/validators/types/workspace";
+import type { AssignableWorkspaceRole, WorkspaceRole } from "@workspace/validators/types/workspace";
+import type { MembersSettingsProps, WorkspaceMember } from "@/types/workspace-settings";
 import { getInitials } from "@/lib/utils";
-import { workspaceRoleSchema } from "@workspace/validators/schemas/common";
+import { ASSIGNABLE_WORKSPACE_ROLE, WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 
-interface Member {
-  id: string;
-  userId: string;
-  role: WorkspaceRole;
-  createdAt: string | Date;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string | null;
-  };
-}
-
-interface MembersSettingsProps {
-  members: Member[];
-  organizationId: string;
-  ownerId?: string;
-}
-
-const roleBadgeVariant: Record<
-  | typeof workspaceRoleSchema.enum.admin
-  | typeof workspaceRoleSchema.enum.member
-  | typeof workspaceRoleSchema.enum.owner,
-  "default" | "secondary" | "outline"
-> = {
-  owner: "default",
-  admin: "secondary",
-  member: "outline",
+const roleBadgeVariant: Record<WorkspaceRole, "default" | "secondary" | "outline"> = {
+  [WORKSPACE_ROLE.owner]: "default",
+  [WORKSPACE_ROLE.admin]: "secondary",
+  [WORKSPACE_ROLE.member]: "outline",
 };
 
 export function MembersSettings({ members, organizationId, ownerId }: MembersSettingsProps) {
   const { data: session } = useAuthSession();
-  const removeMember = useRemoveMember(organizationId);
-  const updateRole = useUpdateMemberRole(organizationId);
+  const { mutate: removeMemberMutation, isPending: isRemovePending } =
+    useRemoveMember(organizationId);
+  const { mutate: updateRoleMutation, isPending: isUpdateRolePending } =
+    useUpdateMemberRole(organizationId);
 
-  const [removeTarget, setRemoveTarget] = useState<Member | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<WorkspaceMember | null>(null);
 
   const currentUserId = session?.user?.id;
   const currentMember = members.find((member) => member.userId === currentUserId);
-  const canManage = currentMember?.role === "owner" || currentMember?.role === "admin";
+  const canManage =
+    currentMember?.role === WORKSPACE_ROLE.owner || currentMember?.role === WORKSPACE_ROLE.admin;
 
-  function handleRoleChange(memberId: string, role: WorkspaceRole) {
-    updateRole.mutate({ memberId, role });
+  function handleRoleChange(memberId: string, role: AssignableWorkspaceRole) {
+    updateRoleMutation({ memberId, role });
   }
 
   function handleRemove() {
     if (!removeTarget) return;
 
-    removeMember.mutate(removeTarget.userId, {
+    removeMemberMutation(removeTarget.userId, {
       onSuccess: () => setRemoveTarget(null),
     });
   }
@@ -150,18 +130,24 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                       <Select
                         value={member.role}
                         onValueChange={(value) =>
-                          handleRoleChange(member.id, value as WorkspaceRole)
+                          handleRoleChange(member.id, value as AssignableWorkspaceRole)
                         }
-                        disabled={updateRole.isPending}
+                        disabled={isUpdateRolePending}
                       >
                         <SelectTrigger className="h-7 w-24 cursor-pointer text-xs">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="member" className="cursor-pointer text-xs">
+                          <SelectItem
+                            value={ASSIGNABLE_WORKSPACE_ROLE.member}
+                            className="cursor-pointer text-xs"
+                          >
                             Member
                           </SelectItem>
-                          <SelectItem value="admin" className="cursor-pointer text-xs">
+                          <SelectItem
+                            value={ASSIGNABLE_WORKSPACE_ROLE.admin}
+                            className="cursor-pointer text-xs"
+                          >
                             Admin
                           </SelectItem>
                         </SelectContent>
@@ -211,7 +197,7 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
         }
         confirmLabel="Remove"
         variant="destructive"
-        isPending={removeMember.isPending}
+        isPending={isRemovePending}
         onConfirm={handleRemove}
       />
     </div>

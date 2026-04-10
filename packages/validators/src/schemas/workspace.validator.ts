@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { idSchema, dateLikeSchema, workspaceRoleSchema } from "./common.validator.js";
+import { idSchema, dateLikeSchema, assignableWorkspaceRoleSchema } from "./common.validator.js";
 
 export const workspaceSlugSchema = z
   .string()
@@ -27,9 +27,7 @@ export const createWorkspaceSchema = z.object({
 
 export const inviteSchema = z.object({
   email: z.string().email("Enter a valid email"),
-  role: z.enum([workspaceRoleSchema.Enum.admin, workspaceRoleSchema.Enum.member], {
-    message: "Role must be either 'admin' or 'member'",
-  }),
+  role: assignableWorkspaceRoleSchema,
 });
 
 export const updateWorkspaceSchema = createWorkspaceSchema.partial();

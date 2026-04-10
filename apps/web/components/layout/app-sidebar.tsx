@@ -1,18 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { getInitials } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  LayoutDashboard,
-  Users,
-  Building2,
-  Kanban,
-  Settings,
-  CreditCard,
-  ChevronDown,
-  LogOut,
-} from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import { TeamSwitcher } from "@/components/layout/team-switcher";
+import { MAIN_NAV_ITEMS, WORKSPACE_NAV_ITEMS } from "@/constants/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/ui/components/ui/avatar";
 import {
   Sidebar,
@@ -35,47 +28,17 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Skeleton } from "@workspace/ui/components/ui/skeleton";
 import { useAuthSession, useSignOut } from "@/hooks/queries/use-auth";
 
-const mainNav = [
-  {
-    label: "People",
-    href: "/people",
-    icon: Users,
-  },
-  {
-    label: "Organizations",
-    href: "/organizations",
-    icon: Building2,
-  },
-  {
-    label: "Deals",
-    href: "/deals",
-    icon: Kanban,
-  },
-];
-
-const workspaceNav = [
-  { label: "Settings", href: "/settings", icon: Settings },
-  { label: "Billing", href: "/billing", icon: CreditCard },
-];
-
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useAuthSession();
-  const signOutMutation = useSignOut();
+  const { mutate: signOutMutation, isPending: isSignOutPending } = useSignOut();
 
   const user = session?.user;
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "?";
+  const userInitials = getInitials(user?.name ?? user?.email ?? "U");
 
   function handleSignOut() {
-    signOutMutation.mutate(undefined, {
+    signOutMutation(undefined, {
       onSuccess: () => router.push("/login"),
     });
   }
@@ -92,7 +55,7 @@ export function AppSidebar() {
         {/* Main Group */}
         <SidebarGroup>
           <SidebarMenu className="gap-1">
-            {mainNav.map((item) => {
+            {MAIN_NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <SidebarMenuItem key={item.href}>
@@ -119,7 +82,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarMenu className="gap-1">
-            {workspaceNav.map((item) => {
+            {WORKSPACE_NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <SidebarMenuItem key={item.href}>
@@ -176,11 +139,11 @@ export function AppSidebar() {
             <DropdownMenuContent align="end" side="top">
               <DropdownMenuItem
                 className="text-destructive cursor-pointer"
-                disabled={signOutMutation.isPending}
+                disabled={isSignOutPending}
                 onClick={handleSignOut}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                {signOutMutation.isPending ? "Logging out..." : "Log out"}
+                {isSignOutPending ? "Logging out..." : "Log out"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

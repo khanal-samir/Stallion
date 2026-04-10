@@ -16,44 +16,27 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
 import { useCancelInvitation } from "@/hooks/queries/use-workspace";
-
-interface Invitation {
-  id: string;
-  email: string;
-  role: string;
-  status: string;
-  expiresAt: string | Date;
-  inviter?: {
-    user: {
-      name: string;
-      email: string;
-    };
-  };
-}
-
-interface InvitationsSettingsProps {
-  invitations: Invitation[];
-  organizationId: string;
-  currentUserRole?: string;
-}
+import type { WorkspaceInvitation, InvitationsSettingsProps } from "@/types/workspace-settings";
+import { WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 
 export function InvitationsSettings({
   invitations,
   organizationId,
   currentUserRole,
 }: InvitationsSettingsProps) {
-  const cancelInvitation = useCancelInvitation();
+  const { mutate: cancelInvitationMutation, isPending: isCancelPending } = useCancelInvitation();
 
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [cancelTarget, setCancelTarget] = useState<Invitation | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<WorkspaceInvitation | null>(null);
 
-  const canInvite = currentUserRole === "owner" || currentUserRole === "admin";
+  const canInvite =
+    currentUserRole === WORKSPACE_ROLE.owner || currentUserRole === WORKSPACE_ROLE.admin;
   const pendingInvitations = invitations.filter((invitation) => invitation.status === "pending");
 
   function handleCancel() {
     if (!cancelTarget) return;
 
-    cancelInvitation.mutate(cancelTarget.id, {
+    cancelInvitationMutation(cancelTarget.id, {
       onSuccess: () => setCancelTarget(null),
     });
   }
@@ -146,7 +129,7 @@ export function InvitationsSettings({
         }
         confirmLabel="Cancel invitation"
         variant="destructive"
-        isPending={cancelInvitation.isPending}
+        isPending={isCancelPending}
         onConfirm={handleCancel}
       />
     </div>

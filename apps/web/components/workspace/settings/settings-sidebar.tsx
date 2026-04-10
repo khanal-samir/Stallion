@@ -1,25 +1,9 @@
 "use client";
 
-import { Mail, Settings2, Users } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/ui/tooltip";
-
-export const NAV_ITEMS = [
-  { id: "general", label: "General", icon: Settings2 },
-  { id: "members", label: "Members", icon: Users },
-  { id: "invitations", label: "Invitations", icon: Mail },
-] as const;
-
-export type SettingsTab = (typeof NAV_ITEMS)[number]["id"];
-
-interface SettingsSidebarProps {
-  activeTab: SettingsTab;
-  onTabChange: (tab: SettingsTab) => void;
-  workspace: {
-    members?: { userId: string; role: string }[];
-  };
-  pendingInvitations: { status: string }[];
-}
+import { SETTINGS_NAV_ITEMS } from "@/constants/navigation";
+import type { SettingsSidebarProps } from "@/types/workspace-settings";
 
 export function SettingsSidebar({
   activeTab,
@@ -29,7 +13,7 @@ export function SettingsSidebar({
 }: SettingsSidebarProps) {
   return (
     <div className="flex w-13 shrink-0 flex-col items-center gap-1 border-r border-border/50 bg-sidebar-background py-3">
-      {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+      {SETTINGS_NAV_ITEMS.map(({ id, label, icon: Icon }) => (
         <Tooltip key={id}>
           <TooltipTrigger asChild>
             <button

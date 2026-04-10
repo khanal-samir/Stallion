@@ -1,7 +1,7 @@
 export const QUERY_KEYS = {
-  AUTH: "auth",
+  AUTH: "auth", //parent key for all auth related queries
   SESSION: "session",
-  WORKSPACES: "workspaces",
+  WORKSPACES: "workspaces", // parent key for all workspace related queries
   WORKSPACE: "workspace",
   ACTIVE_WORKSPACE: "active-workspace",
   WORKSPACE_INVITATIONS: "workspace-invitations",

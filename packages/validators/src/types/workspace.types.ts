@@ -1,10 +1,9 @@
-import type { WorkspaceRole } from "../schemas/common.validator.js";
-
-export type { WorkspaceRole } from "../schemas/common.validator.js";
+import type { AssignableWorkspaceRole } from "../schemas/common.validator.js";
+export type { AssignableWorkspaceRole, WorkspaceRole } from "../schemas/common.validator.js";
 
 export interface InviteMemberInput {
   email: string;
-  role: WorkspaceRole;
+  role: AssignableWorkspaceRole;
   organizationId?: string;
   resend?: boolean;
 }

@@ -22,6 +22,7 @@ import {
 } from "@workspace/ui/components/ui/select";
 import { SharedDialog } from "@/components/shared/shared-dialog";
 import { useInviteMember } from "@/hooks/queries/use-workspace";
+import { ASSIGNABLE_WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 
 interface InviteMemberDialogProps {
   open: boolean;
@@ -34,18 +35,18 @@ export function InviteMemberDialog({
   onOpenChange,
   organizationId,
 }: InviteMemberDialogProps) {
-  const inviteMember = useInviteMember();
+  const { mutate: inviteMemberMutation, isPending: isInvitePending } = useInviteMember();
 
   const form = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
     defaultValues: {
       email: "",
-      role: "member",
+      role: ASSIGNABLE_WORKSPACE_ROLE.member,
     },
   });
 
   function onSubmit(data: InviteForm) {
-    inviteMember.mutate(
+    inviteMemberMutation(
       {
         email: data.email,
         role: data.role,
@@ -80,7 +81,7 @@ export function InviteMemberDialog({
                     type="email"
                     placeholder="colleague@company.com"
                     {...field}
-                    disabled={inviteMember.isPending}
+                    disabled={isInvitePending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -97,7 +98,7 @@ export function InviteMemberDialog({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={inviteMember.isPending}
+                  disabled={isInvitePending}
                 >
                   <FormControl>
                     <SelectTrigger className="cursor-pointer">
@@ -105,10 +106,10 @@ export function InviteMemberDialog({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="member" className="cursor-pointer">
+                    <SelectItem value={ASSIGNABLE_WORKSPACE_ROLE.member} className="cursor-pointer">
                       Member
                     </SelectItem>
-                    <SelectItem value="admin" className="cursor-pointer">
+                    <SelectItem value={ASSIGNABLE_WORKSPACE_ROLE.admin} className="cursor-pointer">
                       Admin
                     </SelectItem>
                   </SelectContent>
@@ -123,12 +124,12 @@ export function InviteMemberDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={inviteMember.isPending}
+              disabled={isInvitePending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={inviteMember.isPending}>
-              {inviteMember.isPending ? "Sending..." : "Send invitation"}
+            <Button type="submit" disabled={isInvitePending}>
+              {isInvitePending ? "Sending..." : "Send invitation"}
             </Button>
           </div>
         </form>

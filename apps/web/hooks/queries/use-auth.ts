@@ -23,16 +23,12 @@ type ResetPasswordWithTokenInput = {
   token: string;
 };
 
-const authSessionQueryKey = [QUERY_KEYS.AUTH, QUERY_KEYS.SESSION] as const;
-const authQueryKey = [QUERY_KEYS.AUTH] as const;
-const workspacesQueryKey = [QUERY_KEYS.WORKSPACES] as const;
-
 export function useAuthSession() {
   return useQuery({
-    queryKey: authSessionQueryKey,
+    queryKey: [QUERY_KEYS.AUTH, QUERY_KEYS.SESSION],
     queryFn: getAuthSession,
     retry: false,
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 60 * 1000, // 1 minute -- dont matter since session is catched for 5 min in api
     refetchOnWindowFocus: true,
   });
 }
@@ -43,8 +39,8 @@ export function useEmailSignIn() {
   return useMutation({
     mutationFn: (input: SignInInput) => signInWithEmail(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authQueryKey });
-      queryClient.invalidateQueries({ queryKey: workspacesQueryKey });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] }); // all auth related queries
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
       toast.success("Signed in", { description: "You have successfully signed in." });
     },
   });
@@ -56,8 +52,8 @@ export function useEmailSignUp() {
   return useMutation({
     mutationFn: (input: SignUpInput) => signUpWithEmail(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authQueryKey });
-      queryClient.invalidateQueries({ queryKey: workspacesQueryKey });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
       toast.success("Account created", {
         description: "Please check your email to verify your account.",
       });
@@ -93,7 +89,7 @@ export function useVerifyEmail() {
   return useMutation({
     mutationFn: (token: string) => verifyEmailToken(token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authQueryKey });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] });
       toast.success("Email verified", {
         description: "Your email has been verified successfully.",
       });
@@ -125,10 +121,10 @@ export function useSignOut() {
   return useMutation({
     mutationFn: signOutCurrentSession,
     onSuccess: () => {
-      queryClient.cancelQueries({ queryKey: authQueryKey });
-      queryClient.cancelQueries({ queryKey: workspacesQueryKey });
-      queryClient.setQueryData(authSessionQueryKey, null);
-      queryClient.removeQueries({ queryKey: workspacesQueryKey });
+      queryClient.cancelQueries({ queryKey: [QUERY_KEYS.AUTH] });
+      queryClient.cancelQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
+      queryClient.setQueryData([QUERY_KEYS.AUTH, QUERY_KEYS.SESSION], null);
+      queryClient.removeQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
       toast.success("Signed out", { description: "You have been logged out." });
     },
   });

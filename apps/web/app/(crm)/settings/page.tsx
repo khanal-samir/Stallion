@@ -6,13 +6,12 @@ import { ErrorState } from "@/components/shared/error-state";
 import { GeneralSettings } from "@/components/workspace/settings/general-settings";
 import { MembersSettings } from "@/components/workspace/settings/members-settings";
 import { InvitationsSettings } from "@/components/workspace/settings/invitations-settings";
-import {
-  SettingsSidebar,
-  NAV_ITEMS,
-  type SettingsTab,
-} from "@/components/workspace/settings/settings-sidebar";
+import { SettingsSidebar } from "@/components/workspace/settings/settings-sidebar";
+import { SETTINGS_NAV_ITEMS, type SettingsTab } from "@/constants/navigation";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
+import { WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
+import type { WorkspaceRole } from "@workspace/validators/types/workspace";
 
 export default function SettingsPage() {
   const { data: session } = useAuthSession();
@@ -37,10 +36,11 @@ export default function SettingsPage() {
   const currentMember = workspace.members?.find(
     (member: { userId: string }) => member.userId === currentUserId,
   );
-  const currentUserRole = currentMember?.role ?? "member";
+  const currentUserRole =
+    (currentMember?.role as WorkspaceRole | undefined) ?? WORKSPACE_ROLE.member;
   const pendingInvitations = workspace.invitations?.filter((inv) => inv.status === "pending") ?? [];
 
-  const activeItem = NAV_ITEMS.find((item) => item.id === activeTab)!;
+  const activeItem = SETTINGS_NAV_ITEMS.find((item) => item.id === activeTab)!;
 
   return (
     <div className="-m-6 flex h-[calc(100vh-3rem)] overflow-hidden">
@@ -57,18 +57,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex-1 overflow-auto p-8">
-          {activeTab === "general" && (
-            <GeneralSettings
-              workspace={{
-                id: workspace.id,
-                name: workspace.name,
-                slug: workspace.slug,
-                logo: workspace.logo,
-                ownerId: (workspace as Record<string, unknown>).ownerId as string | undefined,
-                metadata: workspace.metadata as Record<string, unknown> | undefined,
-              }}
-            />
-          )}
+          {activeTab === "general" && <GeneralSettings workspace={workspace} />}
           {activeTab === "members" && (
             <MembersSettings
               members={workspace.members ?? []}
