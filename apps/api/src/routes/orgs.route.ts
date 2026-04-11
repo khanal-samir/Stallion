@@ -1,10 +1,13 @@
 import { Hono } from "hono";
 import {
+  bulkDeleteSchema,
   createOrgSchema,
   orgParamsSchema,
+  orgsListQuerySchema,
   updateOrgSchema,
 } from "@workspace/validators/schemas/crm";
 import {
+  bulkDeleteOrgs,
   createOrg,
   deleteOrg,
   getOrg,
@@ -17,7 +20,10 @@ import { validateRequest } from "@/middlewares/validate-request.js";
 
 export const orgRoutes = new Hono()
   .use("*", authMiddleware)
-  .get("/", listOrgs)
+  .get("/", validateRequest(VALIDATION_TARGET.QUERY, orgsListQuerySchema), (c) => {
+    const query = c.req.valid(VALIDATION_TARGET.QUERY);
+    return listOrgs(c, query);
+  })
   .get("/:id", validateRequest(VALIDATION_TARGET.PARAM, orgParamsSchema), (c) => {
     const { id } = c.req.valid(VALIDATION_TARGET.PARAM);
     return getOrg(c, id);
@@ -25,6 +31,10 @@ export const orgRoutes = new Hono()
   .post("/", validateRequest(VALIDATION_TARGET.JSON, createOrgSchema), (c) =>
     createOrg(c, c.req.valid(VALIDATION_TARGET.JSON)),
   )
+  .post("/bulk-delete", validateRequest(VALIDATION_TARGET.JSON, bulkDeleteSchema), (c) => {
+    const { ids } = c.req.valid(VALIDATION_TARGET.JSON);
+    return bulkDeleteOrgs(c, ids);
+  })
   .patch(
     "/:id",
     validateRequest(VALIDATION_TARGET.PARAM, orgParamsSchema),
