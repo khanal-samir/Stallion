@@ -25,7 +25,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useRemoveMember, useUpdateMemberRole } from "@/hooks/queries/use-workspace";
 import type { AssignableWorkspaceRole, WorkspaceRole } from "@workspace/validators/types/workspace";
-import type { MembersSettingsProps, WorkspaceMember } from "@/types/workspace-settings";
+import type { MembersSettingsProps, WorkspaceMember } from "@/types/workspace";
 import { getInitials } from "@/lib/utils";
 import { ASSIGNABLE_WORKSPACE_ROLE, WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 

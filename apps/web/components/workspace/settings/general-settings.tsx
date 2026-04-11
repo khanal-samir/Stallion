@@ -29,7 +29,7 @@ import {
 } from "@/hooks/queries/use-workspace";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { Logo } from "@workspace/ui/components/ui/logo";
-import type { GeneralSettingsProps } from "@/types/workspace-settings";
+import type { GeneralSettingsProps } from "@/types/workspace";
 
 type DialogState = "idle" | "editing" | "delete" | "leave";
 

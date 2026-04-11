@@ -16,7 +16,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
 import { useCancelInvitation } from "@/hooks/queries/use-workspace";
-import type { WorkspaceInvitation, InvitationsSettingsProps } from "@/types/workspace-settings";
+import type { WorkspaceInvitation, InvitationsSettingsProps } from "@/types/workspace";
 import { WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 
 export function InvitationsSettings({

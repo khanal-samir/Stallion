@@ -3,7 +3,7 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/ui/tooltip";
 import { SETTINGS_NAV_ITEMS } from "@/constants/navigation";
-import type { SettingsSidebarProps } from "@/types/workspace-settings";
+import type { SettingsSidebarProps } from "@/types/workspace";
 
 export function SettingsSidebar({
   activeTab,
