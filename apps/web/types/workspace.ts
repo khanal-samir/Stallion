@@ -1,5 +1,12 @@
 import type { WorkspaceRole } from "@workspace/validators/types/workspace";
 import type { SettingsTab } from "@/constants/navigation";
+import { AssignableWorkspaceRole } from "@workspace/validators/schemas/common";
+export interface InviteMemberInput {
+  email: string;
+  role: AssignableWorkspaceRole;
+  organizationId?: string;
+  resend?: boolean;
+}
 
 export interface WorkspaceMember {
   id: string;
