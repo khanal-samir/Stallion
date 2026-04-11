@@ -1,10 +1,13 @@
 import { Hono } from "hono";
 import {
+  bulkDeleteSchema,
   createPersonSchema,
+  peopleListQuerySchema,
   personParamsSchema,
   updatePersonSchema,
 } from "@workspace/validators/schemas/crm";
 import {
+  bulkDeletePeople,
   createPerson,
   deletePerson,
   getPerson,
@@ -17,7 +20,10 @@ import { validateRequest } from "@/middlewares/validate-request.js";
 
 export const peopleRoutes = new Hono()
   .use("*", authMiddleware)
-  .get("/", listPeople)
+  .get("/", validateRequest(VALIDATION_TARGET.QUERY, peopleListQuerySchema), (c) => {
+    const query = c.req.valid(VALIDATION_TARGET.QUERY);
+    return listPeople(c, query);
+  })
   .get("/:id", validateRequest(VALIDATION_TARGET.PARAM, personParamsSchema), (c) => {
     const { id } = c.req.valid(VALIDATION_TARGET.PARAM);
     return getPerson(c, id);
@@ -25,6 +31,10 @@ export const peopleRoutes = new Hono()
   .post("/", validateRequest(VALIDATION_TARGET.JSON, createPersonSchema), (c) =>
     createPerson(c, c.req.valid(VALIDATION_TARGET.JSON)),
   )
+  .post("/bulk-delete", validateRequest(VALIDATION_TARGET.JSON, bulkDeleteSchema), (c) => {
+    const { ids } = c.req.valid(VALIDATION_TARGET.JSON);
+    return bulkDeletePeople(c, ids);
+  })
   .patch(
     "/:id",
     validateRequest(VALIDATION_TARGET.PARAM, personParamsSchema),
