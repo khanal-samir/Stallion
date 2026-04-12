@@ -1,65 +1,19 @@
 import { z } from "zod";
 import { dateLikeSchema, idSchema, nullableUuidSchema } from "./common.validator.js";
+import {
+  DEAL_SORT_BY_VALUES,
+  DEAL_STAGE_VALUES,
+  ORG_SORT_BY_VALUES,
+  PERSON_SORT_BY_VALUES,
+  PERSON_SOURCE_VALUES,
+  PERSON_STATUS_VALUES,
+  SORT_ORDER_VALUES,
+} from "../types/crm.types.js";
 
-const emptyStringToUndefined = (value: unknown) => {
-  if (typeof value === "string" && value.trim() === "") {
-    return undefined;
-  }
+const optionalTrimmedString = (max: number) => z.string().trim().min(1).max(max).optional();
+const optionalUuidFilter = z.string().uuid().optional();
 
-  return value;
-};
-
-const optionalTrimmedString = (max: number) =>
-  z.preprocess(emptyStringToUndefined, z.string().trim().min(1).max(max).optional());
-
-const optionalUuidFilter = z.preprocess(emptyStringToUndefined, z.string().uuid().optional());
-
-export const PERSON_STATUS_VALUES = [
-  "lead",
-  "prospect",
-  "qualified",
-  "customer",
-  "churned",
-] as const;
-
-export const PERSON_SOURCE_VALUES = ["manual", "csv", "api"] as const;
-
-export const DEAL_STAGE_VALUES = ["new", "contacted", "demo", "proposal", "won", "lost"] as const;
-
-export const ORG_SORT_BY_VALUES = [
-  "name",
-  "domain",
-  "industry",
-  "size",
-  "location",
-  "createdAt",
-  "updatedAt",
-] as const;
-
-export const PERSON_SORT_BY_VALUES = [
-  "name",
-  "email",
-  "phone",
-  "jobTitle",
-  "status",
-  "source",
-  "lastContactedAt",
-  "createdAt",
-  "updatedAt",
-] as const;
-
-export const DEAL_SORT_BY_VALUES = [
-  "title",
-  "value",
-  "currency",
-  "stage",
-  "closeDate",
-  "createdAt",
-  "updatedAt",
-] as const;
-
-export const SORT_ORDER_VALUES = ["asc", "desc"] as const;
-
+// Enums
 export const personStatusSchema = z.enum(PERSON_STATUS_VALUES);
 export const personSourceSchema = z.enum(PERSON_SOURCE_VALUES);
 export const dealStageSchema = z.enum(DEAL_STAGE_VALUES);
@@ -68,6 +22,7 @@ export const orgSortBySchema = z.enum(ORG_SORT_BY_VALUES);
 export const personSortBySchema = z.enum(PERSON_SORT_BY_VALUES);
 export const dealSortBySchema = z.enum(DEAL_SORT_BY_VALUES);
 
+// Base query schema for listing orgs, people, and deals
 export const crmListQueryBaseSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().positive().max(100).default(25),
@@ -83,21 +38,23 @@ export const listOrgsQuerySchema = crmListQueryBaseSchema.extend({
 
 export const listPeopleQuerySchema = crmListQueryBaseSchema.extend({
   sortBy: personSortBySchema.default("name"),
-  status: z.preprocess(emptyStringToUndefined, personStatusSchema.optional()),
-  source: z.preprocess(emptyStringToUndefined, personSourceSchema.optional()),
+  status: personStatusSchema.optional(),
+  source: personSourceSchema.optional(),
   ownerId: optionalUuidFilter,
 });
 
 export const listDealsQuerySchema = crmListQueryBaseSchema.extend({
   sortBy: dealSortBySchema.default("title"),
-  stage: z.preprocess(emptyStringToUndefined, dealStageSchema.optional()),
+  stage: dealStageSchema.optional(),
   ownerId: optionalUuidFilter,
 });
 
+// Bulk delete schema
 export const bulkDeleteSchema = z.object({
   ids: z.array(idSchema).min(1),
 });
 
+// Create and update schemas
 export const createOrgSchema = z.object({
   name: z.string().min(1).max(255),
   domain: z.string().max(255).optional(),
