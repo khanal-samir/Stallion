@@ -16,14 +16,14 @@ export function ErrorState({
   className,
 }: ErrorStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center py-12 text-center", className)}>
-      <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10">
+    <div className={cn("flex flex-col items-center justify-center py-16 text-center", className)}>
+      <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 border border-destructive/20">
         <AlertTriangle className="size-6 text-destructive" />
       </div>
-      <h3 className="mt-4 text-base font-medium">{title}</h3>
-      <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">{description}</p>
+      <h3 className="mt-4 text-base font-semibold text-foreground">{title}</h3>
+      <p className="mt-1.5 max-w-xs text-sm text-muted-foreground leading-relaxed">{description}</p>
       {onRetry && (
-        <Button variant="outline" size="sm" className="mt-5" onClick={onRetry}>
+        <Button variant="outline" size="sm" className="mt-6" onClick={onRetry}>
           Try again
         </Button>
       )}
