@@ -7,7 +7,7 @@ import type {
 } from "@workspace/validators/schemas/crm";
 import { and, asc, count, desc, eq, ilike, or, inArray } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { people } from "@/db/schema/index.js";
+import { orgs, people, user } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/lib/api-response.js";
 import { AppError } from "@/lib/app-error.js";
@@ -17,23 +17,24 @@ import { getSessionWorkspaceId } from "@/lib/workspace.js";
 export async function listPeople(c: Context, query: ListPeopleQuery) {
   const workspaceId = getSessionWorkspaceId(c);
   const { page, pageSize, sortBy, sortOrder, status, source, ownerId, search } = query;
+  const offset = (page - 1) * pageSize;
 
-  const filters = [
-    eq(people.workspaceId, workspaceId),
-    status ? eq(people.status, status) : undefined,
-    source ? eq(people.source, source) : undefined,
-    ownerId ? eq(people.ownerId, ownerId) : undefined,
-    search
-      ? or(
-          ilike(people.name, `%${search}%`),
-          ilike(people.email, `%${search}%`),
-          ilike(people.phone, `%${search}%`),
-          ilike(people.jobTitle, `%${search}%`),
-        )
-      : undefined,
-  ].filter((value): value is NonNullable<typeof value> => value !== undefined);
+  const conditions = [eq(people.workspaceId, workspaceId)];
+  if (status) conditions.push(eq(people.status, status));
+  if (source) conditions.push(eq(people.source, source));
+  if (ownerId) conditions.push(eq(people.ownerId, ownerId));
+  if (search) {
+    conditions.push(
+      or(
+        ilike(people.name, `%${search}%`),
+        ilike(people.email, `%${search}%`),
+        ilike(people.phone, `%${search}%`),
+        ilike(people.jobTitle, `%${search}%`),
+      )!,
+    );
+  }
 
-  const whereClause = and(...filters);
+  const whereClause = and(...conditions);
 
   const sortColumnMap = {
     name: people.name,
@@ -47,30 +48,37 @@ export async function listPeople(c: Context, query: ListPeopleQuery) {
     updatedAt: people.updatedAt,
   } as const;
 
-  const orderColumn = sortColumnMap[sortBy];
-  const offset = (page - 1) * pageSize;
+  const orderColumn = sortColumnMap[sortBy] ?? people.createdAt;
+  const orderBy = sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn);
 
-  const [results, totalCountResult] = await Promise.all([
-    db.query.people.findMany({
-      where: whereClause,
-      with: {
-        org: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        owner: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: [sortOrder === "desc" ? desc(orderColumn) : asc(orderColumn)],
-      limit: pageSize,
-      offset,
-    }),
+  const [rows, totalCountResult] = await Promise.all([
+    db
+      .select({
+        id: people.id,
+        workspaceId: people.workspaceId,
+        orgId: people.orgId,
+        ownerId: people.ownerId,
+        name: people.name,
+        email: people.email,
+        phone: people.phone,
+        jobTitle: people.jobTitle,
+        linkedinUrl: people.linkedinUrl,
+        status: people.status,
+        source: people.source,
+        lastContactedAt: people.lastContactedAt,
+        customFields: people.customFields,
+        createdAt: people.createdAt,
+        updatedAt: people.updatedAt,
+        orgName: orgs.name,
+        ownerName: user.name,
+      })
+      .from(people)
+      .leftJoin(orgs, eq(people.orgId, orgs.id))
+      .leftJoin(user, eq(people.ownerId, user.id))
+      .where(whereClause)
+      .orderBy(orderBy)
+      .limit(pageSize)
+      .offset(offset),
     db.select({ totalCount: count() }).from(people).where(whereClause),
   ]);
 
@@ -80,22 +88,16 @@ export async function listPeople(c: Context, query: ListPeopleQuery) {
   return sendSuccess(
     c,
     {
-      people: results.map((person) => ({
-        ...person,
-        orgName: person.org?.name ?? null,
-        ownerName: person.owner?.name ?? null,
+      people: rows.map((row) => ({
+        ...row,
+        orgName: row.orgName ?? null,
+        ownerName: row.ownerName ?? null,
       })),
-      meta: {
-        page,
-        pageSize,
-        totalCount,
-        totalPages,
-      },
+      meta: { page, pageSize, totalCount, totalPages },
     },
     STATUS_CODES.OK,
   );
 }
-
 export async function getPerson(c: Context, id: string) {
   const workspaceId = getSessionWorkspaceId(c);
   const person = await db.query.people.findFirst({

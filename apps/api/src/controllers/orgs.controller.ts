@@ -7,25 +7,21 @@ import type {
 } from "@workspace/validators/schemas/crm";
 import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { orgs } from "@/db/schema/index.js";
+import { orgs, people } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/lib/api-response.js";
 import { AppError } from "@/lib/app-error.js";
 import { getSessionWorkspaceId } from "@/lib/workspace.js";
 
-function buildOrgWhereClause(workspaceId: string, query: ListOrgsQuery) {
+export async function listOrgs(c: Context, query: ListOrgsQuery) {
+  const workspaceId = getSessionWorkspaceId(c);
+  const { page, pageSize, sortOrder, sortBy, search, industry, size } = query;
+
   const conditions = [eq(orgs.workspaceId, workspaceId)];
-
-  if (query.industry) {
-    conditions.push(eq(orgs.industry, query.industry));
-  }
-
-  if (query.size) {
-    conditions.push(eq(orgs.size, query.size));
-  }
-
-  if (query.search) {
-    const searchTerm = `%${query.search}%`;
+  if (industry) conditions.push(eq(orgs.industry, industry));
+  if (size) conditions.push(eq(orgs.size, size));
+  if (search) {
+    const searchTerm = `%${search}%`;
     conditions.push(
       or(
         ilike(orgs.name, searchTerm),
@@ -37,73 +33,54 @@ function buildOrgWhereClause(workspaceId: string, query: ListOrgsQuery) {
     );
   }
 
-  return and(...conditions);
-}
+  const whereClause = and(...conditions);
 
-function getOrgOrderBy(query: ListOrgsQuery) {
-  const direction = query.sortOrder === "desc" ? desc : asc;
+  const direction = sortOrder === "desc" ? desc : asc;
+  const orderBy = (() => {
+    switch (sortBy) {
+      case "domain":
+        return direction(orgs.domain);
+      case "industry":
+        return direction(orgs.industry);
+      case "size":
+        return direction(orgs.size);
+      case "location":
+        return direction(orgs.location);
+      case "createdAt":
+        return direction(orgs.createdAt);
+      case "updatedAt":
+        return direction(orgs.updatedAt);
+      case "name":
+      default:
+        return direction(orgs.name);
+    }
+  })();
 
-  switch (query.sortBy) {
-    case "domain":
-      return direction(orgs.domain);
-    case "industry":
-      return direction(orgs.industry);
-    case "size":
-      return direction(orgs.size);
-    case "location":
-      return direction(orgs.location);
-    case "createdAt":
-      return direction(orgs.createdAt);
-    case "updatedAt":
-      return direction(orgs.updatedAt);
-    case "name":
-    default:
-      return direction(orgs.name);
-  }
-}
-
-export async function listOrgs(c: Context, query: ListOrgsQuery) {
-  const workspaceId = getSessionWorkspaceId(c);
-  const whereClause = buildOrgWhereClause(workspaceId, query);
-  const page = query.page;
-  const pageSize = query.pageSize;
-  const offset = (page - 1) * pageSize;
-
-  const [results, totalCountResult] = await Promise.all([
-    db.query.orgs.findMany({
-      where: whereClause,
-      with: {
-        people: {
-          columns: {
-            id: true,
-          },
-        },
-      },
-      orderBy: [getOrgOrderBy(query)],
-      limit: pageSize,
-      offset,
-    }),
+  const [rows, totalCountResult, peopleCounts] = await Promise.all([
+    db
+      .select()
+      .from(orgs)
+      .where(whereClause)
+      .orderBy(orderBy)
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
     db.select({ totalCount: count() }).from(orgs).where(whereClause),
+    db
+      .select({ orgId: people.orgId, count: count() })
+      .from(people)
+      .where(eq(people.workspaceId, workspaceId))
+      .groupBy(people.orgId),
   ]);
 
   const totalCount = Number(totalCountResult[0]?.totalCount ?? 0);
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / pageSize);
-
-  const normalizedResults = results.map(({ people, ...org }) => ({
-    ...org,
-    peopleCount: people.length,
-  }));
+  const peopleCountMap = new Map(peopleCounts.map((r) => [r.orgId, r.count]));
 
   return sendSuccess(
     c,
     {
-      orgs: normalizedResults,
-      meta: {
-        page,
-        pageSize,
-        totalCount,
-        totalPages,
-      },
+      orgs: rows.map((org) => ({ ...org, peopleCount: peopleCountMap.get(org.id) ?? 0 })),
+      meta: { page, pageSize, totalCount, totalPages },
     },
     STATUS_CODES.OK,
   );
