@@ -11,7 +11,7 @@ import { getPeopleColumns } from "./people-columns";
 import { PEOPLE_FILTER_CONFIG } from "./people-filters";
 import { PeopleDrawer } from "./people-drawer";
 import { usePeople, useDeletePerson, useBulkDeletePeople } from "@/hooks/queries/use-people";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDebounceValue } from "usehooks-ts";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
 import type { Person, PeopleListParams } from "@/types/crm";
 
@@ -41,15 +41,11 @@ export function PeopleDataTable() {
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
 
   // Debounce search to avoid a query on every keystroke
-  const debouncedSearch = useDebounce(searchInput, 350);
+  const [debouncedSearch] = useDebounceValue(searchInput, 350);
 
   // Extract individual filter values from the TanStack ColumnFiltersState
-  const statusFilter = columnFilters.find((f) => f.id === "status")?.value as
-    | string
-    | undefined;
-  const sourceFilter = columnFilters.find((f) => f.id === "source")?.value as
-    | string
-    | undefined;
+  const statusFilter = columnFilters.find((f) => f.id === "status")?.value as string | undefined;
+  const sourceFilter = columnFilters.find((f) => f.id === "source")?.value as string | undefined;
 
   // Build the API query params from all state slices
   const queryParams = useMemo<PeopleListParams>(
@@ -79,7 +75,10 @@ export function PeopleDataTable() {
 
   // Selected row IDs (row keys come from getRowId which returns person.id)
   const selectedIds = useMemo(
-    () => Object.entries(rowSelection).filter(([, v]) => v).map(([id]) => id),
+    () =>
+      Object.entries(rowSelection)
+        .filter(([, v]) => v)
+        .map(([id]) => id),
     [rowSelection],
   );
   const selectedCount = selectedIds.length;

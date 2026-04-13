@@ -8,7 +8,7 @@ import type {
   UpdatePerson,
 } from "@workspace/validators/schemas/crm";
 import type { Person, PeopleListResponse } from "@/types/crm";
-import { cleanQueryParams, unwrapApiResponse } from "./utils";
+import { cleanQueryParams } from "./utils";
 
 type PersonResponse = ApiSuccessResponse<{ person: Person }>;
 type PeopleResponse = ApiSuccessResponse<PeopleListResponse>;
@@ -19,27 +19,32 @@ export async function listPeople(params: Partial<ListPeopleQuery> = {}) {
     params: cleanQueryParams(params),
   });
 
-  return unwrapApiResponse(response.data);
+  const { data } = response.data;
+  return data;
 }
 
 export async function getPerson(id: PersonParams["id"]) {
   const response = await apiClient.get<PersonResponse>(`/people/${id}`);
-  return unwrapApiResponse(response.data).person;
+  const { data } = response.data;
+  return data.person;
 }
 
 export async function createPerson(input: CreatePerson) {
   const response = await apiClient.post<PersonResponse>("/people", input);
-  return unwrapApiResponse(response.data).person;
+  const { data } = response.data;
+  return data.person;
 }
 
 export async function updatePerson(id: PersonParams["id"], input: UpdatePerson) {
   const response = await apiClient.patch<PersonResponse>(`/people/${id}`, input);
-  return unwrapApiResponse(response.data).person;
+  const { data } = response.data;
+  return data.person;
 }
 
 export async function deletePerson(id: PersonParams["id"]) {
   const response = await apiClient.delete<PersonResponse>(`/people/${id}`);
-  return unwrapApiResponse(response.data).person;
+  const { data } = response.data;
+  return data.person;
 }
 
 export async function bulkDeletePeople(input: BulkDeleteInput) {
@@ -47,5 +52,6 @@ export async function bulkDeletePeople(input: BulkDeleteInput) {
     data: input,
   });
 
-  return unwrapApiResponse(response.data).deleted;
+  const { data } = response.data;
+  return data.deleted;
 }

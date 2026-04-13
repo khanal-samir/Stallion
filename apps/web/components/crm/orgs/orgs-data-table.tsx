@@ -10,12 +10,8 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { getOrgsColumns } from "./orgs-columns";
 import { ORGS_FILTER_CONFIG } from "./orgs-filters";
 import { OrgDrawer } from "./orgs-drawer";
-import {
-  useBulkDeleteOrgs,
-  useDeleteOrg,
-  useOrganizations,
-} from "@/hooks/queries/use-orgs";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useBulkDeleteOrgs, useDeleteOrg, useOrganizations } from "@/hooks/queries/use-orgs";
+import { useDebounceValue } from "usehooks-ts";
 import type { Organization, OrganizationsListParams } from "@/types/crm";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
 
@@ -42,7 +38,7 @@ export function OrgsDataTable() {
   const [deleteTarget, setDeleteTarget] = useState<Organization | "bulk" | null>(null);
 
   // Debounced search value drives the query; raw input drives the input element
-  const debouncedSearch = useDebounce(searchInput, 300);
+  const [debouncedSearch] = useDebounceValue(searchInput, 300);
 
   // Derive filter values from TanStack columnFilters
   const industryFilter = columnFilters.find((f) => f.id === "industry")?.value as

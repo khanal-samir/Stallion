@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/axios-client";
-import { cleanQueryParams, unwrapApiResponse } from "@/services/crm/utils";
+import { cleanQueryParams } from "@/services/crm/utils";
 import type {
   BulkDeleteInput,
   CreateOrg,
@@ -19,27 +19,32 @@ export async function listOrganizations(params: Partial<ListOrgsQuery> = {}) {
     params: cleanQueryParams(params),
   });
 
-  return unwrapApiResponse(response.data);
+  const { data } = response.data;
+  return data;
 }
 
 export async function getOrganization(id: OrgParams["id"]) {
   const response = await apiClient.get<OrganizationResponse>(`/orgs/${id}`);
-  return unwrapApiResponse(response.data).org;
+  const { data } = response.data;
+  return data.org;
 }
 
 export async function createOrganization(input: CreateOrg) {
   const response = await apiClient.post<OrganizationResponse>("/orgs", input);
-  return unwrapApiResponse(response.data).org;
+  const { data } = response.data;
+  return data.org;
 }
 
 export async function updateOrganization(id: OrgParams["id"], input: UpdateOrg) {
   const response = await apiClient.patch<OrganizationResponse>(`/orgs/${id}`, input);
-  return unwrapApiResponse(response.data).org;
+  const { data } = response.data;
+  return data.org;
 }
 
 export async function deleteOrganization(id: OrgParams["id"]) {
   const response = await apiClient.delete<OrganizationResponse>(`/orgs/${id}`);
-  return unwrapApiResponse(response.data).org;
+  const { data } = response.data;
+  return data.org;
 }
 
 export async function bulkDeleteOrganizations(input: BulkDeleteInput) {
@@ -47,5 +52,6 @@ export async function bulkDeleteOrganizations(input: BulkDeleteInput) {
     data: input,
   });
 
-  return unwrapApiResponse(response.data).deleted;
+  const { data } = response.data;
+  return data.deleted;
 }
