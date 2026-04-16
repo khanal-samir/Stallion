@@ -30,7 +30,7 @@ import { useOrganizations } from "@/hooks/queries/use-orgs";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
 import type { Person } from "@/types/crm";
 import type { WorkspaceMember } from "@/types/workspace-settings";
-import { PERSON_SOURCE_OPTIONS, PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
+import { PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
 
 // ─── View-mode field helpers ──────────────────────────────────────────────────
 
@@ -275,34 +275,6 @@ function PersonForm({
                   </FormControl>
                   <SelectContent>
                     {PERSON_STATUS_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="source"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Source</FormLabel>
-                <Select
-                  value={field.value ?? "manual"}
-                  onValueChange={field.onChange}
-                  disabled={isPending}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select source" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {PERSON_SOURCE_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
