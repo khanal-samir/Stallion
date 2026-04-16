@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import {
   createDealSchema,
   dealParamsSchema,
+  listDealsQuerySchema,
   updateDealSchema,
 } from "@workspace/validators/schemas/crm";
 import {
@@ -17,7 +18,9 @@ import { validateRequest } from "@/middlewares/validate-request.js";
 
 export const dealRoutes = new Hono()
   .use("*", authMiddleware)
-  .get("/", listDeals)
+  .get("/", validateRequest(VALIDATION_TARGET.QUERY, listDealsQuerySchema), (c) =>
+    listDeals(c, c.req.valid(VALIDATION_TARGET.QUERY)),
+  )
   .get("/:id", validateRequest(VALIDATION_TARGET.PARAM, dealParamsSchema), (c) => {
     const { id } = c.req.valid(VALIDATION_TARGET.PARAM);
     return getDeal(c, id);

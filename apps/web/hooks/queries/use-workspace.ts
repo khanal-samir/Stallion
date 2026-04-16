@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   acceptInvitation,
@@ -74,6 +74,7 @@ export function useCreateWorkspace() {
   return useMutation({
     mutationFn: (input: CreateWorkspace) => createWorkspace(input),
     onSuccess: () => {
+      clearCrmQueries(qc);
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] });
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
       toast.success("Workspace created", { description: "Your new workspace is ready." });
@@ -101,6 +102,7 @@ export function useDeleteWorkspace() {
   return useMutation({
     mutationFn: (organizationId: string) => deleteWorkspace(organizationId),
     onSuccess: () => {
+      clearCrmQueries(qc);
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] });
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
       toast.success("Workspace deleted", {
@@ -118,6 +120,7 @@ export function useSetActiveWorkspace(opts?: { showToast?: boolean }) {
     mutationFn: (opts: { organizationId?: string | null; organizationSlug?: string }) =>
       setActiveWorkspace(opts),
     onSuccess: () => {
+      clearCrmQueries(qc);
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] });
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
 
@@ -159,6 +162,7 @@ export function useAcceptInvitation() {
   return useMutation({
     mutationFn: (invitationId: string) => acceptInvitation(invitationId),
     onSuccess: () => {
+      clearCrmQueries(qc);
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] });
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
       toast.success("Invitation accepted", {
@@ -217,6 +221,7 @@ export function useLeaveWorkspace() {
   return useMutation({
     mutationFn: (organizationId: string) => leaveWorkspace(organizationId),
     onSuccess: () => {
+      clearCrmQueries(qc);
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.AUTH] });
       qc.invalidateQueries({ queryKey: [QUERY_KEYS.WORKSPACES] });
       toast.success("Left workspace", {
@@ -272,4 +277,10 @@ export function useRestoreActiveWorkspace(opts: {
     isSetActivePending,
     setActiveWorkspace,
   ]);
+}
+
+function clearCrmQueries(queryClient: QueryClient) {
+  queryClient.removeQueries({ queryKey: [QUERY_KEYS.PEOPLE] });
+  queryClient.removeQueries({ queryKey: [QUERY_KEYS.ORGS] });
+  queryClient.removeQueries({ queryKey: [QUERY_KEYS.DEALS] });
 }
