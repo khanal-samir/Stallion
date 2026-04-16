@@ -1,90 +1,76 @@
 import type { Context } from "hono";
 import type { CreateDeal, ListDealsQuery, UpdateDeal } from "@workspace/validators/schemas/crm";
-import { and, asc, count, desc, eq, ilike, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { deals } from "@/db/schema/index.js";
+import { deals, orgs, people, user } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/lib/api-response.js";
 import { AppError } from "@/lib/app-error.js";
 import { toDate } from "@/lib/date.js";
 import { getSessionWorkspaceId } from "@/lib/workspace.js";
 
-const dealSortColumns = {
-  title: deals.title,
-  value: deals.value,
-  currency: deals.currency,
-  stage: deals.stage,
-  closeDate: deals.closeDate,
-  createdAt: deals.createdAt,
-  updatedAt: deals.updatedAt,
-} as const;
-
-function buildDealFilters(workspaceId: string, query: ListDealsQuery): SQL[] {
-  const filters: SQL[] = [eq(deals.workspaceId, workspaceId)];
-
-  if (query.stage) {
-    filters.push(eq(deals.stage, query.stage));
-  }
-
-  if (query.ownerId) {
-    filters.push(eq(deals.ownerId, query.ownerId));
-  }
-
-  if (query.search) {
-    const searchTerm = `%${query.search}%`;
-
-    filters.push(ilike(deals.title, searchTerm));
-  }
-
-  return filters;
-}
-
-function buildDealOrderBy(query: ListDealsQuery) {
-  const column = dealSortColumns[query.sortBy] ?? deals.title;
-  return query.sortOrder === "desc" ? desc(column) : asc(column);
-}
-
 export async function listDeals(c: Context, query: ListDealsQuery) {
   const workspaceId = getSessionWorkspaceId(c);
-  const page = query.page;
-  const pageSize = query.pageSize;
+  const { page, pageSize, sortBy, sortOrder, stage, ownerId, search } = query;
   const offset = (page - 1) * pageSize;
-  const filters = buildDealFilters(workspaceId, query);
-  const orderBy = buildDealOrderBy(query);
+  const conditions = [eq(deals.workspaceId, workspaceId)];
+
+  if (stage) conditions.push(eq(deals.stage, stage));
+  if (ownerId) conditions.push(eq(deals.ownerId, ownerId));
+  if (search) {
+    conditions.push(or(ilike(deals.title, `%${search}%`))!);
+  }
+
+  const whereClause = and(...conditions);
+
+  const orderBy = (() => {
+    switch (sortBy) {
+      case "value":
+        return sortOrder === "desc" ? desc(deals.value) : asc(deals.value);
+      case "currency":
+        return sortOrder === "desc" ? desc(deals.currency) : asc(deals.currency);
+      case "stage":
+        return sortOrder === "desc" ? desc(deals.stage) : asc(deals.stage);
+      case "closeDate":
+        return sortOrder === "desc" ? desc(deals.closeDate) : asc(deals.closeDate);
+      case "createdAt":
+        return sortOrder === "desc" ? desc(deals.createdAt) : asc(deals.createdAt);
+      case "updatedAt":
+        return sortOrder === "desc" ? desc(deals.updatedAt) : asc(deals.updatedAt);
+      case "title":
+      default:
+        return sortOrder === "desc" ? desc(deals.title) : asc(deals.title);
+    }
+  })();
 
   const [results, totalCountRows] = await Promise.all([
-    db.query.deals.findMany({
-      where: and(...filters),
-      with: {
-        org: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        person: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        owner: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: [orderBy],
-      limit: pageSize,
-      offset,
-    }),
     db
       .select({
-        totalCount: count(deals.id),
+        id: deals.id,
+        workspaceId: deals.workspaceId,
+        orgId: deals.orgId,
+        personId: deals.personId,
+        ownerId: deals.ownerId,
+        title: deals.title,
+        value: deals.value,
+        currency: deals.currency,
+        stage: deals.stage,
+        closeDate: deals.closeDate,
+        createdAt: deals.createdAt,
+        updatedAt: deals.updatedAt,
+        orgName: orgs.name,
+        personName: people.name,
+        ownerName: user.name,
       })
       .from(deals)
-      .where(and(...filters)),
+      .leftJoin(orgs, eq(deals.orgId, orgs.id))
+      .leftJoin(people, eq(deals.personId, people.id))
+      .leftJoin(user, eq(deals.ownerId, user.id))
+      .where(whereClause)
+      .orderBy(orderBy)
+      .limit(pageSize)
+      .offset(offset),
+    db.select({ totalCount: count() }).from(deals).where(whereClause),
   ]);
 
   const totalCount = Number(totalCountRows[0]?.totalCount ?? 0);
@@ -93,7 +79,12 @@ export async function listDeals(c: Context, query: ListDealsQuery) {
   return sendSuccess(
     c,
     {
-      deals: results,
+      deals: results.map((deal) => ({
+        ...deal,
+        orgName: deal.orgName ?? null,
+        personName: deal.personName ?? null,
+        ownerName: deal.ownerName ?? null,
+      })),
       meta: {
         page,
         pageSize,
