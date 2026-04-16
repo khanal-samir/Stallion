@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import type { ColumnFiltersState, RowSelectionState, SortingState } from "@tanstack/react-table";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/ui/button";
@@ -15,52 +15,59 @@ import { useDebounceValue } from "usehooks-ts";
 import type { Organization, OrganizationsListParams } from "@/types/crm";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
 
-// ─── Types ─────────────────────────────────────────────────────────────────
-
 type DrawerState = {
   open: boolean;
   mode: EntitySheetMode;
   org?: Organization;
 };
 
-// ─── Component ──────────────────────────────────────────────────────────────
+type OrgsTableState = {
+  pagination: { pageIndex: number; pageSize: number };
+  sorting: SortingState;
+  columnFilters: ColumnFiltersState;
+  searchInput: string;
+  rowSelection: RowSelectionState;
+};
+
+type OrgsUiState = {
+  drawer: DrawerState;
+  deleteTarget: Organization | "bulk" | null;
+};
 
 export function OrgsDataTable() {
-  // Table state
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [searchInput, setSearchInput] = useState("");
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-
-  // Drawer / delete state
-  const [drawer, setDrawer] = useState<DrawerState>({ open: false, mode: "view" });
-  const [deleteTarget, setDeleteTarget] = useState<Organization | "bulk" | null>(null);
+  const [table, setTable] = useState<OrgsTableState>({
+    pagination: { pageIndex: 0, pageSize: 25 },
+    sorting: [],
+    columnFilters: [],
+    searchInput: "",
+    rowSelection: {},
+  });
+  const [ui, setUi] = useState<OrgsUiState>({
+    drawer: { open: false, mode: "view" },
+    deleteTarget: null,
+  });
 
   // Debounced search value drives the query; raw input drives the input element
-  const [debouncedSearch] = useDebounceValue(searchInput, 300);
+  const [debouncedSearch] = useDebounceValue(table.searchInput, 300);
 
   // Derive filter values from TanStack columnFilters
-  const industryFilter = columnFilters.find((f) => f.id === "industry")?.value as
+  const industryFilter = table.columnFilters.find((f) => f.id === "industry")?.value as
     | string
     | undefined;
-  const sizeFilter = columnFilters.find((f) => f.id === "size")?.value as string | undefined;
+  const sizeFilter = table.columnFilters.find((f) => f.id === "size")?.value as string | undefined;
 
   // Build server query params
-  const queryParams = useMemo<OrganizationsListParams>(
-    () => ({
-      page: pagination.pageIndex + 1,
-      pageSize: pagination.pageSize,
-      ...(sorting[0] && {
-        sortBy: sorting[0].id as OrganizationsListParams["sortBy"],
-        sortOrder: sorting[0].desc ? "desc" : "asc",
-      }),
-      ...(debouncedSearch.trim() && { search: debouncedSearch.trim() }),
-      ...(industryFilter && { industry: industryFilter }),
-      ...(sizeFilter && { size: sizeFilter }),
+  const queryParams: OrganizationsListParams = {
+    page: table.pagination.pageIndex + 1,
+    pageSize: table.pagination.pageSize,
+    ...(table.sorting[0] && {
+      sortBy: table.sorting[0].id as OrganizationsListParams["sortBy"],
+      sortOrder: table.sorting[0].desc ? "desc" : "asc",
     }),
-    [pagination, sorting, debouncedSearch, industryFilter, sizeFilter],
-  );
+    ...(debouncedSearch.trim() && { search: debouncedSearch.trim() }),
+    ...(industryFilter && { industry: industryFilter }),
+    ...(sizeFilter && { size: sizeFilter }),
+  };
 
   // Data + mutations
   const { data, isLoading, isError, refetch } = useOrganizations(queryParams);
@@ -71,51 +78,50 @@ export function OrgsDataTable() {
   const totalCount = data?.meta.totalCount ?? 0;
   const pageCount = data?.meta.totalPages ?? 0;
 
-  const selectedIds = Object.keys(rowSelection).filter((id) => rowSelection[id]);
+  const selectedIds = Object.keys(table.rowSelection).filter((id) => table.rowSelection[id]);
   const selectedCount = selectedIds.length;
   const isDeletePending = isBulkDeleting || isDeleting;
 
-  // Stable column callbacks (setters are always stable)
-  const handleView = useCallback(
-    (org: Organization) => setDrawer({ open: true, mode: "view", org }),
-    [],
-  );
-  const handleEdit = useCallback(
-    (org: Organization) => setDrawer({ open: true, mode: "edit", org }),
-    [],
-  );
-  const handleDeleteRow = useCallback((org: Organization) => setDeleteTarget(org), []);
+  function updateTable(next: Partial<OrgsTableState>) {
+    setTable((current) => ({ ...current, ...next }));
+  }
 
-  const columns = useMemo(
-    () => getOrgsColumns({ onView: handleView, onEdit: handleEdit, onDelete: handleDeleteRow }),
-    [handleView, handleEdit, handleDeleteRow],
-  );
+  function openDrawer(mode: EntitySheetMode, org?: Organization) {
+    setUi((current) => ({
+      ...current,
+      drawer: { open: true, mode, org },
+    }));
+  }
+
+  const columns = getOrgsColumns({
+    onView: (org) => openDrawer("view", org),
+    onEdit: (org) => openDrawer("edit", org),
+    onDelete: (org) => setUi((current) => ({ ...current, deleteTarget: org })),
+  });
 
   // Handlers
   function handleSortingChange(next: SortingState) {
-    setSorting(next);
-    setPagination((p) => ({ ...p, pageIndex: 0 }));
-  }
-
-  function handleSearchChange(value: string) {
-    setSearchInput(value);
-    setPagination((p) => ({ ...p, pageIndex: 0 }));
+    setTable((current) => ({
+      ...current,
+      sorting: next,
+      pagination: { ...current.pagination, pageIndex: 0 },
+    }));
   }
 
   function handleConfirmDelete() {
-    if (deleteTarget === "bulk") {
+    if (ui.deleteTarget === "bulk") {
       bulkDeleteMutate(
         { ids: selectedIds },
         {
           onSuccess: () => {
-            setRowSelection({});
-            setDeleteTarget(null);
+            setTable((current) => ({ ...current, rowSelection: {} }));
+            setUi((current) => ({ ...current, deleteTarget: null }));
           },
         },
       );
-    } else if (deleteTarget) {
-      deleteOrgMutate(deleteTarget.id, {
-        onSuccess: () => setDeleteTarget(null),
+    } else if (ui.deleteTarget) {
+      deleteOrgMutate(ui.deleteTarget.id, {
+        onSuccess: () => setUi((current) => ({ ...current, deleteTarget: null })),
       });
     }
   }
@@ -126,7 +132,7 @@ export function OrgsDataTable() {
       <Button
         variant="destructive"
         size="sm"
-        onClick={() => setDeleteTarget("bulk")}
+        onClick={() => setUi((current) => ({ ...current, deleteTarget: "bulk" }))}
         disabled={isDeletePending}
       >
         <Trash2 className="size-3.5" />
@@ -135,16 +141,16 @@ export function OrgsDataTable() {
     ) : null;
 
   // Confirm dialog copy
-  const isBulkTarget = deleteTarget === "bulk";
+  const isBulkTarget = ui.deleteTarget === "bulk";
   const confirmTitle = isBulkTarget
     ? `Delete ${selectedCount} organization${selectedCount === 1 ? "" : "s"}?`
-    : `Delete "${(deleteTarget as Organization | null)?.name}"?`;
+    : `Delete "${(ui.deleteTarget as Organization | null)?.name}"?`;
 
   const confirmDescription = isBulkTarget
     ? `This will permanently remove ${selectedCount} organization${
         selectedCount === 1 ? "" : "s"
       }. People linked to ${selectedCount === 1 ? "it" : "them"} will have their organization cleared. This action cannot be undone.`
-    : `This will permanently delete "${(deleteTarget as Organization | null)?.name}". People linked to this organization will have their organization cleared. This action cannot be undone.`;
+    : `This will permanently delete "${(ui.deleteTarget as Organization | null)?.name}". People linked to this organization will have their organization cleared. This action cannot be undone.`;
 
   return (
     <>
@@ -152,7 +158,7 @@ export function OrgsDataTable() {
         title="Organizations"
         count={isLoading ? undefined : totalCount}
         actions={
-          <Button size="sm" onClick={() => setDrawer({ open: true, mode: "create" })}>
+          <Button size="sm" onClick={() => openDrawer("create")}>
             <Plus className="size-3.5" />
             Add Organization
           </Button>
@@ -163,15 +169,15 @@ export function OrgsDataTable() {
         columns={columns}
         data={orgs}
         pageCount={pageCount}
-        pageIndex={pagination.pageIndex}
-        pageSize={pagination.pageSize}
-        onPaginationChange={setPagination}
-        sorting={sorting}
+        pageIndex={table.pagination.pageIndex}
+        pageSize={table.pagination.pageSize}
+        onPaginationChange={(pagination) => updateTable({ pagination })}
+        sorting={table.sorting}
         onSortingChange={handleSortingChange}
-        columnFilters={columnFilters}
-        onColumnFiltersChange={setColumnFilters}
-        searchValue={searchInput}
-        onSearchChange={handleSearchChange}
+        columnFilters={table.columnFilters}
+        onColumnFiltersChange={(columnFilters) => updateTable({ columnFilters })}
+        searchValue={table.searchInput}
+        onSearchChange={(searchInput) => updateTable({ searchInput })}
         searchPlaceholder="Search organizations…"
         filterConfig={ORGS_FILTER_CONFIG}
         isLoading={isLoading}
@@ -180,26 +186,31 @@ export function OrgsDataTable() {
         errorDescription="There was a problem fetching your organizations."
         onRetry={refetch}
         enableRowSelection
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
+        rowSelection={table.rowSelection}
+        onRowSelectionChange={(rowSelection) => updateTable({ rowSelection })}
         getRowId={(row) => row.id}
-        onRowClick={handleView}
+        onRowClick={(org) => openDrawer("view", org)}
         emptyTitle="No organizations yet"
         emptyDescription="Add your first organization to start tracking companies in your CRM."
         toolbarActions={toolbarActions}
       />
 
       <OrgDrawer
-        open={drawer.open}
-        onOpenChange={(open) => setDrawer((s) => ({ ...s, open }))}
-        initialMode={drawer.mode}
-        org={drawer.org}
+        open={ui.drawer.open}
+        onOpenChange={(open) =>
+          setUi((current) => ({ ...current, drawer: { ...current.drawer, open } }))
+        }
+        mode={ui.drawer.mode}
+        onModeChange={(mode) =>
+          setUi((current) => ({ ...current, drawer: { ...current.drawer, mode } }))
+        }
+        org={ui.drawer.org}
       />
 
       <ConfirmDialog
-        open={deleteTarget !== null}
+        open={ui.deleteTarget !== null}
         onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
+          if (!open) setUi((current) => ({ ...current, deleteTarget: null }));
         }}
         title={confirmTitle}
         description={confirmDescription}

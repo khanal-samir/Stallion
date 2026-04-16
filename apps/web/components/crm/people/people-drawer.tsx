@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import dayjs from "dayjs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createPersonSchema, type CreatePerson } from "@workspace/validators/schemas/crm";
@@ -28,40 +29,8 @@ import { useCreatePerson, useUpdatePerson, useDeletePerson } from "@/hooks/queri
 import { useOrganizations } from "@/hooks/queries/use-orgs";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
 import type { Person } from "@/types/crm";
-
-import { PERSON_STATUS_CONFIG } from "./people-columns";
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(new Date(value));
-}
-
-function toDateInputValue(value: Date | string | null | undefined): string {
-  if (!value) return "";
-  const d = value instanceof Date ? value : new Date(value);
-  return d.toISOString().slice(0, 10);
-}
-
-function getDefaultValues(person?: Person | null): Partial<CreatePerson> {
-  return {
-    name: person?.name ?? "",
-    email: person?.email ?? undefined,
-    phone: person?.phone ?? undefined,
-    jobTitle: person?.jobTitle ?? undefined,
-    linkedinUrl: person?.linkedinUrl ?? undefined,
-    status: person?.status ?? "lead",
-    source: person?.source ?? "manual",
-    orgId: person?.orgId ?? null,
-    ownerId: person?.ownerId ?? null,
-    lastContactedAt: person?.lastContactedAt ? new Date(person.lastContactedAt) : undefined,
-  };
-}
+import type { WorkspaceMember } from "@/types/workspace-settings";
+import { PERSON_SOURCE_OPTIONS, PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
 
 // ─── View-mode field helpers ──────────────────────────────────────────────────
 
@@ -90,7 +59,7 @@ function ViewSection({ title, children }: { title: string; children: React.React
 // ─── View content ─────────────────────────────────────────────────────────────
 
 function PersonViewContent({ person }: { person: Person }) {
-  const statusConfig = PERSON_STATUS_CONFIG[person.status];
+  const statusConfig = PERSON_STATUS_OPTIONS.find((option) => option.value === person.status);
   const orgName = person.orgName ?? person.org?.name;
   const ownerName = person.ownerName ?? person.owner?.name;
 
@@ -145,13 +114,19 @@ function PersonViewContent({ person }: { person: Person }) {
           {person.jobTitle ?? <span className="text-muted-foreground/50">Not set</span>}
         </ViewField>
         <ViewField label="Status">
-          <Badge className={cn("font-medium", statusConfig.className)}>{statusConfig.label}</Badge>
+          {statusConfig ? (
+            <Badge className={cn("font-medium", statusConfig.badgeClassName)}>
+              {statusConfig.label}
+            </Badge>
+          ) : null}
         </ViewField>
         <ViewField label="Source">
           <span className="capitalize">{person.source}</span>
         </ViewField>
         <ViewField label="Last Contacted">
-          <span className="text-muted-foreground">{formatDate(person.lastContactedAt)}</span>
+          <span className="text-muted-foreground">
+            {person.lastContactedAt ? dayjs(person.lastContactedAt).format("MMMM D, YYYY") : "—"}
+          </span>
         </ViewField>
       </ViewSection>
 
@@ -169,10 +144,14 @@ function PersonViewContent({ person }: { person: Person }) {
       <div className="pt-2 border-t border-dashed">
         <div className="grid grid-cols-2 gap-4">
           <ViewField label="Created">
-            <span className="text-muted-foreground">{formatDate(person.createdAt)}</span>
+            <span className="text-muted-foreground">
+              {dayjs(person.createdAt).format("MMMM D, YYYY")}
+            </span>
           </ViewField>
           <ViewField label="Updated">
-            <span className="text-muted-foreground">{formatDate(person.updatedAt)}</span>
+            <span className="text-muted-foreground">
+              {dayjs(person.updatedAt).format("MMMM D, YYYY")}
+            </span>
           </ViewField>
         </div>
       </div>
@@ -193,12 +172,7 @@ function PersonForm({
   const { data: workspace } = useActiveWorkspace();
 
   const orgs = orgsData?.orgs ?? [];
-  const members =
-    (
-      workspace as unknown as {
-        members?: Array<{ userId: string; user: { name: string } }>;
-      }
-    )?.members ?? [];
+  const members = (workspace?.members ?? []) as Pick<WorkspaceMember, "userId" | "user">[];
 
   return (
     <Form {...form}>
@@ -300,11 +274,11 @@ function PersonForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="lead">Lead</SelectItem>
-                    <SelectItem value="prospect">Prospect</SelectItem>
-                    <SelectItem value="qualified">Qualified</SelectItem>
-                    <SelectItem value="customer">Customer</SelectItem>
-                    <SelectItem value="churned">Churned</SelectItem>
+                    {PERSON_STATUS_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -328,9 +302,11 @@ function PersonForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="manual">Manual</SelectItem>
-                    <SelectItem value="csv">CSV import</SelectItem>
-                    <SelectItem value="api">API</SelectItem>
+                    {PERSON_SOURCE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -431,9 +407,11 @@ function PersonForm({
               <FormControl>
                 <Input
                   type="date"
-                  value={toDateInputValue(field.value as Date | string | undefined)}
+                  value={field.value ? dayjs(field.value).format("YYYY-MM-DD") : ""}
                   onChange={(e) =>
-                    field.onChange(e.target.value ? new Date(e.target.value) : undefined)
+                    field.onChange(
+                      e.target.value ? dayjs(e.target.value, "YYYY-MM-DD").toDate() : undefined,
+                    )
                   }
                   disabled={isPending}
                 />
@@ -452,7 +430,8 @@ function PersonForm({
 interface PeopleDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialMode: EntitySheetMode;
+  mode: EntitySheetMode;
+  onModeChange: (mode: EntitySheetMode) => void;
   person?: Person | null;
   onDeleteSuccess?: () => void;
 }
@@ -460,30 +439,42 @@ interface PeopleDrawerProps {
 export function PeopleDrawer({
   open,
   onOpenChange,
-  initialMode,
+  mode,
+  onModeChange,
   person,
   onDeleteSuccess,
 }: PeopleDrawerProps) {
-  const [mode, setMode] = useState<EntitySheetMode>(initialMode);
-
   const { mutate: createPerson, isPending: isCreating } = useCreatePerson();
   const { mutate: updatePerson, isPending: isUpdating } = useUpdatePerson(person?.id ?? "");
   const { mutate: deletePerson, isPending: isDeleting } = useDeletePerson();
 
   const isSaving = isCreating || isUpdating || isDeleting;
 
+  const formValues = useMemo<CreatePerson>(
+    () => ({
+      name: mode === "create" ? "" : (person?.name ?? ""),
+      email: mode === "create" ? undefined : (person?.email ?? undefined),
+      phone: mode === "create" ? undefined : (person?.phone ?? undefined),
+      jobTitle: mode === "create" ? undefined : (person?.jobTitle ?? undefined),
+      linkedinUrl: mode === "create" ? undefined : (person?.linkedinUrl ?? undefined),
+      status: mode === "create" ? "lead" : (person?.status ?? "lead"),
+      source: mode === "create" ? "manual" : (person?.source ?? "manual"),
+      orgId: mode === "create" ? null : (person?.orgId ?? null),
+      ownerId: mode === "create" ? null : (person?.ownerId ?? null),
+      lastContactedAt:
+        mode === "create"
+          ? undefined
+          : person?.lastContactedAt
+            ? dayjs(person.lastContactedAt).toDate()
+            : undefined,
+    }),
+    [mode, person],
+  );
+
   const form = useForm<CreatePerson>({
     resolver: zodResolver(createPersonSchema),
-    defaultValues: getDefaultValues(person),
+    values: formValues,
   });
-
-  // Reset form and mode every time the drawer opens
-  useEffect(() => {
-    if (!open) return;
-    setMode(initialMode);
-    form.reset(getDefaultValues(initialMode === "create" ? null : person));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, person?.id, initialMode]);
 
   function onSubmit(values: CreatePerson) {
     const payload: CreatePerson = {
@@ -533,7 +524,7 @@ export function PeopleDrawer({
       description={description}
       mode={mode}
       isSaving={isSaving}
-      onEdit={person ? () => setMode("edit") : undefined}
+      onEdit={person ? () => onModeChange("edit") : undefined}
       onSave={form.handleSubmit(onSubmit)}
       onDelete={mode !== "create" && person ? handleDelete : undefined}
     >

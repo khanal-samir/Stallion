@@ -1,30 +1,17 @@
 import type { FilterConfig } from "@/components/shared/data-table";
+import { ORG_INDUSTRY_OPTIONS, ORG_SIZE_OPTIONS } from "@/components/crm/crm-options";
 
 export const ORGS_FILTER_CONFIG: FilterConfig[] = [
   {
     columnId: "industry",
     label: "Industry",
     allLabel: "All Industries",
-    options: [
-      { label: "Technology", value: "technology" },
-      { label: "Finance", value: "finance" },
-      { label: "Healthcare", value: "healthcare" },
-      { label: "Manufacturing", value: "manufacturing" },
-      { label: "Retail", value: "retail" },
-      { label: "Consulting", value: "consulting" },
-      { label: "Other", value: "other" },
-    ],
+    options: ORG_INDUSTRY_OPTIONS,
   },
   {
     columnId: "size",
     label: "Size",
     allLabel: "Any Size",
-    options: [
-      { label: "1–10", value: "1-10" },
-      { label: "11–50", value: "11-50" },
-      { label: "51–200", value: "51-200" },
-      { label: "201–500", value: "201-500" },
-      { label: "500+", value: "500+" },
-    ],
+    options: ORG_SIZE_OPTIONS,
   },
 ];

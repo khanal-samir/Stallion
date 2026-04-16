@@ -1,15 +1,8 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Building2, Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@workspace/ui/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/ui/dropdown-menu";
+import { Building2 } from "lucide-react";
+import { CrmRowActions } from "@/components/crm/crm-row-actions";
 import type { Organization } from "@/types/crm";
 
 interface GetOrgsColumnsProps {
@@ -23,6 +16,8 @@ export function getOrgsColumns({
   onEdit,
   onDelete,
 }: GetOrgsColumnsProps): ColumnDef<Organization>[] {
+  const emptyCell = <span className="text-sm text-muted-foreground/50">—</span>;
+
   return [
     {
       id: "name",
@@ -51,7 +46,7 @@ export function getOrgsColumns({
         row.original.domain ? (
           <span className="text-sm text-muted-foreground">{row.original.domain}</span>
         ) : (
-          <span className="text-sm text-muted-foreground/50">—</span>
+          emptyCell
         ),
     },
     {
@@ -63,7 +58,7 @@ export function getOrgsColumns({
         row.original.industry ? (
           <span className="capitalize">{row.original.industry}</span>
         ) : (
-          <span className="text-muted-foreground/50">—</span>
+          emptyCell
         ),
     },
     {
@@ -71,12 +66,7 @@ export function getOrgsColumns({
       accessorKey: "size",
       header: "Size",
       enableSorting: true,
-      cell: ({ row }) =>
-        row.original.size ? (
-          <span>{row.original.size}</span>
-        ) : (
-          <span className="text-muted-foreground/50">—</span>
-        ),
+      cell: ({ row }) => (row.original.size ? <span>{row.original.size}</span> : emptyCell),
     },
     {
       id: "location",
@@ -87,7 +77,7 @@ export function getOrgsColumns({
         row.original.location ? (
           <span className="text-sm text-muted-foreground">{row.original.location}</span>
         ) : (
-          <span className="text-sm text-muted-foreground/50">—</span>
+          emptyCell
         ),
     },
     {
@@ -96,11 +86,7 @@ export function getOrgsColumns({
       enableSorting: false,
       cell: ({ row }) => {
         const count = row.original.peopleCount ?? 0;
-        return (
-          <span className="tabular-nums text-muted-foreground">
-            {count}
-          </span>
-        );
+        return <span className="tabular-nums text-muted-foreground">{count}</span>;
       },
     },
     {
@@ -108,36 +94,12 @@ export function getOrgsColumns({
       enableSorting: false,
       enableHiding: false,
       cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              data-row-action="true"
-              aria-label="Open actions"
-            >
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onView(row.original)}>
-              <Eye className="size-4" />
-              View
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit(row.original)}>
-              <Pencil className="size-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => onDelete(row.original)}
-            >
-              <Trash2 className="size-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <CrmRowActions
+          triggerLabel="Open actions"
+          onView={() => onView(row.original)}
+          onEdit={() => onEdit(row.original)}
+          onDelete={() => onDelete(row.original)}
+        />
       ),
     },
   ];

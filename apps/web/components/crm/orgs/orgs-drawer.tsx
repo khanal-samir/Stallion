@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2 } from "lucide-react";
@@ -25,26 +25,7 @@ import { Separator } from "@workspace/ui/components/ui/separator";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
 import { useCreateOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/queries/use-orgs";
 import type { Organization } from "@/types/crm";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const INDUSTRY_OPTIONS = [
-  { label: "Technology", value: "technology" },
-  { label: "Finance", value: "finance" },
-  { label: "Healthcare", value: "healthcare" },
-  { label: "Manufacturing", value: "manufacturing" },
-  { label: "Retail", value: "retail" },
-  { label: "Consulting", value: "consulting" },
-  { label: "Other", value: "other" },
-] as const;
-
-const SIZE_OPTIONS = [
-  { label: "1–10", value: "1-10" },
-  { label: "11–50", value: "11-50" },
-  { label: "51–200", value: "51-200" },
-  { label: "201–500", value: "201-500" },
-  { label: "500+", value: "500+" },
-] as const;
+import { ORG_INDUSTRY_OPTIONS, ORG_SIZE_OPTIONS } from "@/components/crm/crm-options";
 
 // ─── View helpers ─────────────────────────────────────────────────────────────
 
@@ -198,7 +179,7 @@ function OrgForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="__none">Not specified</SelectItem>
-                    {INDUSTRY_OPTIONS.map((opt) => (
+                    {ORG_INDUSTRY_OPTIONS.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>
@@ -228,7 +209,7 @@ function OrgForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="__none">Not specified</SelectItem>
-                    {SIZE_OPTIONS.map((opt) => (
+                    {ORG_SIZE_OPTIONS.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>
@@ -270,41 +251,33 @@ function OrgForm({
 interface OrgDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialMode: EntitySheetMode;
+  mode: EntitySheetMode;
+  onModeChange: (mode: EntitySheetMode) => void;
   org?: Organization;
 }
 
-function getDefaultValues(org?: Organization): CreateOrg {
-  return {
-    name: org?.name ?? "",
-    domain: org?.domain ?? "",
-    industry: org?.industry ?? "",
-    size: org?.size ?? "",
-    location: org?.location ?? "",
-  };
-}
-
-export function OrgDrawer({ open, onOpenChange, initialMode, org }: OrgDrawerProps) {
-  const [mode, setMode] = useState<EntitySheetMode>(initialMode);
-
+export function OrgDrawer({ open, onOpenChange, mode, onModeChange, org }: OrgDrawerProps) {
   const { mutate: createOrgMutate, isPending: isCreating } = useCreateOrg();
   const { mutate: updateOrgMutate, isPending: isUpdating } = useUpdateOrg(org?.id ?? "");
   const { mutate: deleteOrgMutate, isPending: isDeleting } = useDeleteOrg();
 
   const isPending = isCreating || isUpdating || isDeleting;
 
+  const formValues = useMemo<CreateOrg>(
+    () => ({
+      name: mode === "create" ? "" : (org?.name ?? ""),
+      domain: mode === "create" ? "" : (org?.domain ?? ""),
+      industry: mode === "create" ? "" : (org?.industry ?? ""),
+      size: mode === "create" ? "" : (org?.size ?? ""),
+      location: mode === "create" ? "" : (org?.location ?? ""),
+    }),
+    [mode, org],
+  );
+
   const form = useForm<CreateOrg>({
     resolver: zodResolver(createOrgSchema),
-    defaultValues: getDefaultValues(org),
+    values: formValues,
   });
-
-  // Reset form and mode whenever the drawer opens
-  useEffect(() => {
-    if (!open) return;
-    setMode(initialMode);
-    form.reset(getDefaultValues(org));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, org?.id, initialMode]);
 
   function onSubmit(values: CreateOrg) {
     // Strip empty optional strings to undefined
@@ -350,7 +323,7 @@ export function OrgDrawer({ open, onOpenChange, initialMode, org }: OrgDrawerPro
       description={description}
       mode={mode}
       isSaving={isPending}
-      onEdit={mode === "view" ? () => setMode("edit") : undefined}
+      onEdit={mode === "view" ? () => onModeChange("edit") : undefined}
       onSave={mode !== "view" ? form.handleSubmit(onSubmit) : undefined}
       onDelete={mode === "view" && org ? handleDelete : undefined}
       deleteLabel={isDeleting ? "Deleting…" : "Delete"}

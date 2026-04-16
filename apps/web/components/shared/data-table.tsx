@@ -131,6 +131,10 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   // The only local state — column visibility doesn't affect server queries
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const pagination = { pageIndex, pageSize };
+  const currentPage = pageCount === 0 ? 0 : pageIndex + 1;
+  const canGoToPreviousPage = !isLoading && pageIndex > 0;
+  const canGoToNextPage = !isLoading && pageIndex < pageCount - 1 && pageCount > 0;
 
   const selectionColumn = React.useMemo<ColumnDef<TData>>(
     () => ({
@@ -174,14 +178,14 @@ export function DataTable<TData>({
     manualFiltering: true,
     enableRowSelection,
     state: {
-      pagination: { pageIndex, pageSize },
+      pagination,
       sorting,
       columnFilters,
       rowSelection,
       columnVisibility,
     },
     onPaginationChange: (updater) => {
-      const next = typeof updater === "function" ? updater({ pageIndex, pageSize }) : updater;
+      const next = typeof updater === "function" ? updater(pagination) : updater;
       onPaginationChange(next);
     },
     onSortingChange: (updater) => {
@@ -215,12 +219,12 @@ export function DataTable<TData>({
     const next = columnFilters.filter((f) => f.id !== columnId);
     if (value !== "__all") next.push({ id: columnId, value });
     onColumnFiltersChange?.(next);
-    onPaginationChange({ pageIndex: 0, pageSize });
+    onPaginationChange({ ...pagination, pageIndex: 0 });
   }
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange?.(e.target.value);
-    onPaginationChange({ pageIndex: 0, pageSize });
+    onPaginationChange({ ...pagination, pageIndex: 0 });
   }
 
   function handleRowClick(row: Row<TData>, e: React.MouseEvent<HTMLTableRowElement>) {
@@ -402,7 +406,7 @@ export function DataTable<TData>({
       {/* Pagination */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Page {pageCount === 0 ? 0 : pageIndex + 1} of {pageCount}
+          Page {currentPage} of {pageCount}
         </p>
 
         <Pagination className="mx-0 w-auto justify-end">
@@ -411,8 +415,8 @@ export function DataTable<TData>({
               <Button
                 variant="outline"
                 size="icon-sm"
-                onClick={() => onPaginationChange({ pageIndex: 0, pageSize })}
-                disabled={isLoading || pageIndex <= 0 || pageCount <= 1}
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: 0 })}
+                disabled={!canGoToPreviousPage || pageCount <= 1}
                 aria-label="First page"
               >
                 <ChevronsLeft className="size-4" />
@@ -423,8 +427,8 @@ export function DataTable<TData>({
               <Button
                 variant="outline"
                 size="icon-sm"
-                onClick={() => onPaginationChange({ pageIndex: pageIndex - 1, pageSize })}
-                disabled={isLoading || pageIndex <= 0}
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: pageIndex - 1 })}
+                disabled={!canGoToPreviousPage}
                 aria-label="Previous page"
               >
                 <ChevronDown className="size-4 rotate-90" />
@@ -446,7 +450,7 @@ export function DataTable<TData>({
                     size="icon-sm"
                     onClick={(e) => {
                       e.preventDefault();
-                      onPaginationChange({ pageIndex: num - 1, pageSize });
+                      onPaginationChange({ ...pagination, pageIndex: num - 1 });
                     }}
                   >
                     {num}
@@ -459,8 +463,8 @@ export function DataTable<TData>({
               <Button
                 variant="outline"
                 size="icon-sm"
-                onClick={() => onPaginationChange({ pageIndex: pageIndex + 1, pageSize })}
-                disabled={isLoading || pageIndex >= pageCount - 1 || pageCount === 0}
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: pageIndex + 1 })}
+                disabled={!canGoToNextPage}
                 aria-label="Next page"
               >
                 <ChevronDown className="size-4 -rotate-90" />
@@ -471,8 +475,8 @@ export function DataTable<TData>({
               <Button
                 variant="outline"
                 size="icon-sm"
-                onClick={() => onPaginationChange({ pageIndex: pageCount - 1, pageSize })}
-                disabled={isLoading || pageIndex >= pageCount - 1 || pageCount === 0}
+                onClick={() => onPaginationChange({ ...pagination, pageIndex: pageCount - 1 })}
+                disabled={!canGoToNextPage}
                 aria-label="Last page"
               >
                 <ChevronsRight className="size-4" />
