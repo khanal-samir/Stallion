@@ -23,44 +23,10 @@ import {
 } from "@workspace/ui/components/ui/select";
 import { Separator } from "@workspace/ui/components/ui/separator";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
+import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreateOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/queries/use-orgs";
 import type { Organization } from "@/types/crm";
 import { ORG_INDUSTRY_OPTIONS, ORG_SIZE_OPTIONS } from "@/components/crm/crm-options";
-
-// ─── View helpers ─────────────────────────────────────────────────────────────
-
-function ViewField({
-  label,
-  value,
-  children,
-}: {
-  label: string;
-  value?: string | null;
-  children?: React.ReactNode;
-}) {
-  const content = children ?? value;
-  return (
-    <div className="space-y-0.5">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
-      {content ? (
-        <p className="text-sm">{content}</p>
-      ) : (
-        <p className="text-sm text-muted-foreground/50">—</p>
-      )}
-    </div>
-  );
-}
-
-function ViewSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-        {title}
-      </p>
-      <div className="space-y-4">{children}</div>
-    </div>
-  );
-}
 
 function capitalize(str: string | null | undefined): string | null | undefined {
   if (!str) return str;
@@ -91,21 +57,26 @@ function ViewContent({ org }: { org: Organization }) {
 
       <Separator />
 
-      <ViewSection title="Details">
-        <ViewField label="Industry" value={capitalize(org.industry)} />
-        <ViewField label="Company Size" value={org.size} />
-        <ViewField label="Location" value={org.location} />
-      </ViewSection>
+      <CrmViewSection title="Details">
+        <CrmViewField label="Industry">
+          {capitalize(org.industry) ?? <span className="text-muted-foreground/50">—</span>}
+        </CrmViewField>
+        <CrmViewField label="Company Size">
+          {org.size ?? <span className="text-muted-foreground/50">—</span>}
+        </CrmViewField>
+        <CrmViewField label="Location">
+          {org.location ?? <span className="text-muted-foreground/50">—</span>}
+        </CrmViewField>
+      </CrmViewSection>
 
       {org.peopleCount !== undefined && (
         <>
           <Separator />
-          <ViewSection title="People">
-            <ViewField
-              label="Contacts"
-              value={`${org.peopleCount} ${org.peopleCount === 1 ? "person" : "people"}`}
-            />
-          </ViewSection>
+          <CrmViewSection title="People">
+            <CrmViewField label="Contacts">
+              {`${org.peopleCount} ${org.peopleCount === 1 ? "person" : "people"}`}
+            </CrmViewField>
+          </CrmViewSection>
         </>
       )}
     </div>

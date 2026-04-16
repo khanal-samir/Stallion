@@ -25,6 +25,7 @@ import { Separator } from "@workspace/ui/components/ui/separator";
 import { Badge } from "@workspace/ui/components/ui/badge";
 import { cn } from "@workspace/ui/lib/utils";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
+import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreateDeal, useUpdateDeal, useDeleteDeal } from "@/hooks/queries/use-deals";
 import { usePeople } from "@/hooks/queries/use-people";
 import { useOrganizations } from "@/hooks/queries/use-orgs";
@@ -32,30 +33,6 @@ import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
 import type { Deal } from "@/types/crm";
 import type { WorkspaceMember } from "@/types/workspace-settings";
 import { DEAL_STAGE_OPTIONS, DEAL_STAGE_MAP } from "@/components/crm/deals/deals-options";
-
-// ─── View-mode field helpers ──────────────────────────────────────────────────
-
-function ViewField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
-      <div className="text-sm">{children}</div>
-    </div>
-  );
-}
-
-function ViewSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-        {title}
-      </p>
-      <div className="grid gap-4">{children}</div>
-    </div>
-  );
-}
 
 // ─── View content ─────────────────────────────────────────────────────────────
 
@@ -67,19 +44,19 @@ function DealViewContent({ deal }: { deal: Deal }) {
 
   return (
     <div className="space-y-6 py-2">
-      <ViewSection title="Deal">
-        <ViewField label="Title">
+      <CrmViewSection title="Deal">
+        <CrmViewField label="Title">
           <span className="font-medium">{deal.title}</span>
-        </ViewField>
-        <ViewField label="Stage">
+        </CrmViewField>
+        <CrmViewField label="Stage">
           {stageConfig ? (
             <Badge className={cn("font-medium", stageConfig.badgeClassName)}>
               {stageConfig.label}
             </Badge>
           ) : null}
-        </ViewField>
+        </CrmViewField>
         <div className="grid grid-cols-2 gap-4">
-          <ViewField label="Value">
+          <CrmViewField label="Value">
             {deal.value ? (
               <span className="font-medium">
                 {deal.value} <span className="text-muted-foreground">{deal.currency}</span>
@@ -87,41 +64,41 @@ function DealViewContent({ deal }: { deal: Deal }) {
             ) : (
               <span className="text-muted-foreground/50">Not set</span>
             )}
-          </ViewField>
-          <ViewField label="Close Date">
+          </CrmViewField>
+          <CrmViewField label="Close Date">
             <span className="text-muted-foreground">
               {deal.closeDate ? dayjs(deal.closeDate).format("MMMM D, YYYY") : "—"}
             </span>
-          </ViewField>
+          </CrmViewField>
         </div>
-      </ViewSection>
+      </CrmViewSection>
 
       <Separator />
 
-      <ViewSection title="Associations">
-        <ViewField label="Contact">
+      <CrmViewSection title="Associations">
+        <CrmViewField label="Contact">
           {personName ?? <span className="text-muted-foreground/50">Not linked</span>}
-        </ViewField>
-        <ViewField label="Organization">
+        </CrmViewField>
+        <CrmViewField label="Organization">
           {orgName ?? <span className="text-muted-foreground/50">Not linked</span>}
-        </ViewField>
-        <ViewField label="Owner">
+        </CrmViewField>
+        <CrmViewField label="Owner">
           {ownerName ?? <span className="text-muted-foreground/50">Not assigned</span>}
-        </ViewField>
-      </ViewSection>
+        </CrmViewField>
+      </CrmViewSection>
 
       <div className="pt-2 border-t border-dashed">
         <div className="grid grid-cols-2 gap-4">
-          <ViewField label="Created">
+          <CrmViewField label="Created">
             <span className="text-muted-foreground">
               {dayjs(deal.createdAt).format("MMMM D, YYYY")}
             </span>
-          </ViewField>
-          <ViewField label="Updated">
+          </CrmViewField>
+          <CrmViewField label="Updated">
             <span className="text-muted-foreground">
               {dayjs(deal.updatedAt).format("MMMM D, YYYY")}
             </span>
-          </ViewField>
+          </CrmViewField>
         </div>
       </div>
     </div>
@@ -158,7 +135,11 @@ function DealForm({
                 Title <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Acme Corp - Enterprise Plan" {...field} disabled={isPending} />
+                <Input
+                  placeholder="e.g. Acme Corp - Enterprise Plan"
+                  {...field}
+                  disabled={isPending}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -389,14 +370,18 @@ export function DealsDrawer({
   const formValues = useMemo<CreateDeal>(
     () => ({
       title: mode === "create" ? "" : (deal?.title ?? ""),
-      stage: mode === "create" ? ((initialStage as CreateDeal["stage"]) ?? "new") : (deal?.stage ?? "new"),
+      stage:
+        mode === "create"
+          ? ((initialStage as CreateDeal["stage"]) ?? "new")
+          : (deal?.stage ?? "new"),
       value: mode === "create" ? undefined : (deal?.value ?? undefined),
       currency: mode === "create" ? "USD" : (deal?.currency ?? "USD"),
-      closeDate: mode === "create"
-        ? undefined
-        : deal?.closeDate
-          ? dayjs(deal.closeDate).toDate()
-          : undefined,
+      closeDate:
+        mode === "create"
+          ? undefined
+          : deal?.closeDate
+            ? dayjs(deal.closeDate).toDate()
+            : undefined,
       personId: mode === "create" ? null : (deal?.personId ?? null),
       orgId: mode === "create" ? null : (deal?.orgId ?? null),
       ownerId: mode === "create" ? null : (deal?.ownerId ?? null),

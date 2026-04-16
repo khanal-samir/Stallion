@@ -25,36 +25,13 @@ import { Separator } from "@workspace/ui/components/ui/separator";
 import { Badge } from "@workspace/ui/components/ui/badge";
 import { cn } from "@workspace/ui/lib/utils";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
+import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreatePerson, useUpdatePerson, useDeletePerson } from "@/hooks/queries/use-people";
 import { useOrganizations } from "@/hooks/queries/use-orgs";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
 import type { Person } from "@/types/crm";
 import type { WorkspaceMember } from "@/types/workspace-settings";
 import { PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
-
-// ─── View-mode field helpers ──────────────────────────────────────────────────
-
-function ViewField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
-      <div className="text-sm">{children}</div>
-    </div>
-  );
-}
-
-function ViewSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-        {title}
-      </p>
-      <div className="grid gap-4">{children}</div>
-    </div>
-  );
-}
 
 // ─── View content ─────────────────────────────────────────────────────────────
 
@@ -65,11 +42,11 @@ function PersonViewContent({ person }: { person: Person }) {
 
   return (
     <div className="space-y-6 py-2">
-      <ViewSection title="Contact">
-        <ViewField label="Full Name">
+      <CrmViewSection title="Contact">
+        <CrmViewField label="Full Name">
           <span className="font-medium">{person.name}</span>
-        </ViewField>
-        <ViewField label="Email">
+        </CrmViewField>
+        <CrmViewField label="Email">
           {person.email ? (
             <a
               href={`mailto:${person.email}`}
@@ -80,8 +57,8 @@ function PersonViewContent({ person }: { person: Person }) {
           ) : (
             <span className="text-muted-foreground/50">Not provided</span>
           )}
-        </ViewField>
-        <ViewField label="Phone">
+        </CrmViewField>
+        <CrmViewField label="Phone">
           {person.phone ? (
             <a
               href={`tel:${person.phone}`}
@@ -92,9 +69,9 @@ function PersonViewContent({ person }: { person: Person }) {
           ) : (
             <span className="text-muted-foreground/50">Not provided</span>
           )}
-        </ViewField>
+        </CrmViewField>
         {person.linkedinUrl && (
-          <ViewField label="LinkedIn">
+          <CrmViewField label="LinkedIn">
             <a
               href={person.linkedinUrl}
               target="_blank"
@@ -103,56 +80,56 @@ function PersonViewContent({ person }: { person: Person }) {
             >
               {person.linkedinUrl}
             </a>
-          </ViewField>
+          </CrmViewField>
         )}
-      </ViewSection>
+      </CrmViewSection>
 
       <Separator />
 
-      <ViewSection title="Profile">
-        <ViewField label="Job Title">
+      <CrmViewSection title="Profile">
+        <CrmViewField label="Job Title">
           {person.jobTitle ?? <span className="text-muted-foreground/50">Not set</span>}
-        </ViewField>
-        <ViewField label="Status">
+        </CrmViewField>
+        <CrmViewField label="Status">
           {statusConfig ? (
             <Badge className={cn("font-medium", statusConfig.badgeClassName)}>
               {statusConfig.label}
             </Badge>
           ) : null}
-        </ViewField>
-        <ViewField label="Source">
+        </CrmViewField>
+        <CrmViewField label="Source">
           <span className="capitalize">{person.source}</span>
-        </ViewField>
-        <ViewField label="Last Contacted">
+        </CrmViewField>
+        <CrmViewField label="Last Contacted">
           <span className="text-muted-foreground">
             {person.lastContactedAt ? dayjs(person.lastContactedAt).format("MMMM D, YYYY") : "—"}
           </span>
-        </ViewField>
-      </ViewSection>
+        </CrmViewField>
+      </CrmViewSection>
 
       <Separator />
 
-      <ViewSection title="Assignment">
-        <ViewField label="Organization">
+      <CrmViewSection title="Assignment">
+        <CrmViewField label="Organization">
           {orgName ?? <span className="text-muted-foreground/50">Not assigned</span>}
-        </ViewField>
-        <ViewField label="Owner">
+        </CrmViewField>
+        <CrmViewField label="Owner">
           {ownerName ?? <span className="text-muted-foreground/50">Not assigned</span>}
-        </ViewField>
-      </ViewSection>
+        </CrmViewField>
+      </CrmViewSection>
 
       <div className="pt-2 border-t border-dashed">
         <div className="grid grid-cols-2 gap-4">
-          <ViewField label="Created">
+          <CrmViewField label="Created">
             <span className="text-muted-foreground">
               {dayjs(person.createdAt).format("MMMM D, YYYY")}
             </span>
-          </ViewField>
-          <ViewField label="Updated">
+          </CrmViewField>
+          <CrmViewField label="Updated">
             <span className="text-muted-foreground">
               {dayjs(person.updatedAt).format("MMMM D, YYYY")}
             </span>
-          </ViewField>
+          </CrmViewField>
         </div>
       </div>
     </div>
