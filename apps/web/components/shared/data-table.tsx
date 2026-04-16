@@ -100,33 +100,33 @@ export interface DataTableProps<TData> {
 }
 
 export function DataTable<TData>({
-  columns,
-  data,
-  pageCount,
-  pageIndex,
-  pageSize,
-  onPaginationChange,
-  sorting = [],
-  onSortingChange,
-  columnFilters = [],
-  onColumnFiltersChange,
+  columns, // the column definitions, memoized by the parent component
+  data, // the current page of data to display, memoized by the parent component
+  pageCount, // total number of pages, calculated by the parent component based on the total row count and page size
+  pageIndex, // the current page index (0-based), controlled by the parent component
+  pageSize, // the number of rows per page, controlled by the parent component
+  onPaginationChange, // callback to update the pagination state in the parent component
+  sorting = [], // the current sorting state, controlled by the parent component
+  onSortingChange, // callback to update the sorting state in the parent component
+  columnFilters = [], // the current column filters state, controlled by the parent component
+  onColumnFiltersChange, // callback to update the column filters state in the parent component
   searchPlaceholder = "Search...",
-  searchValue = "",
-  onSearchChange,
-  filterConfig = [],
+  searchValue = "", // the current global search value, controlled by the parent component
+  onSearchChange, // callback to update the global search value in the parent component
+  filterConfig = [], // configuration for the filter dropdowns, memoized by the parent component
   isLoading = false,
   isError = false,
   errorTitle,
   errorDescription,
   onRetry,
   enableRowSelection = false,
-  rowSelection = {},
+  rowSelection = {}, // the current row selection state, controlled by the parent component
   onRowSelectionChange,
-  getRowId,
+  getRowId, // optional function to generate unique row IDs, useful when your data doesn't have a stable ID field
   onRowClick,
   emptyTitle = "No results found",
   emptyDescription = "Try adjusting your filters or search to find what you're looking for.",
-  toolbarActions,
+  toolbarActions, // optional additional actions to show in the toolbar, memoized by the parent component
   className,
 }: DataTableProps<TData>) {
   // The only local state — column visibility doesn't affect server queries
@@ -136,6 +136,7 @@ export function DataTable<TData>({
   const canGoToPreviousPage = !isLoading && pageIndex > 0;
   const canGoToNextPage = !isLoading && pageIndex < pageCount - 1 && pageCount > 0;
 
+  // adds a selection column to the left of the table when row selection is enabled
   const selectionColumn = React.useMemo<ColumnDef<TData>>(
     () => ({
       id: "__select",
@@ -164,11 +165,13 @@ export function DataTable<TData>({
     [],
   );
 
+  // when row selection is enabled, add the selection column to the beginning of the columns array
   const resolvedColumns = React.useMemo(
     () => (enableRowSelection ? [selectionColumn, ...columns] : columns),
     [columns, enableRowSelection, selectionColumn],
   );
 
+  // useReactTable manages the state and logic of the table, while we control the server interactions via the on*Change handlers
   const table = useReactTable({
     data,
     columns: resolvedColumns,
@@ -210,6 +213,7 @@ export function DataTable<TData>({
   const hasRows = table.getRowModel().rows.length > 0;
   const pageNumbers = getVisiblePageNumbers(pageIndex, pageCount);
 
+  // helper to get the current filter value for a column, used to set the value of the filter dropdowns
   function getFilterValue(columnId: string) {
     const filter = columnFilters.find((f) => f.id === columnId);
     return typeof filter?.value === "string" ? filter.value : "";
@@ -222,6 +226,7 @@ export function DataTable<TData>({
     onPaginationChange({ ...pagination, pageIndex: 0 });
   }
 
+  // when the search input changes, update the search state and reset to the first page
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange?.(e.target.value);
     onPaginationChange({ ...pagination, pageIndex: 0 });
