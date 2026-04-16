@@ -45,6 +45,7 @@ export function useCreatePerson() {
     mutationFn: (input: CreatePersonInput) => createPerson(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PEOPLE] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
       toast.success("Person created", {
         description: "The person has been added to your CRM.",
       });
@@ -59,6 +60,7 @@ export function useUpdatePerson(personId: string) {
     mutationFn: (input: UpdatePersonInput) => updatePerson(personId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PEOPLE] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
       toast.success("Person updated", {
         description: "The person has been updated.",
       });
@@ -73,6 +75,7 @@ export function useDeletePerson() {
     mutationFn: (personId: string) => deletePerson(personId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PEOPLE] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
       toast.success("Person deleted", {
         description: "The person has been removed from your CRM.",
       });
@@ -87,6 +90,7 @@ export function useBulkDeletePeople() {
     mutationFn: (input: BulkDeleteInput) => bulkDeletePeople(input),
     onSuccess: (deletedCount) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PEOPLE] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
       toast.success("People deleted", {
         description:
           deletedCount === 1
