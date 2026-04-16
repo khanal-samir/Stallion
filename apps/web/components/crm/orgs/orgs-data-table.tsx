@@ -156,6 +156,7 @@ export function OrgsDataTable() {
     <>
       <PageHeader
         title="Organizations"
+        description="Manage the companies you're tracking in your CRM."
         count={isLoading ? undefined : totalCount}
         actions={
           <Button size="sm" onClick={() => openDrawer("create")}>

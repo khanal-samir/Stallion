@@ -18,7 +18,7 @@ import {
 import { useDeals, useUpdateDeal } from "@/hooks/queries/use-deals";
 import type { Deal } from "@/types/crm";
 import type { DealStage } from "@workspace/validators/schemas/crm";
-import { DEAL_STAGE_OPTIONS, DEAL_STAGE_MAP } from "./deals-options";
+import { DEAL_STAGE_OPTIONS } from "./deals-options";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -66,9 +66,7 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
       {deal.value && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
           <DollarSign className="size-3 shrink-0" />
-          <span className="font-medium text-foreground">
-            {Number(deal.value).toLocaleString()}
-          </span>
+          <span className="font-medium text-foreground">{Number(deal.value).toLocaleString()}</span>
           <span>{deal.currency}</span>
         </div>
       )}
@@ -108,7 +106,7 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
 
 function DealCardGhost({ deal }: { deal: Deal }) {
   return (
-    <div className="bg-card border border-primary/40 rounded-lg p-3 shadow-xl rotate-1 w-[232px] opacity-95">
+    <div className="bg-card border border-primary/40 rounded-lg p-3 shadow-xl rotate-1 w-58 opacity-95">
       <p className="font-medium text-sm text-foreground line-clamp-2">{deal.title}</p>
       {deal.value && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
@@ -190,7 +188,7 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
             >
               <div className="h-4 bg-muted rounded w-20" />
             </div>
-            <div className="rounded-b-lg border border-t-0 p-2 min-h-[280px] bg-muted/10 flex flex-col gap-2">
+            <div className="rounded-b-lg border border-t-0 p-2 min-h-70 bg-muted/10 flex flex-col gap-2">
               {Array.from({ length: 2 }).map((_, i) => (
                 <div key={i} className="bg-card border rounded-lg p-3 space-y-2">
                   <div className="h-3.5 bg-muted rounded w-4/5" />
@@ -232,10 +230,7 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
           }, 0);
 
           return (
-            <KanbanColumn
-              key={stage.value}
-              value={stage.value}
-            >
+            <KanbanColumn key={stage.value} value={stage.value}>
               {/* Column header — not a drag handle (columns are fixed order) */}
               <div
                 className={cn(
@@ -270,17 +265,14 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
               <KanbanColumnContent
                 value={stage.value}
                 className={cn(
-                  "rounded-b-lg border border-t-0 p-2 flex flex-col gap-2 min-h-[280px]",
+                  "rounded-b-lg border border-t-0 p-2 flex flex-col gap-2 min-h-70",
                   "bg-muted/10",
                 )}
               >
                 {stageDeals.map((deal) => (
                   <KanbanItem key={deal.id} value={deal.id} className="rounded-lg">
                     <KanbanItemHandle className="block w-full">
-                      <DealCard
-                        deal={deal}
-                        onClick={() => openDrawer("view", deal)}
-                      />
+                      <DealCard deal={deal} onClick={() => openDrawer("view", deal)} />
                     </KanbanItemHandle>
                   </KanbanItem>
                 ))}
