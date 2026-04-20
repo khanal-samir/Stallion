@@ -3,7 +3,45 @@ import { jsonb, pgTable, text, timestamp, uuid, unique, varchar, index } from "d
 import { id, timestamps } from "./common.schema.js";
 import { user } from "./auth.schema.js";
 import { workspaces } from "./workspace.schema.js";
-import { peopleStatusEnum, peopleSourceEnum, dealStageEnum } from "./enums.schema.js";
+import {
+  crmCustomFieldEntityTypeEnum,
+  crmCustomFieldTypeEnum,
+  peopleStatusEnum,
+  peopleSourceEnum,
+  dealStageEnum,
+} from "./enums.schema.js";
+
+type CrmCustomFieldOption = {
+  id: string;
+  label: string;
+};
+
+export const crmCustomFieldDefinitions = pgTable(
+  "crm_custom_field_definitions",
+  {
+    ...id,
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    entityType: crmCustomFieldEntityTypeEnum("entity_type").notNull(),
+    fieldType: crmCustomFieldTypeEnum("field_type").notNull(),
+    label: varchar("label", { length: 255 }).notNull(),
+    options: jsonb("options").$type<CrmCustomFieldOption[]>().default([]).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    unique("crm_custom_field_definitions_workspace_entity_label_unique").on(
+      table.workspaceId,
+      table.entityType,
+      table.label,
+    ),
+    index("crm_custom_field_definitions_workspace_entity_idx").on(
+      table.workspaceId,
+      table.entityType,
+    ),
+    index("crm_custom_field_definitions_workspace_id_idx").on(table.workspaceId),
+  ],
+);
 
 export const orgs = pgTable(
   "orgs",
@@ -108,3 +146,13 @@ export const dealsRelations = relations(deals, ({ one }) => ({
   org: one(orgs, { fields: [deals.orgId], references: [orgs.id] }),
   owner: one(user, { fields: [deals.ownerId], references: [user.id] }),
 }));
+
+export const crmCustomFieldDefinitionsRelations = relations(
+  crmCustomFieldDefinitions,
+  ({ one }) => ({
+    workspace: one(workspaces, {
+      fields: [crmCustomFieldDefinitions.workspaceId],
+      references: [workspaces.id],
+    }),
+  }),
+);

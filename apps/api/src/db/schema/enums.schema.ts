@@ -29,3 +29,15 @@ export const dealStageEnum = pgEnum("deal_stage", [
   "won",
   "lost",
 ]);
+
+export const crmCustomFieldEntityTypeEnum = pgEnum("crm_custom_field_entity_type", [
+  "people",
+  "orgs",
+]);
+
+export const crmCustomFieldTypeEnum = pgEnum("crm_custom_field_type", [
+  "text",
+  "number",
+  "select",
+  "dateTime",
+]);

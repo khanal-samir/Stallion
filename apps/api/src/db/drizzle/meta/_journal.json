@@ -22,6 +22,13 @@
       "when": 1775817769397,
       "tag": "0002_smart_stepford_cuckoos",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776386663072,
+      "tag": "0004_fine_corsair",
+      "breakpoints": true
     }
   ]
 }
