@@ -55,6 +55,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { getColumnLabel, getVisiblePageNumbers } from "@/lib/data-table-utils";
 
 export interface DataTableFilterOption {
   label: string;
@@ -64,7 +65,6 @@ export interface DataTableFilterOption {
 export interface FilterConfig {
   columnId: string;
   label: string;
-  type?: "select" | "text" | "number" | "dateRange";
   options?: DataTableFilterOption[];
   allLabel?: string;
 }
@@ -101,43 +101,41 @@ export interface DataTableProps<TData> {
 }
 
 export function DataTable<TData>({
-  columns, // the column definitions, memoized by the parent component
-  data, // the current page of data to display, memoized by the parent component
-  pageCount, // total number of pages, calculated by the parent component based on the total row count and page size
-  pageIndex, // the current page index (0-based), controlled by the parent component
-  pageSize, // the number of rows per page, controlled by the parent component
-  onPaginationChange, // callback to update the pagination state in the parent component
-  sorting = [], // the current sorting state, controlled by the parent component
-  onSortingChange, // callback to update the sorting state in the parent component
-  columnFilters = [], // the current column filters state, controlled by the parent component
-  onColumnFiltersChange, // callback to update the column filters state in the parent component
+  columns,
+  data,
+  pageCount,
+  pageIndex,
+  pageSize,
+  onPaginationChange,
+  sorting = [],
+  onSortingChange,
+  columnFilters = [],
+  onColumnFiltersChange,
   searchPlaceholder = "Search...",
-  searchValue = "", // the current global search value, controlled by the parent component
-  onSearchChange, // callback to update the global search value in the parent component
-  filterConfig = [], // configuration for the filter dropdowns, memoized by the parent component
+  searchValue = "",
+  onSearchChange,
+  filterConfig = [],
   isLoading = false,
   isError = false,
   errorTitle,
   errorDescription,
   onRetry,
   enableRowSelection = false,
-  rowSelection = {}, // the current row selection state, controlled by the parent component
+  rowSelection = {},
   onRowSelectionChange,
-  getRowId, // optional function to generate unique row IDs, useful when your data doesn't have a stable ID field
+  getRowId,
   onRowClick,
   emptyTitle = "No results found",
   emptyDescription = "Try adjusting your filters or search to find what you're looking for.",
-  toolbarActions, // optional additional actions to show in the toolbar, memoized by the parent component
+  toolbarActions,
   className,
 }: DataTableProps<TData>) {
-  // The only local state — column visibility doesn't affect server queries
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const pagination = { pageIndex, pageSize };
   const currentPage = pageCount === 0 ? 0 : pageIndex + 1;
   const canGoToPreviousPage = !isLoading && pageIndex > 0;
   const canGoToNextPage = !isLoading && pageIndex < pageCount - 1 && pageCount > 0;
 
-  // adds a selection column to the left of the table when row selection is enabled
   const selectionColumn = React.useMemo<ColumnDef<TData>>(
     () => ({
       id: "__select",
@@ -166,13 +164,12 @@ export function DataTable<TData>({
     [],
   );
 
-  // when row selection is enabled, add the selection column to the beginning of the columns array
   const resolvedColumns = React.useMemo(
     () => (enableRowSelection ? [selectionColumn, ...columns] : columns),
     [columns, enableRowSelection, selectionColumn],
   );
 
-  // useReactTable manages the state and logic of the table, while we control the server interactions via the on*Change handlers
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns: resolvedColumns,
@@ -214,7 +211,6 @@ export function DataTable<TData>({
   const hasRows = table.getRowModel().rows.length > 0;
   const pageNumbers = getVisiblePageNumbers(pageIndex, pageCount);
 
-  // helper to get the current filter value for a column, used to set the value of the filter dropdowns
   function getFilterValue(columnId: string): unknown {
     const filter = columnFilters.find((f) => f.id === columnId);
     return filter?.value;
@@ -227,42 +223,9 @@ export function DataTable<TData>({
     onPaginationChange({ ...pagination, pageIndex: 0 });
   }
 
-  // when the search input changes, update the search state and reset to the first page
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange?.(e.target.value);
     onPaginationChange({ ...pagination, pageIndex: 0 });
-  }
-
-  function updateFilterValue(columnId: string, value: unknown) {
-    const next = columnFilters.filter((f) => f.id !== columnId);
-
-    const shouldClear =
-      value === undefined ||
-      value === null ||
-      (typeof value === "string" && value.trim() === "") ||
-      (typeof value === "object" &&
-        value !== null &&
-        "from" in value &&
-        "to" in value &&
-        !(value as { from?: string; to?: string }).from &&
-        !(value as { from?: string; to?: string }).to);
-
-    if (!shouldClear) {
-      next.push({ id: columnId, value });
-    }
-
-    onColumnFiltersChange?.(next);
-    onPaginationChange({ ...pagination, pageIndex: 0 });
-  }
-
-  function getDateRangeValue(columnId: string) {
-    const value = getFilterValue(columnId);
-    if (typeof value === "object" && value !== null && ("from" in value || "to" in value)) {
-      const range = value as { from?: string; to?: string };
-      return { from: range.from ?? "", to: range.to ?? "" };
-    }
-
-    return { from: "", to: "" };
   }
 
   function handleRowClick(row: Row<TData>, e: React.MouseEvent<HTMLTableRowElement>) {
@@ -296,89 +259,29 @@ export function DataTable<TData>({
             </div>
           )}
 
-          {filterConfig.map((filter) =>
-            filter.type === "text" ? (
-              <Input
-                key={filter.columnId}
-                value={
-                  typeof getFilterValue(filter.columnId) === "string"
-                    ? (getFilterValue(filter.columnId) as string)
-                    : ""
-                }
-                onChange={(event) => updateFilterValue(filter.columnId, event.target.value)}
-                placeholder={filter.allLabel ?? filter.label}
-                className="min-w-40"
-              />
-            ) : filter.type === "number" ? (
-              <Input
-                key={filter.columnId}
-                type="number"
-                step="any"
-                value={
-                  typeof getFilterValue(filter.columnId) === "string"
-                    ? (getFilterValue(filter.columnId) as string)
-                    : ""
-                }
-                onChange={(event) => updateFilterValue(filter.columnId, event.target.value)}
-                placeholder={filter.allLabel ?? filter.label}
-                className="min-w-32"
-              />
-            ) : filter.type === "dateRange" ? (
-              <div
-                key={filter.columnId}
-                className="flex items-center gap-2 rounded-md border bg-background px-2 py-1"
-              >
-                <span className="text-xs text-muted-foreground">{filter.label}</span>
-                <Input
-                  type="date"
-                  value={getDateRangeValue(filter.columnId).from}
-                  onChange={(event) => {
-                    const range = getDateRangeValue(filter.columnId);
-                    updateFilterValue(filter.columnId, {
-                      ...range,
-                      from: event.target.value,
-                    });
-                  }}
-                  className="h-8 w-36"
-                />
-                <span className="text-xs text-muted-foreground">to</span>
-                <Input
-                  type="date"
-                  value={getDateRangeValue(filter.columnId).to}
-                  onChange={(event) => {
-                    const range = getDateRangeValue(filter.columnId);
-                    updateFilterValue(filter.columnId, {
-                      ...range,
-                      to: event.target.value,
-                    });
-                  }}
-                  className="h-8 w-36"
-                />
-              </div>
-            ) : (
-              <Select
-                key={filter.columnId}
-                value={
-                  typeof getFilterValue(filter.columnId) === "string"
-                    ? (getFilterValue(filter.columnId) as string) || "__all"
-                    : "__all"
-                }
-                onValueChange={(value) => updateFilter(filter.columnId, value)}
-              >
-                <SelectTrigger className="min-w-35">
-                  <SelectValue placeholder={filter.label} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all">{filter.allLabel ?? `All ${filter.label}`}</SelectItem>
-                  {(filter.options ?? []).map((option) => (
-                    <SelectItem key={`${filter.columnId}-${option.value}`} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ),
-          )}
+          {filterConfig.map((filter) => (
+            <Select
+              key={filter.columnId}
+              value={
+                typeof getFilterValue(filter.columnId) === "string"
+                  ? (getFilterValue(filter.columnId) as string) || "__all"
+                  : "__all"
+              }
+              onValueChange={(value) => updateFilter(filter.columnId, value)}
+            >
+              <SelectTrigger className="min-w-35">
+                <SelectValue placeholder={filter.label} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">{filter.allLabel ?? `All ${filter.label}`}</SelectItem>
+                {(filter.options ?? []).map((option) => (
+                  <SelectItem key={`${filter.columnId}-${option.value}`} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ))}
 
           {selectedCount > 0 && (
             <span className="text-sm text-muted-foreground">
@@ -589,41 +492,4 @@ export function DataTable<TData>({
       </div>
     </div>
   );
-}
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function formatColumnLabel(id: string) {
-  return id
-    .replace(/^_+/, "")
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[-_]/g, " ")
-    .trim();
-}
-
-function getColumnLabel(id: string, header: unknown) {
-  if (typeof header === "string") {
-    return header;
-  }
-
-  return formatColumnLabel(id);
-}
-
-function getVisiblePageNumbers(pageIndex: number, pageCount: number): Array<number | "ellipsis"> {
-  if (pageCount <= 0) return [];
-  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, i) => i + 1);
-
-  const current = pageIndex + 1;
-  const pages: Array<number | "ellipsis"> = [1];
-
-  if (current > 3) pages.push("ellipsis");
-
-  const start = Math.max(2, current - 1);
-  const end = Math.min(pageCount - 1, current + 1);
-  for (let p = start; p <= end; p++) pages.push(p);
-
-  if (current < pageCount - 2) pages.push("ellipsis");
-
-  pages.push(pageCount);
-  return pages;
 }
