@@ -37,7 +37,6 @@ export interface MembersSettingsProps {
 export interface InvitationsSettingsProps {
   invitations: WorkspaceInvitation[];
   organizationId: string;
-  currentUserRole?: WorkspaceRole;
 }
 
 export interface GeneralSettingsProps {

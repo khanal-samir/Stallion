@@ -79,12 +79,7 @@ export async function listDeals(c: Context, query: ListDealsQuery) {
   return sendSuccess(
     c,
     {
-      deals: results.map((deal) => ({
-        ...deal,
-        orgName: deal.orgName ?? null,
-        personName: deal.personName ?? null,
-        ownerName: deal.ownerName ?? null,
-      })),
+      deals: results,
       meta: {
         page,
         pageSize,

@@ -64,7 +64,8 @@ export interface DataTableFilterOption {
 export interface FilterConfig {
   columnId: string;
   label: string;
-  options: DataTableFilterOption[];
+  type?: "select" | "text" | "number" | "dateRange";
+  options?: DataTableFilterOption[];
   allLabel?: string;
 }
 
@@ -214,9 +215,9 @@ export function DataTable<TData>({
   const pageNumbers = getVisiblePageNumbers(pageIndex, pageCount);
 
   // helper to get the current filter value for a column, used to set the value of the filter dropdowns
-  function getFilterValue(columnId: string) {
+  function getFilterValue(columnId: string): unknown {
     const filter = columnFilters.find((f) => f.id === columnId);
-    return typeof filter?.value === "string" ? filter.value : "";
+    return filter?.value;
   }
 
   function updateFilter(columnId: string, value: string) {
@@ -230,6 +231,38 @@ export function DataTable<TData>({
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange?.(e.target.value);
     onPaginationChange({ ...pagination, pageIndex: 0 });
+  }
+
+  function updateFilterValue(columnId: string, value: unknown) {
+    const next = columnFilters.filter((f) => f.id !== columnId);
+
+    const shouldClear =
+      value === undefined ||
+      value === null ||
+      (typeof value === "string" && value.trim() === "") ||
+      (typeof value === "object" &&
+        value !== null &&
+        "from" in value &&
+        "to" in value &&
+        !(value as { from?: string; to?: string }).from &&
+        !(value as { from?: string; to?: string }).to);
+
+    if (!shouldClear) {
+      next.push({ id: columnId, value });
+    }
+
+    onColumnFiltersChange?.(next);
+    onPaginationChange({ ...pagination, pageIndex: 0 });
+  }
+
+  function getDateRangeValue(columnId: string) {
+    const value = getFilterValue(columnId);
+    if (typeof value === "object" && value !== null && ("from" in value || "to" in value)) {
+      const range = value as { from?: string; to?: string };
+      return { from: range.from ?? "", to: range.to ?? "" };
+    }
+
+    return { from: "", to: "" };
   }
 
   function handleRowClick(row: Row<TData>, e: React.MouseEvent<HTMLTableRowElement>) {
@@ -263,25 +296,89 @@ export function DataTable<TData>({
             </div>
           )}
 
-          {filterConfig.map((filter) => (
-            <Select
-              key={filter.columnId}
-              value={getFilterValue(filter.columnId) || "__all"}
-              onValueChange={(value) => updateFilter(filter.columnId, value)}
-            >
-              <SelectTrigger className="min-w-35">
-                <SelectValue placeholder={filter.label} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all">{filter.allLabel ?? `All ${filter.label}`}</SelectItem>
-                {filter.options.map((option) => (
-                  <SelectItem key={`${filter.columnId}-${option.value}`} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ))}
+          {filterConfig.map((filter) =>
+            filter.type === "text" ? (
+              <Input
+                key={filter.columnId}
+                value={
+                  typeof getFilterValue(filter.columnId) === "string"
+                    ? (getFilterValue(filter.columnId) as string)
+                    : ""
+                }
+                onChange={(event) => updateFilterValue(filter.columnId, event.target.value)}
+                placeholder={filter.allLabel ?? filter.label}
+                className="min-w-40"
+              />
+            ) : filter.type === "number" ? (
+              <Input
+                key={filter.columnId}
+                type="number"
+                step="any"
+                value={
+                  typeof getFilterValue(filter.columnId) === "string"
+                    ? (getFilterValue(filter.columnId) as string)
+                    : ""
+                }
+                onChange={(event) => updateFilterValue(filter.columnId, event.target.value)}
+                placeholder={filter.allLabel ?? filter.label}
+                className="min-w-32"
+              />
+            ) : filter.type === "dateRange" ? (
+              <div
+                key={filter.columnId}
+                className="flex items-center gap-2 rounded-md border bg-background px-2 py-1"
+              >
+                <span className="text-xs text-muted-foreground">{filter.label}</span>
+                <Input
+                  type="date"
+                  value={getDateRangeValue(filter.columnId).from}
+                  onChange={(event) => {
+                    const range = getDateRangeValue(filter.columnId);
+                    updateFilterValue(filter.columnId, {
+                      ...range,
+                      from: event.target.value,
+                    });
+                  }}
+                  className="h-8 w-36"
+                />
+                <span className="text-xs text-muted-foreground">to</span>
+                <Input
+                  type="date"
+                  value={getDateRangeValue(filter.columnId).to}
+                  onChange={(event) => {
+                    const range = getDateRangeValue(filter.columnId);
+                    updateFilterValue(filter.columnId, {
+                      ...range,
+                      to: event.target.value,
+                    });
+                  }}
+                  className="h-8 w-36"
+                />
+              </div>
+            ) : (
+              <Select
+                key={filter.columnId}
+                value={
+                  typeof getFilterValue(filter.columnId) === "string"
+                    ? (getFilterValue(filter.columnId) as string) || "__all"
+                    : "__all"
+                }
+                onValueChange={(value) => updateFilter(filter.columnId, value)}
+              >
+                <SelectTrigger className="min-w-35">
+                  <SelectValue placeholder={filter.label} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all">{filter.allLabel ?? `All ${filter.label}`}</SelectItem>
+                  {(filter.options ?? []).map((option) => (
+                    <SelectItem key={`${filter.columnId}-${option.value}`} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ),
+          )}
 
           {selectedCount > 0 && (
             <span className="text-sm text-muted-foreground">
@@ -312,7 +409,7 @@ export function DataTable<TData>({
                     onSelect={(e) => e.preventDefault()}
                     className="capitalize"
                   >
-                    {formatColumnLabel(col.id)}
+                    {getColumnLabel(col.id, col.columnDef.header)}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
@@ -502,6 +599,14 @@ function formatColumnLabel(id: string) {
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
     .replace(/[-_]/g, " ")
     .trim();
+}
+
+function getColumnLabel(id: string, header: unknown) {
+  if (typeof header === "string") {
+    return header;
+  }
+
+  return formatColumnLabel(id);
 }
 
 function getVisiblePageNumbers(pageIndex: number, pageCount: number): Array<number | "ellipsis"> {

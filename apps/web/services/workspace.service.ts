@@ -34,6 +34,31 @@ export async function getFullWorkspace(
   return data;
 }
 
+export async function listWorkspaceMembers(
+  opts: { organizationId?: string; limit?: number; offset?: number } = {},
+) {
+  const { data, error } = await authClient.organization.listMembers({
+    query: opts,
+  });
+  if (error) throw toBetterAuthError(error, "Failed to fetch members");
+  // Normalize: Better Auth may return { members: [...] } or [...] directly
+  const members = Array.isArray(data)
+    ? data
+    : ((data as { members?: unknown[] } | null)?.members ?? []);
+  return members;
+}
+
+export async function listWorkspaceInvitations(opts: { organizationId?: string } = {}) {
+  const { data, error } = await authClient.organization.listInvitations({
+    query: opts,
+  });
+  if (error) throw toBetterAuthError(error, "Failed to fetch invitations");
+  const invitations = Array.isArray(data)
+    ? data
+    : ((data as { invitations?: unknown[] } | null)?.invitations ?? []);
+  return invitations;
+}
+
 export async function updateWorkspace(organizationId: string, input: UpdateWorkspace) {
   const { data, error } = await authClient.organization.update({
     organizationId,

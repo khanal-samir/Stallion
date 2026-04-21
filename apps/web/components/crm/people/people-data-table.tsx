@@ -11,9 +11,10 @@ import { getPeopleColumns } from "./people-columns";
 import { PEOPLE_FILTER_CONFIG } from "./people-filters";
 import { PeopleDrawer } from "./people-drawer";
 import { usePeople, useDeletePerson, useBulkDeletePeople } from "@/hooks/queries/use-people";
+import { usePeopleCustomFields } from "@/hooks/queries/use-crm-custom-fields";
 import { useDebounceValue } from "usehooks-ts";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
-import type { Person, PeopleListParams } from "@/types/crm";
+import type { CustomFieldDefinition, Person, PeopleListParams } from "@/types/crm";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -65,12 +66,32 @@ export function PeopleDataTable() {
     | string
     | undefined;
 
+  const { data: customFieldsData } = usePeopleCustomFields();
+  const customFields = (customFieldsData ?? []) as CustomFieldDefinition[];
+  const nativeSortableColumns = new Set<PeopleListParams["sortBy"]>([
+    "name",
+    "email",
+    "phone",
+    "jobTitle",
+    "status",
+    "source",
+    "lastContactedAt",
+    "createdAt",
+    "updatedAt",
+  ]);
+
+  const activeSort = table.sorting[0];
+  const sortBy =
+    activeSort && nativeSortableColumns.has(activeSort.id as PeopleListParams["sortBy"])
+      ? (activeSort.id as PeopleListParams["sortBy"])
+      : undefined;
+
   const queryParams: PeopleListParams = {
     page: table.pagination.pageIndex + 1,
     pageSize: table.pagination.pageSize,
-    ...(table.sorting[0] && {
-      sortBy: table.sorting[0].id as PeopleListParams["sortBy"],
-      sortOrder: table.sorting[0].desc ? "desc" : "asc",
+    ...(sortBy && {
+      sortBy,
+      sortOrder: activeSort?.desc ? "desc" : "asc",
     }),
     ...(debouncedSearch.trim() && { search: debouncedSearch.trim() }),
     ...(statusFilter && { status: statusFilter as PeopleListParams["status"] }),
@@ -115,6 +136,7 @@ export function PeopleDataTable() {
     onView: (person) => openDrawer("view", person),
     onEdit: (person) => openDrawer("edit", person),
     onDelete: (person) => setUi((current) => ({ ...current, deleteTarget: person })),
+    customFields,
   });
 
   // ─── Delete ──────────────────────────────────────────────────────────────────
@@ -228,6 +250,7 @@ export function PeopleDataTable() {
           setUi((current) => ({ ...current, drawer: { ...current.drawer, mode } }))
         }
         person={ui.drawer.person}
+        customFields={customFields}
       />
 
       <ConfirmDialog

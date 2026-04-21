@@ -25,8 +25,13 @@ import { Separator } from "@workspace/ui/components/ui/separator";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
 import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreateOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/queries/use-orgs";
-import type { Organization } from "@/types/crm";
+import type { CustomFieldDefinition, Organization } from "@/types/crm";
 import { ORG_INDUSTRY_OPTIONS, ORG_SIZE_OPTIONS } from "@/components/crm/crm-options";
+import {
+  buildCustomFieldsPayload,
+  formatCustomFieldValueForView,
+  toDateTimeInputValue,
+} from "@/lib/crm-custom-fields";
 
 function capitalize(str: string | null | undefined): string | null | undefined {
   if (!str) return str;
@@ -43,7 +48,13 @@ function OrgAvatar() {
   );
 }
 
-function ViewContent({ org }: { org: Organization }) {
+function ViewContent({
+  org,
+  customFields,
+}: {
+  org: Organization;
+  customFields: CustomFieldDefinition[];
+}) {
   return (
     <div className="space-y-6">
       {/* Identity */}
@@ -59,15 +70,28 @@ function ViewContent({ org }: { org: Organization }) {
 
       <CrmViewSection title="Details">
         <CrmViewField label="Industry">
-          {capitalize(org.industry) ?? <span className="text-muted-foreground/50">—</span>}
+          {capitalize(org.industry) ?? <span className="text-muted-foreground/50">Not set</span>}
         </CrmViewField>
         <CrmViewField label="Company Size">
-          {org.size ?? <span className="text-muted-foreground/50">—</span>}
+          {org.size ?? <span className="text-muted-foreground/50">Not set</span>}
         </CrmViewField>
         <CrmViewField label="Location">
-          {org.location ?? <span className="text-muted-foreground/50">—</span>}
+          {org.location ?? <span className="text-muted-foreground/50">Not set</span>}
         </CrmViewField>
       </CrmViewSection>
+
+      {customFields.length > 0 && (
+        <>
+          <Separator />
+          <CrmViewSection title="Custom fields">
+            {customFields.map((field) => (
+              <CrmViewField key={field.id} label={field.label}>
+                {formatCustomFieldValueForView(field, org.customFields?.[field.id])}
+              </CrmViewField>
+            ))}
+          </CrmViewSection>
+        </>
+      )}
 
       {org.peopleCount !== undefined && (
         <>
@@ -86,9 +110,11 @@ function ViewContent({ org }: { org: Organization }) {
 function OrgForm({
   form,
   isPending,
+  customFields,
 }: {
   form: ReturnType<typeof useForm<CreateOrg>>;
   isPending: boolean;
+  customFields: CustomFieldDefinition[];
 }) {
   return (
     <Form {...form}>
@@ -212,6 +238,80 @@ function OrgForm({
             </FormItem>
           )}
         />
+
+        {customFields.length > 0 && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                Custom fields
+              </p>
+
+              {customFields.map((customField) => {
+                const fieldName = `customFields.${customField.id}` as const;
+
+                return (
+                  <FormField
+                    key={customField.id}
+                    control={form.control}
+                    name={fieldName}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{customField.label}</FormLabel>
+                        <FormControl>
+                          {customField.fieldType === "select" ? (
+                            <Select
+                              value={typeof field.value === "string" ? field.value : "__none"}
+                              onValueChange={(value) =>
+                                field.onChange(value === "__none" ? undefined : value)
+                              }
+                              disabled={isPending}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Not set" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="__none">Not set</SelectItem>
+                                {customField.options.map((option) => (
+                                  <SelectItem key={option.id} value={option.id}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : customField.fieldType === "number" ? (
+                            <Input
+                              type="number"
+                              step="any"
+                              value={field.value == null ? "" : String(field.value)}
+                              onChange={(event) => field.onChange(event.target.value)}
+                              disabled={isPending}
+                            />
+                          ) : customField.fieldType === "dateTime" ? (
+                            <Input
+                              type="datetime-local"
+                              value={toDateTimeInputValue(field.value)}
+                              onChange={(event) => field.onChange(event.target.value || undefined)}
+                              disabled={isPending}
+                            />
+                          ) : (
+                            <Input
+                              maxLength={255}
+                              value={typeof field.value === "string" ? field.value : ""}
+                              onChange={(event) => field.onChange(event.target.value)}
+                              disabled={isPending}
+                            />
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </Form>
   );
@@ -225,9 +325,17 @@ interface OrgDrawerProps {
   mode: EntitySheetMode;
   onModeChange: (mode: EntitySheetMode) => void;
   org?: Organization;
+  customFields?: CustomFieldDefinition[];
 }
 
-export function OrgDrawer({ open, onOpenChange, mode, onModeChange, org }: OrgDrawerProps) {
+export function OrgDrawer({
+  open,
+  onOpenChange,
+  mode,
+  onModeChange,
+  org,
+  customFields = [],
+}: OrgDrawerProps) {
   const { mutate: createOrgMutate, isPending: isCreating } = useCreateOrg();
   const { mutate: updateOrgMutate, isPending: isUpdating } = useUpdateOrg(org?.id ?? "");
   const { mutate: deleteOrgMutate, isPending: isDeleting } = useDeleteOrg();
@@ -241,6 +349,7 @@ export function OrgDrawer({ open, onOpenChange, mode, onModeChange, org }: OrgDr
       industry: mode === "create" ? "" : (org?.industry ?? ""),
       size: mode === "create" ? "" : (org?.size ?? ""),
       location: mode === "create" ? "" : (org?.location ?? ""),
+      customFields: mode === "create" ? undefined : (org?.customFields ?? undefined),
     }),
     [mode, org],
   );
@@ -258,6 +367,10 @@ export function OrgDrawer({ open, onOpenChange, mode, onModeChange, org }: OrgDr
       industry: values.industry || undefined,
       size: values.size || undefined,
       location: values.location || undefined,
+      customFields: buildCustomFieldsPayload(
+        customFields,
+        (values.customFields ?? {}) as Record<string, unknown>,
+      ),
     };
 
     if (mode === "create") {
@@ -300,9 +413,9 @@ export function OrgDrawer({ open, onOpenChange, mode, onModeChange, org }: OrgDr
       deleteLabel={isDeleting ? "Deleting…" : "Delete"}
     >
       {mode === "view" && org ? (
-        <ViewContent org={org} />
+        <ViewContent org={org} customFields={customFields} />
       ) : (
-        <OrgForm form={form} isPending={isPending} />
+        <OrgForm form={form} isPending={isPending} customFields={customFields} />
       )}
     </EntitySheet>
   );

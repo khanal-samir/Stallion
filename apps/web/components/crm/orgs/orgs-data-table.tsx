@@ -10,9 +10,10 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { getOrgsColumns } from "./orgs-columns";
 import { ORGS_FILTER_CONFIG } from "./orgs-filters";
 import { OrgDrawer } from "./orgs-drawer";
+import { useOrgCustomFields } from "@/hooks/queries/use-crm-custom-fields";
 import { useBulkDeleteOrgs, useDeleteOrg, useOrganizations } from "@/hooks/queries/use-orgs";
 import { useDebounceValue } from "usehooks-ts";
-import type { Organization, OrganizationsListParams } from "@/types/crm";
+import type { CustomFieldDefinition, Organization, OrganizationsListParams } from "@/types/crm";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
 
 type DrawerState = {
@@ -56,13 +57,31 @@ export function OrgsDataTable() {
     | undefined;
   const sizeFilter = table.columnFilters.find((f) => f.id === "size")?.value as string | undefined;
 
+  const { data: customFieldsData } = useOrgCustomFields();
+  const customFields = (customFieldsData ?? []) as CustomFieldDefinition[];
+  const nativeSortableColumns = new Set<OrganizationsListParams["sortBy"]>([
+    "name",
+    "domain",
+    "industry",
+    "size",
+    "location",
+    "createdAt",
+    "updatedAt",
+  ]);
+
+  const activeSort = table.sorting[0];
+  const sortBy =
+    activeSort && nativeSortableColumns.has(activeSort.id as OrganizationsListParams["sortBy"])
+      ? (activeSort.id as OrganizationsListParams["sortBy"])
+      : undefined;
+
   // Build server query params
   const queryParams: OrganizationsListParams = {
     page: table.pagination.pageIndex + 1,
     pageSize: table.pagination.pageSize,
-    ...(table.sorting[0] && {
-      sortBy: table.sorting[0].id as OrganizationsListParams["sortBy"],
-      sortOrder: table.sorting[0].desc ? "desc" : "asc",
+    ...(sortBy && {
+      sortBy,
+      sortOrder: activeSort?.desc ? "desc" : "asc",
     }),
     ...(debouncedSearch.trim() && { search: debouncedSearch.trim() }),
     ...(industryFilter && { industry: industryFilter }),
@@ -97,6 +116,7 @@ export function OrgsDataTable() {
     onView: (org) => openDrawer("view", org),
     onEdit: (org) => openDrawer("edit", org),
     onDelete: (org) => setUi((current) => ({ ...current, deleteTarget: org })),
+    customFields,
   });
 
   // Handlers
@@ -206,6 +226,7 @@ export function OrgsDataTable() {
           setUi((current) => ({ ...current, drawer: { ...current.drawer, mode } }))
         }
         org={ui.drawer.org}
+        customFields={customFields}
       />
 
       <ConfirmDialog

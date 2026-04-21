@@ -1,4 +1,13 @@
-import { Building2, Kanban, LayoutDashboard, Mail, Settings, Settings2, Users } from "lucide-react";
+import {
+  Building2,
+  Kanban,
+  LayoutDashboard,
+  Mail,
+  Settings,
+  Settings2,
+  Users,
+  FormInput,
+} from "lucide-react";
 
 export const MAIN_NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -13,6 +22,7 @@ export const WORKSPACE_NAV_ITEMS = [
 
 export const SETTINGS_NAV_ITEMS = [
   { id: "general", label: "General", icon: Settings2 },
+  { id: "custom-fields", label: "Custom fields", icon: FormInput },
   { id: "members", label: "Members", icon: Users },
   { id: "invitations", label: "Invitations", icon: Mail },
 ] as const;
