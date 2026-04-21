@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import type { ColumnFiltersState, RowSelectionState, SortingState } from "@tanstack/react-table";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
@@ -12,59 +10,18 @@ import { PEOPLE_FILTER_CONFIG } from "./people-filters";
 import { PeopleDrawer } from "./people-drawer";
 import { usePeople, useDeletePerson, useBulkDeletePeople } from "@/hooks/queries/use-people";
 import { usePeopleCustomFields } from "@/hooks/queries/use-crm-custom-fields";
-import { useDebounceValue } from "usehooks-ts";
-import type { EntitySheetMode } from "@/components/shared/entity-sheet";
+import { useDataTableState } from "@/hooks/use-data-table-state";
+import { useEntityDrawer } from "@/hooks/use-entity-drawer";
+import { useEntityDelete } from "@/hooks/use-entity-delete";
 import type { CustomFieldDefinition, Person, PeopleListParams } from "@/types/crm";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type DrawerState = {
-  open: boolean;
-  mode: EntitySheetMode;
-  person?: Person;
-};
-
-// A Person = single delete, "bulk" = bulk delete
-type DeleteTarget = Person | "bulk" | null;
-
-type PeopleTableState = {
-  pagination: { pageIndex: number; pageSize: number };
-  sorting: SortingState;
-  columnFilters: ColumnFiltersState;
-  rowSelection: RowSelectionState;
-  searchInput: string;
-};
-
-type PeopleUiState = {
-  drawer: DrawerState;
-  deleteTarget: DeleteTarget;
-};
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function PeopleDataTable() {
-  const [table, setTable] = useState<PeopleTableState>({
-    pagination: { pageIndex: 0, pageSize: 25 },
-    sorting: [],
-    columnFilters: [],
-    rowSelection: {},
-    searchInput: "",
-  });
-  const [ui, setUi] = useState<PeopleUiState>({
-    drawer: { open: false, mode: "view" },
-    deleteTarget: null,
-  });
+  const table = useDataTableState({ defaultPageSize: 25, debounceMs: 350 });
+  const drawer = useEntityDrawer<Person>();
+  const deleteDialog = useEntityDelete<Person>({ enableBulkDelete: true });
 
-  // Debounce search to avoid a query on every keystroke
-  const [debouncedSearch] = useDebounceValue(table.searchInput, 350);
-
-  // Extract individual filter values from the TanStack ColumnFiltersState
-  const statusFilter = table.columnFilters.find((f) => f.id === "status")?.value as
-    | string
-    | undefined;
-  const sourceFilter = table.columnFilters.find((f) => f.id === "source")?.value as
-    | string
-    | undefined;
+  const statusFilter = table.getFilterValue("status") as string | undefined;
+  const sourceFilter = table.getFilterValue("source") as string | undefined;
 
   const { data: customFieldsData } = usePeopleCustomFields();
   const customFields = (customFieldsData ?? []) as CustomFieldDefinition[];
@@ -93,68 +50,45 @@ export function PeopleDataTable() {
       sortBy,
       sortOrder: activeSort?.desc ? "desc" : "asc",
     }),
-    ...(debouncedSearch.trim() && { search: debouncedSearch.trim() }),
+    ...(table.debouncedSearch.trim() && { search: table.debouncedSearch.trim() }),
     ...(statusFilter && { status: statusFilter as PeopleListParams["status"] }),
     ...(sourceFilter && { source: sourceFilter as PeopleListParams["source"] }),
   };
 
-  // Data
   const { data, isLoading, isError, refetch } = usePeople(queryParams);
   const people = data?.people ?? [];
   const totalCount = data?.meta.totalCount ?? 0;
   const pageCount = data?.meta.totalPages ?? 0;
 
-  // Mutations
   const { mutate: deletePerson, isPending: isDeleting } = useDeletePerson();
   const { mutate: bulkDelete, isPending: isBulkDeleting } = useBulkDeletePeople();
 
-  // Selected row IDs (row keys come from getRowId which returns person.id)
   const selectedIds = Object.entries(table.rowSelection)
     .filter(([, value]) => value)
     .map(([id]) => id);
   const selectedCount = selectedIds.length;
 
-  function updateTable(next: Partial<PeopleTableState>) {
-    setTable((current) => ({ ...current, ...next }));
-  }
-
-  function openDrawer(mode: EntitySheetMode, person?: Person) {
-    setUi((current) => ({
-      ...current,
-      drawer: { open: true, mode, person },
-    }));
-  }
-
-  function closeDrawer() {
-    setUi((current) => ({
-      ...current,
-      drawer: { ...current.drawer, open: false },
-    }));
-  }
-
   const columns = getPeopleColumns({
-    onView: (person) => openDrawer("view", person),
-    onEdit: (person) => openDrawer("edit", person),
-    onDelete: (person) => setUi((current) => ({ ...current, deleteTarget: person })),
+    onView: (person) => drawer.openDrawer("view", person),
+    onEdit: (person) => drawer.openDrawer("edit", person),
+    onDelete: (person) => deleteDialog.openDelete(person),
     customFields,
   });
 
-  // ─── Delete ──────────────────────────────────────────────────────────────────
-
   function handleDeleteConfirm() {
-    if (ui.deleteTarget === "bulk") {
+    if (deleteDialog.isBulkDelete) {
       bulkDelete(
         { ids: selectedIds },
         {
           onSuccess: () => {
-            setTable((current) => ({ ...current, rowSelection: {} }));
-            setUi((current) => ({ ...current, deleteTarget: null }));
+            table.resetRowSelection();
+            deleteDialog.closeDelete();
           },
         },
       );
-    } else if (ui.deleteTarget) {
-      deletePerson(ui.deleteTarget.id, {
-        onSuccess: () => setUi((current) => ({ ...current, deleteTarget: null })),
+    } else if (deleteDialog.deleteTarget && deleteDialog.deleteTarget !== "bulk") {
+      deletePerson(deleteDialog.deleteTarget.id, {
+        onSuccess: () => deleteDialog.closeDelete(),
       });
     }
   }
@@ -162,21 +96,19 @@ export function PeopleDataTable() {
   const isDeletePending = isDeleting || isBulkDeleting;
 
   const confirmDialogCopy =
-    ui.deleteTarget === "bulk"
+    deleteDialog.deleteTarget && deleteDialog.deleteTarget !== "bulk"
       ? {
-          title: `Delete ${selectedCount} ${selectedCount === 1 ? "person" : "people"}?`,
-          description: `This will permanently remove ${
-            selectedCount === 1 ? "this person" : `these ${selectedCount} people`
-          } from your CRM. This action cannot be undone.`,
+          title: `Delete "${deleteDialog.deleteTarget.name}"?`,
+          description: `This will permanently remove ${deleteDialog.deleteTarget.name} from your CRM. This action cannot be undone.`,
         }
-      : ui.deleteTarget
+      : deleteDialog.isBulkDelete
         ? {
-            title: `Delete "${ui.deleteTarget.name}"?`,
-            description: `This will permanently remove ${ui.deleteTarget.name} from your CRM. This action cannot be undone.`,
+            title: `Delete ${selectedCount} ${selectedCount === 1 ? "person" : "people"}?`,
+            description: `This will permanently remove ${
+              selectedCount === 1 ? "this person" : `these ${selectedCount} people`
+            } from your CRM. This action cannot be undone.`,
           }
         : { title: "", description: "" };
-
-  // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div>
@@ -185,7 +117,7 @@ export function PeopleDataTable() {
         count={isLoading ? undefined : totalCount}
         description="Manage your contacts, leads, and customers."
         actions={
-          <Button size="sm" onClick={() => openDrawer("create")}>
+          <Button size="sm" onClick={() => drawer.openDrawer("create")}>
             <Plus className="size-3.5" />
             Add Person
           </Button>
@@ -198,19 +130,13 @@ export function PeopleDataTable() {
         pageCount={pageCount}
         pageIndex={table.pagination.pageIndex}
         pageSize={table.pagination.pageSize}
-        onPaginationChange={(pagination) => updateTable({ pagination })}
+        onPaginationChange={table.onPaginationChange}
         sorting={table.sorting}
-        onSortingChange={(next) => {
-          setTable((current) => ({
-            ...current,
-            sorting: next,
-            pagination: { ...current.pagination, pageIndex: 0 },
-          }));
-        }}
+        onSortingChange={table.onSortingChange}
         columnFilters={table.columnFilters}
-        onColumnFiltersChange={(columnFilters) => updateTable({ columnFilters })}
+        onColumnFiltersChange={table.onColumnFiltersChange}
         searchValue={table.searchInput}
-        onSearchChange={(searchInput) => updateTable({ searchInput })}
+        onSearchChange={table.onSearchChange}
         searchPlaceholder="Search people…"
         filterConfig={PEOPLE_FILTER_CONFIG}
         isLoading={isLoading}
@@ -220,9 +146,9 @@ export function PeopleDataTable() {
         onRetry={refetch}
         enableRowSelection
         rowSelection={table.rowSelection}
-        onRowSelectionChange={(rowSelection) => updateTable({ rowSelection })}
+        onRowSelectionChange={table.onRowSelectionChange}
         getRowId={(row) => row.id}
-        onRowClick={(person) => openDrawer("view", person)}
+        onRowClick={(person) => drawer.openDrawer("view", person)}
         emptyTitle="No people yet"
         emptyDescription="Add your first contact to get started."
         toolbarActions={
@@ -230,7 +156,7 @@ export function PeopleDataTable() {
             <Button
               variant="destructive"
               size="sm"
-              onClick={() => setUi((current) => ({ ...current, deleteTarget: "bulk" }))}
+              onClick={deleteDialog.openBulkDelete}
               disabled={isDeletePending}
             >
               <Trash2 className="size-3.5" />
@@ -241,22 +167,18 @@ export function PeopleDataTable() {
       />
 
       <PeopleDrawer
-        open={ui.drawer.open}
-        onOpenChange={(open) => {
-          if (!open) closeDrawer();
-        }}
-        mode={ui.drawer.mode}
-        onModeChange={(mode) =>
-          setUi((current) => ({ ...current, drawer: { ...current.drawer, mode } }))
-        }
-        person={ui.drawer.person}
+        open={drawer.drawer.open}
+        onOpenChange={drawer.onDrawerOpenChange}
+        mode={drawer.drawer.mode}
+        onModeChange={drawer.onDrawerModeChange}
+        person={drawer.drawer.entity}
         customFields={customFields}
       />
 
       <ConfirmDialog
-        open={ui.deleteTarget !== null}
+        open={deleteDialog.deleteTarget !== null}
         onOpenChange={(open) => {
-          if (!open) setUi((current) => ({ ...current, deleteTarget: null }));
+          if (!open) deleteDialog.closeDelete();
         }}
         title={confirmDialogCopy.title}
         description={confirmDialogCopy.description}

@@ -25,19 +25,9 @@ import { LoadingState } from "@/components/shared/loading-state";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface DrawerState {
-  open: boolean;
-  mode: EntitySheetMode;
-  deal?: Deal;
-  initialStage?: string;
-}
-
 interface DealsKanbanProps {
-  drawerState: DrawerState;
-  onDrawerStateChange: (state: DrawerState) => void;
+  onOpenDrawer: (mode: EntitySheetMode, deal?: Deal, initialStage?: string) => void;
 }
-
-// ─── Deal Card ────────────────────────────────────────────────────────────────
 
 function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
   return (
@@ -116,7 +106,7 @@ function DealCardGhost({ deal }: { deal: Deal }) {
   );
 }
 
-export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
+export function DealsKanban({ onOpenDrawer }: DealsKanbanProps) {
   const { data, isLoading, isError } = useDeals({ pageSize: 100 });
   const { mutate: updateDeal } = useUpdateDeal();
 
@@ -161,10 +151,6 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
 
     const newStage = overContainer as DealStage;
     updateDeal({ dealId: movedDeal.id, input: { stage: newStage } });
-  }
-
-  function openDrawer(mode: EntitySheetMode, deal?: Deal, initialStage?: string) {
-    onDrawerStateChange({ open: true, mode, deal, initialStage });
   }
 
   if (isLoading) {
@@ -231,7 +217,7 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
                 {stageDeals.map((deal) => (
                   <KanbanItem key={deal.id} value={deal.id} className="rounded-lg">
                     <KanbanItemHandle className="block w-full">
-                      <DealCard deal={deal} onClick={() => openDrawer("view", deal)} />
+                      <DealCard deal={deal} onClick={() => onOpenDrawer("view", deal)} />
                     </KanbanItemHandle>
                   </KanbanItem>
                 ))}
@@ -239,7 +225,7 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
                 {/* Add deal */}
                 <button
                   type="button"
-                  onClick={() => openDrawer("create", undefined, stage.value)}
+                  onClick={() => onOpenDrawer("create", undefined, stage.value)}
                   className={cn(
                     "flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground",
                     "rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors w-full mt-auto",
