@@ -7,13 +7,13 @@ import { usePeopleCustomFields, useOrgCustomFields } from "@/hooks/queries/use-c
 
 export default function CustomFieldsSettingsPage() {
   const peopleQuery = usePeopleCustomFields();
-  const orgsQuery = useOrgCustomFields();
+  const orgQuery = useOrgCustomFields();
 
-  const isPending = peopleQuery.isPending || orgsQuery.isPending;
-  const isError = peopleQuery.isError || orgsQuery.isError;
+  const isPending = peopleQuery.isPending || orgQuery.isPending;
+  const isError = peopleQuery.isError || orgQuery.isError;
   const refetch = () => {
     peopleQuery.refetch();
-    orgsQuery.refetch();
+    orgQuery.refetch();
   };
 
   if (isPending) {

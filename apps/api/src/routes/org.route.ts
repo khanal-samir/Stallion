@@ -16,7 +16,7 @@ import {
   getOrg,
   listOrgs,
   updateOrg,
-} from "@/controllers/orgs.controller.js";
+} from "@/controllers/org.controller.js";
 import {
   createCustomFieldDefinition,
   deleteCustomFieldDefinition,
@@ -33,12 +33,12 @@ export const orgRoutes = new Hono()
   .get("/", validateRequest(VALIDATION_TARGET.QUERY, listOrgsQuerySchema), (c) =>
     listOrgs(c, c.req.valid(VALIDATION_TARGET.QUERY)),
   )
-  .get("/custom-fields", customFieldsAuthMiddleware, (c) => listCustomFieldDefinitions(c, "orgs"))
+  .get("/custom-fields", customFieldsAuthMiddleware,     (c) => listCustomFieldDefinitions(c, "org"))
   .post(
     "/custom-fields",
     customFieldsAuthMiddleware,
     validateRequest(VALIDATION_TARGET.JSON, createCustomFieldDefinitionSchema),
-    (c) => createCustomFieldDefinition(c, "orgs", c.req.valid(VALIDATION_TARGET.JSON)),
+    (c) => createCustomFieldDefinition(c, "org", c.req.valid(VALIDATION_TARGET.JSON)),
   )
   .patch(
     "/custom-fields/:id",
@@ -47,7 +47,7 @@ export const orgRoutes = new Hono()
     validateRequest(VALIDATION_TARGET.JSON, updateCustomFieldDefinitionSchema),
     (c) => {
       const { id } = c.req.valid(VALIDATION_TARGET.PARAM);
-      return updateCustomFieldDefinition(c, "orgs", id, c.req.valid(VALIDATION_TARGET.JSON));
+      return updateCustomFieldDefinition(c, "org", id, c.req.valid(VALIDATION_TARGET.JSON));
     },
   )
   .delete(
@@ -56,7 +56,7 @@ export const orgRoutes = new Hono()
     validateRequest(VALIDATION_TARGET.PARAM, customFieldParamsSchema),
     (c) => {
       const { id } = c.req.valid(VALIDATION_TARGET.PARAM);
-      return deleteCustomFieldDefinition(c, "orgs", id);
+      return deleteCustomFieldDefinition(c, "org", id);
     },
   )
   .get("/:id", validateRequest(VALIDATION_TARGET.PARAM, orgParamsSchema), (c) => {

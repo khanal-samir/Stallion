@@ -27,7 +27,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
 import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreatePerson, useUpdatePerson, useDeletePerson } from "@/hooks/queries/use-people";
-import { useOrganizations } from "@/hooks/queries/use-orgs";
+import { useOrganizations } from "@/hooks/queries/use-org";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
 import type { CustomFieldDefinition, Person } from "@/types/crm";
 import type { WorkspaceMember } from "@/types/workspace-settings";
@@ -171,10 +171,10 @@ function PersonForm({
   isPending: boolean;
   customFields: CustomFieldDefinition[];
 }) {
-  const { data: orgsData } = useOrganizations({ pageSize: 100 });
+  const { data: orgData } = useOrganizations({ pageSize: 100 });
   const { data: workspace } = useActiveWorkspace();
 
-  const orgs = orgsData?.orgs ?? [];
+  const org = orgData?.org ?? [];
   const members = (workspace?.members ?? []) as Pick<WorkspaceMember, "userId" | "user">[];
 
   return (
@@ -309,9 +309,9 @@ function PersonForm({
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="__none">No organization</SelectItem>
-                  {orgs.map((org) => (
-                    <SelectItem key={org.id} value={org.id}>
-                      {org.name}
+                  {org.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -1,4 +1,4 @@
-import { OrgsDataTable } from "@/components/crm/orgs/orgs-data-table";
+import { OrgsDataTable } from "@/components/crm/org/org-data-table";
 
 export default function OrganizationsPage() {
   return <OrgsDataTable />;

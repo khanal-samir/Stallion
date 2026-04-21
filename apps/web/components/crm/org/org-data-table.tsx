@@ -7,11 +7,11 @@ import { Button } from "@workspace/ui/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import { getOrgsColumns } from "./orgs-columns";
-import { ORGS_FILTER_CONFIG } from "./orgs-filters";
-import { OrgDrawer } from "./orgs-drawer";
+import { getOrgsColumns } from "./org-columns";
+import { ORGS_FILTER_CONFIG } from "./org-filters";
+import { OrgDrawer } from "./org-drawer";
 import { useOrgCustomFields } from "@/hooks/queries/use-crm-custom-fields";
-import { useBulkDeleteOrgs, useDeleteOrg, useOrganizations } from "@/hooks/queries/use-orgs";
+import { useBulkDeleteOrgs, useDeleteOrg, useOrganizations } from "@/hooks/queries/use-org";
 import { useDebounceValue } from "usehooks-ts";
 import type { CustomFieldDefinition, Organization, OrganizationsListParams } from "@/types/crm";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
@@ -93,7 +93,7 @@ export function OrgsDataTable() {
   const { mutate: bulkDeleteMutate, isPending: isBulkDeleting } = useBulkDeleteOrgs();
   const { mutate: deleteOrgMutate, isPending: isDeleting } = useDeleteOrg();
 
-  const orgs = data?.orgs ?? [];
+  const org = data?.org ?? [];
   const totalCount = data?.meta.totalCount ?? 0;
   const pageCount = data?.meta.totalPages ?? 0;
 
@@ -188,7 +188,7 @@ export function OrgsDataTable() {
 
       <DataTable
         columns={columns}
-        data={orgs}
+        data={org}
         pageCount={pageCount}
         pageIndex={table.pagination.pageIndex}
         pageSize={table.pagination.pageSize}

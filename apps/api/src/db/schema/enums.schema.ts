@@ -32,7 +32,7 @@ export const dealStageEnum = pgEnum("deal_stage", [
 
 export const crmCustomFieldEntityTypeEnum = pgEnum("crm_custom_field_entity_type", [
   "people",
-  "orgs",
+  "org",
 ]);
 
 export const crmCustomFieldTypeEnum = pgEnum("crm_custom_field_type", [

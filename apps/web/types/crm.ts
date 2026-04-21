@@ -86,6 +86,8 @@ export interface Deal {
   ownerName?: string | null;
   people?: RelatedEntityRef[];
   org?: RelatedEntityRef | null;
+  person?: RelatedEntityRef | null;
+  owner?: RelatedEntityRef | null;
 }
 
 export interface PeopleListResponse {
@@ -94,7 +96,7 @@ export interface PeopleListResponse {
 }
 
 export interface OrganizationsListResponse {
-  orgs: Organization[];
+  org: Organization[];
   meta: PaginationMeta;
 }
 
@@ -122,7 +124,7 @@ export interface BulkDeleteResponse {
 export interface CustomFieldDefinition {
   id: string;
   workspaceId: string;
-  entityType: "people" | "orgs";
+  entityType: "people" | "org";
   fieldType: CustomFieldType;
   label: string;
   options: CustomFieldOption[];

@@ -34,7 +34,7 @@ import {
 } from "@/hooks/queries/use-crm-custom-fields";
 import type { CustomFieldDefinition, CustomFieldType } from "@/types/crm";
 
-type CustomFieldEntity = "people" | "orgs";
+type CustomFieldEntity = "people" | "org";
 
 const CUSTOM_FIELD_TYPE_OPTIONS: Array<{ label: string; value: CustomFieldType }> = [
   { label: "Text", value: "text" },
@@ -299,7 +299,7 @@ export function CustomFieldsSettings() {
           type="single"
           value={entityType}
           onValueChange={(value) => {
-            if (value === "people" || value === "orgs") {
+            if (value === "people" || value === "org") {
               setEntityType(value);
               setExpandedFieldId(null);
               resetCreateForm();
@@ -308,7 +308,7 @@ export function CustomFieldsSettings() {
           variant="outline"
         >
           <ToggleGroupItem value="people">People</ToggleGroupItem>
-          <ToggleGroupItem value="orgs">Organizations</ToggleGroupItem>
+          <ToggleGroupItem value="org">Organizations</ToggleGroupItem>
         </ToggleGroup>
 
         <div className="rounded-lg border bg-background p-4 space-y-4">

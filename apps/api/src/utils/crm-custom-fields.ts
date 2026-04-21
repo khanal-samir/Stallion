@@ -5,7 +5,7 @@ import { STATUS_CODES } from "@/constants/status-codes.js";
 import { db } from "@/db/client.js";
 import {
   crmCustomFieldDefinitions,
-  orgs,
+  org,
   people,
   workspaceMembers,
   workspaces,
@@ -162,12 +162,12 @@ export async function clearFieldValues(
   }
 
   await client
-    .update(orgs)
+    .update(org)
     .set({
-      customFields: sql`coalesce(${orgs.customFields}, '{}'::jsonb) - ${fieldId}`,
+      customFields: sql`coalesce(${org.customFields}, '{}'::jsonb) - ${fieldId}`,
       updatedAt: new Date(),
     })
-    .where(and(eq(orgs.workspaceId, workspaceId), sql`${orgs.customFields} ? ${fieldId}`));
+    .where(and(eq(org.workspaceId, workspaceId), sql`${org.customFields} ? ${fieldId}`));
 }
 
 export async function clearOptionValue(
@@ -196,15 +196,15 @@ export async function clearOptionValue(
   }
 
   await client
-    .update(orgs)
+    .update(org)
     .set({
-      customFields: sql`coalesce(${orgs.customFields}, '{}'::jsonb) - ${fieldId}`,
+      customFields: sql`coalesce(${org.customFields}, '{}'::jsonb) - ${fieldId}`,
       updatedAt: new Date(),
     })
     .where(
       and(
-        eq(orgs.workspaceId, workspaceId),
-        sql`${orgs.customFields} ->> ${fieldId} = ${optionId}`,
+        eq(org.workspaceId, workspaceId),
+        sql`${org.customFields} ->> ${fieldId} = ${optionId}`,
       ),
     );
 }

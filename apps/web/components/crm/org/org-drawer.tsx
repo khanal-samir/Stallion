@@ -24,7 +24,7 @@ import {
 import { Separator } from "@workspace/ui/components/ui/separator";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
 import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
-import { useCreateOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/queries/use-orgs";
+import { useCreateOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/queries/use-org";
 import type { CustomFieldDefinition, Organization } from "@/types/crm";
 import { ORG_INDUSTRY_OPTIONS, ORG_SIZE_OPTIONS } from "@/components/crm/crm-options";
 import {

@@ -33,7 +33,7 @@ export const customFieldOptionSchema = z.object({
 
 export const customFieldOptionInputSchema = customFieldOptionSchema.omit({ id: true });
 
-// Base query schema for listing orgs, people, and deals
+// Base query schema for listing org, people, and deals
 export const crmListQueryBaseSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().positive().max(100).default(25),

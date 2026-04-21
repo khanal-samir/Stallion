@@ -17,7 +17,7 @@ export async function listPeopleCustomFields() {
 }
 
 export async function listOrgCustomFields() {
-  const response = await apiClient.get<CustomFieldsResponse>("/orgs/custom-fields");
+  const response = await apiClient.get<CustomFieldsResponse>("/org/custom-fields");
   const { data } = response.data;
   return data.customFields;
 }
@@ -33,7 +33,7 @@ export async function createPeopleCustomField(input: CreateCustomFieldDefinition
 
 export async function createOrgCustomField(input: CreateCustomFieldDefinition) {
   const response = await apiClient.post<CustomFieldDefinitionResponse>(
-    "/orgs/custom-fields",
+    "/org/custom-fields",
     input,
   );
   const { data } = response.data;
@@ -51,7 +51,7 @@ export async function updatePeopleCustomField(id: string, input: UpdateCustomFie
 
 export async function updateOrgCustomField(id: string, input: UpdateCustomFieldDefinition) {
   const response = await apiClient.patch<CustomFieldDefinitionResponse>(
-    `/orgs/custom-fields/${id}`,
+    `/org/custom-fields/${id}`,
     input,
   );
   const { data } = response.data;
@@ -68,7 +68,7 @@ export async function deletePeopleCustomField(id: string) {
 
 export async function deleteOrgCustomField(id: string) {
   const response = await apiClient.delete<CustomFieldDefinitionResponse>(
-    `/orgs/custom-fields/${id}`,
+    `/org/custom-fields/${id}`,
   );
   const { data } = response.data;
   return data.customField;

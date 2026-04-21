@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import type { CreateDeal, ListDealsQuery, UpdateDeal } from "@workspace/validators/schemas/crm";
 import { and, asc, count, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { deals, orgs, people, user } from "@/db/schema/index.js";
+import { deals, org, people, user } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/lib/api-response.js";
 import { AppError } from "@/lib/app-error.js";
@@ -58,12 +58,12 @@ export async function listDeals(c: Context, query: ListDealsQuery) {
         closeDate: deals.closeDate,
         createdAt: deals.createdAt,
         updatedAt: deals.updatedAt,
-        orgName: orgs.name,
+        orgName: org.name,
         personName: people.name,
         ownerName: user.name,
       })
       .from(deals)
-      .leftJoin(orgs, eq(deals.orgId, orgs.id))
+      .leftJoin(org, eq(deals.orgId, org.id))
       .leftJoin(people, eq(deals.personId, people.id))
       .leftJoin(user, eq(deals.ownerId, user.id))
       .where(whereClause)

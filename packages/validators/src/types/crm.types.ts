@@ -44,6 +44,6 @@ export const DEAL_SORT_BY_VALUES = [
 
 export const SORT_ORDER_VALUES = ["asc", "desc"] as const;
 
-export const CUSTOM_FIELD_ENTITY_TYPE_VALUES = ["people", "orgs"] as const;
+export const CUSTOM_FIELD_ENTITY_TYPE_VALUES = ["people", "org"] as const;
 
 export const CUSTOM_FIELD_TYPE_VALUES = ["text", "number", "select", "dateTime"] as const;
