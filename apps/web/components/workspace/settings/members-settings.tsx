@@ -35,8 +35,10 @@ const roleBadgeVariant: Record<WorkspaceRole, "default" | "secondary" | "outline
   [WORKSPACE_ROLE.member]: "outline",
 };
 
-export function MembersSettings({ members, organizationId, ownerId }: MembersSettingsProps) {
+export function MembersSettings({ members, ownerId }: MembersSettingsProps) {
   const { data: session } = useAuthSession();
+  const organizationId = session?.session?.activeOrganizationId ?? undefined;
+
   const { mutate: removeMemberMutation, isPending: isRemovePending } =
     useRemoveMember(organizationId);
   const { mutate: updateRoleMutation, isPending: isUpdateRolePending } =
@@ -121,7 +123,7 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                     </div>
                   </TableCell>
                   <TableCell>
-                    {member.role === WORKSPACE_ROLE.owner ? (
+                    {isOwner ? (
                       <Badge
                         variant={roleBadgeVariant[member.role] ?? "outline"}
                         className="text-xs"
@@ -159,17 +161,20 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                   <TableCell className="text-xs text-muted-foreground">
                     {new Date(member.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="cursor-pointer text-muted-foreground hover:text-destructive"
-                      onClick={() => setRemoveTarget(member)}
-                    >
-                      <Trash2 className="size-3.5" />
-                      <span className="sr-only">Remove member</span>
-                    </Button>
-                  </TableCell>
+                  {!isOwner && (
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="ml-auto cursor-pointer text-muted-foreground hover:text-destructive"
+                        onClick={() => setRemoveTarget(member)}
+                        disabled={isRemovePending}
+                      >
+                        <Trash2 className="size-3.5" />
+                        <span className="sr-only">Remove member</span>
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               );
             })}

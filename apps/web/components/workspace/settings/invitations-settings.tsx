@@ -15,10 +15,14 @@ import { Badge } from "@workspace/ui/components/ui/badge";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useCancelInvitation } from "@/hooks/queries/use-workspace";
 import type { WorkspaceInvitation, InvitationsSettingsProps } from "@/types/workspace-settings";
 
-export function InvitationsSettings({ invitations, organizationId }: InvitationsSettingsProps) {
+export function InvitationsSettings({ invitations }: InvitationsSettingsProps) {
+  const { data: session } = useAuthSession();
+  const organizationId = session?.session?.activeOrganizationId ?? undefined;
+
   const { mutate: cancelInvitationMutation, isPending: isCancelPending } = useCancelInvitation();
 
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -102,7 +106,7 @@ export function InvitationsSettings({ invitations, organizationId }: Invitations
       <InviteMemberDialog
         open={inviteOpen}
         onOpenChange={setInviteOpen}
-        organizationId={organizationId}
+        organizationId={organizationId!}
       />
 
       <ConfirmDialog

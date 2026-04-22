@@ -43,7 +43,6 @@ export default function MembersSettingsPage() {
   return (
     <MembersSettings
       members={members}
-      organizationId={workspace.id}
       ownerId={(workspace as Record<string, unknown>).ownerId as string | undefined}
     />
   );

@@ -65,7 +65,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
     deleteWorkspaceMutation(workspace.id, {
       onSuccess: () => {
         setDialogState("idle");
-        router.push("/onboarding");
+        router.push("/dashboard");
       },
     });
   }
@@ -74,7 +74,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
     leaveWorkspaceMutation(workspace.id, {
       onSuccess: () => {
         setDialogState("idle");
-        router.push("/onboarding");
+        router.push("/dashboard");
       },
     });
   }

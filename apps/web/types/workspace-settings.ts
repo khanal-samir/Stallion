@@ -30,13 +30,11 @@ export interface WorkspaceInvitation {
 
 export interface MembersSettingsProps {
   members: WorkspaceMember[];
-  organizationId: string;
   ownerId?: string;
 }
 
 export interface InvitationsSettingsProps {
   invitations: WorkspaceInvitation[];
-  organizationId: string;
 }
 
 export interface GeneralSettingsProps {
