@@ -11,6 +11,8 @@ import {
   inviteMember,
   leaveWorkspace,
   listWorkspaces,
+  listWorkspaceInvitations,
+  listWorkspaceMembers,
   rejectInvitation,
   removeMember,
   setActiveWorkspace,
@@ -24,6 +26,7 @@ import type {
 import type { CreateWorkspace, UpdateWorkspace } from "@workspace/validators/schemas/workspace";
 import { QUERY_KEYS } from "@/lib/query-keys";
 import { useAuthSession } from "@/hooks/queries/use-auth";
+import type { WorkspaceInvitation, WorkspaceMember } from "@/types/workspace-settings";
 
 export function useWorkspaces() {
   const { data: session } = useAuthSession();
@@ -65,6 +68,30 @@ export function useInvitation(invitationId: string | null) {
     enabled: !!invitationId,
     staleTime: 5 * 60 * 1000,
     retry: false,
+  });
+}
+
+export function useWorkspaceMembers(
+  opts: { organizationId?: string; limit?: number; offset?: number } = {},
+) {
+  const { data: session } = useAuthSession();
+
+  return useQuery<WorkspaceMember[]>({
+    queryKey: [QUERY_KEYS.WORKSPACES, QUERY_KEYS.WORKSPACE, "members", opts],
+    queryFn: () => listWorkspaceMembers(opts) as Promise<WorkspaceMember[]>,
+    enabled: !!session?.user,
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useWorkspaceInvitations(opts: { organizationId?: string } = {}) {
+  const { data: session } = useAuthSession();
+
+  return useQuery<WorkspaceInvitation[]>({
+    queryKey: [QUERY_KEYS.WORKSPACES, QUERY_KEYS.WORKSPACE_INVITATIONS, opts],
+    queryFn: () => listWorkspaceInvitations(opts) as Promise<WorkspaceInvitation[]>,
+    enabled: !!session?.user,
+    placeholderData: (prev) => prev,
   });
 }
 

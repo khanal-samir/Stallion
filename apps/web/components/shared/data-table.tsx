@@ -55,6 +55,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
+import { getColumnLabel, getVisiblePageNumbers } from "@/lib/data-table-utils";
 
 export interface DataTableFilterOption {
   label: string;
@@ -64,7 +65,7 @@ export interface DataTableFilterOption {
 export interface FilterConfig {
   columnId: string;
   label: string;
-  options: DataTableFilterOption[];
+  options?: DataTableFilterOption[];
   allLabel?: string;
 }
 
@@ -100,43 +101,41 @@ export interface DataTableProps<TData> {
 }
 
 export function DataTable<TData>({
-  columns, // the column definitions, memoized by the parent component
-  data, // the current page of data to display, memoized by the parent component
-  pageCount, // total number of pages, calculated by the parent component based on the total row count and page size
-  pageIndex, // the current page index (0-based), controlled by the parent component
-  pageSize, // the number of rows per page, controlled by the parent component
-  onPaginationChange, // callback to update the pagination state in the parent component
-  sorting = [], // the current sorting state, controlled by the parent component
-  onSortingChange, // callback to update the sorting state in the parent component
-  columnFilters = [], // the current column filters state, controlled by the parent component
-  onColumnFiltersChange, // callback to update the column filters state in the parent component
+  columns,
+  data,
+  pageCount,
+  pageIndex,
+  pageSize,
+  onPaginationChange,
+  sorting = [],
+  onSortingChange,
+  columnFilters = [],
+  onColumnFiltersChange,
   searchPlaceholder = "Search...",
-  searchValue = "", // the current global search value, controlled by the parent component
-  onSearchChange, // callback to update the global search value in the parent component
-  filterConfig = [], // configuration for the filter dropdowns, memoized by the parent component
+  searchValue = "",
+  onSearchChange,
+  filterConfig = [],
   isLoading = false,
   isError = false,
   errorTitle,
   errorDescription,
   onRetry,
   enableRowSelection = false,
-  rowSelection = {}, // the current row selection state, controlled by the parent component
+  rowSelection = {},
   onRowSelectionChange,
-  getRowId, // optional function to generate unique row IDs, useful when your data doesn't have a stable ID field
+  getRowId,
   onRowClick,
   emptyTitle = "No results found",
   emptyDescription = "Try adjusting your filters or search to find what you're looking for.",
-  toolbarActions, // optional additional actions to show in the toolbar, memoized by the parent component
+  toolbarActions,
   className,
 }: DataTableProps<TData>) {
-  // The only local state — column visibility doesn't affect server queries
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const pagination = { pageIndex, pageSize };
   const currentPage = pageCount === 0 ? 0 : pageIndex + 1;
   const canGoToPreviousPage = !isLoading && pageIndex > 0;
   const canGoToNextPage = !isLoading && pageIndex < pageCount - 1 && pageCount > 0;
 
-  // adds a selection column to the left of the table when row selection is enabled
   const selectionColumn = React.useMemo<ColumnDef<TData>>(
     () => ({
       id: "__select",
@@ -165,13 +164,12 @@ export function DataTable<TData>({
     [],
   );
 
-  // when row selection is enabled, add the selection column to the beginning of the columns array
   const resolvedColumns = React.useMemo(
     () => (enableRowSelection ? [selectionColumn, ...columns] : columns),
     [columns, enableRowSelection, selectionColumn],
   );
 
-  // useReactTable manages the state and logic of the table, while we control the server interactions via the on*Change handlers
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns: resolvedColumns,
@@ -213,10 +211,9 @@ export function DataTable<TData>({
   const hasRows = table.getRowModel().rows.length > 0;
   const pageNumbers = getVisiblePageNumbers(pageIndex, pageCount);
 
-  // helper to get the current filter value for a column, used to set the value of the filter dropdowns
-  function getFilterValue(columnId: string) {
+  function getFilterValue(columnId: string): unknown {
     const filter = columnFilters.find((f) => f.id === columnId);
-    return typeof filter?.value === "string" ? filter.value : "";
+    return filter?.value;
   }
 
   function updateFilter(columnId: string, value: string) {
@@ -226,7 +223,6 @@ export function DataTable<TData>({
     onPaginationChange({ ...pagination, pageIndex: 0 });
   }
 
-  // when the search input changes, update the search state and reset to the first page
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange?.(e.target.value);
     onPaginationChange({ ...pagination, pageIndex: 0 });
@@ -266,7 +262,11 @@ export function DataTable<TData>({
           {filterConfig.map((filter) => (
             <Select
               key={filter.columnId}
-              value={getFilterValue(filter.columnId) || "__all"}
+              value={
+                typeof getFilterValue(filter.columnId) === "string"
+                  ? (getFilterValue(filter.columnId) as string) || "__all"
+                  : "__all"
+              }
               onValueChange={(value) => updateFilter(filter.columnId, value)}
             >
               <SelectTrigger className="min-w-35">
@@ -274,7 +274,7 @@ export function DataTable<TData>({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all">{filter.allLabel ?? `All ${filter.label}`}</SelectItem>
-                {filter.options.map((option) => (
+                {(filter.options ?? []).map((option) => (
                   <SelectItem key={`${filter.columnId}-${option.value}`} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -312,7 +312,7 @@ export function DataTable<TData>({
                     onSelect={(e) => e.preventDefault()}
                     className="capitalize"
                   >
-                    {formatColumnLabel(col.id)}
+                    {getColumnLabel(col.id, col.columnDef.header)}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
@@ -492,33 +492,4 @@ export function DataTable<TData>({
       </div>
     </div>
   );
-}
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function formatColumnLabel(id: string) {
-  return id
-    .replace(/^_+/, "")
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[-_]/g, " ")
-    .trim();
-}
-
-function getVisiblePageNumbers(pageIndex: number, pageCount: number): Array<number | "ellipsis"> {
-  if (pageCount <= 0) return [];
-  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, i) => i + 1);
-
-  const current = pageIndex + 1;
-  const pages: Array<number | "ellipsis"> = [1];
-
-  if (current > 3) pages.push("ellipsis");
-
-  const start = Math.max(2, current - 1);
-  const end = Math.min(pageCount - 1, current + 1);
-  for (let p = start; p <= end; p++) pages.push(p);
-
-  if (current < pageCount - 2) pages.push("ellipsis");
-
-  pages.push(pageCount);
-  return pages;
 }

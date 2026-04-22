@@ -3,10 +3,48 @@ import { jsonb, pgTable, text, timestamp, uuid, unique, varchar, index } from "d
 import { id, timestamps } from "./common.schema.js";
 import { user } from "./auth.schema.js";
 import { workspaces } from "./workspace.schema.js";
-import { peopleStatusEnum, peopleSourceEnum, dealStageEnum } from "./enums.schema.js";
+import {
+  crmCustomFieldEntityTypeEnum,
+  crmCustomFieldTypeEnum,
+  peopleStatusEnum,
+  peopleSourceEnum,
+  dealStageEnum,
+} from "./enums.schema.js";
 
-export const orgs = pgTable(
-  "orgs",
+type CrmCustomFieldOption = {
+  id: string;
+  label: string;
+};
+
+export const crmCustomFieldDefinitions = pgTable(
+  "crm_custom_field_definitions",
+  {
+    ...id,
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    entityType: crmCustomFieldEntityTypeEnum("entity_type").notNull(),
+    fieldType: crmCustomFieldTypeEnum("field_type").notNull(),
+    label: varchar("label", { length: 255 }).notNull(),
+    options: jsonb("options").$type<CrmCustomFieldOption[]>().default([]).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    unique("crm_custom_field_definitions_workspace_entity_label_unique").on(
+      table.workspaceId,
+      table.entityType,
+      table.label,
+    ),
+    index("crm_custom_field_definitions_workspace_entity_idx").on(
+      table.workspaceId,
+      table.entityType,
+    ),
+    index("crm_custom_field_definitions_workspace_id_idx").on(table.workspaceId),
+  ],
+);
+
+export const org = pgTable(
+  "org",
   {
     ...id,
     workspaceId: uuid("workspace_id")
@@ -21,8 +59,8 @@ export const orgs = pgTable(
     ...timestamps,
   },
   (table) => [
-    unique("orgs_workspace_name_unique").on(table.workspaceId, table.name),
-    index("orgs_workspace_id_idx").on(table.workspaceId),
+    unique("org_workspace_name_unique").on(table.workspaceId, table.name),
+    index("org_workspace_id_idx").on(table.workspaceId),
   ],
 );
 
@@ -33,7 +71,7 @@ export const people = pgTable(
     workspaceId: uuid("workspace_id")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
-    orgId: uuid("org_id").references(() => orgs.id, { onDelete: "set null" }),
+    orgId: uuid("org_id").references(() => org.id, { onDelete: "set null" }),
     ownerId: uuid("owner_id").references(() => user.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }),
@@ -64,7 +102,7 @@ export const deals = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     personId: uuid("person_id").references(() => people.id, { onDelete: "set null" }),
-    orgId: uuid("org_id").references(() => orgs.id, { onDelete: "set null" }),
+    orgId: uuid("org_id").references(() => org.id, { onDelete: "set null" }),
     ownerId: uuid("owner_id").references(() => user.id, { onDelete: "set null" }),
     title: varchar("title", { length: 255 }).notNull(),
     value: text("value"),
@@ -83,8 +121,8 @@ export const deals = pgTable(
   ],
 );
 
-export const orgsRelations = relations(orgs, ({ one, many }) => ({
-  workspace: one(workspaces, { fields: [orgs.workspaceId], references: [workspaces.id] }),
+export const orgRelations = relations(org, ({ one, many }) => ({
+  workspace: one(workspaces, { fields: [org.workspaceId], references: [workspaces.id] }),
   people: many(people),
   deals: many(deals),
 }));
@@ -94,7 +132,7 @@ export const peopleRelations = relations(people, ({ one, many }) => ({
     fields: [people.workspaceId],
     references: [workspaces.id],
   }),
-  org: one(orgs, { fields: [people.orgId], references: [orgs.id] }),
+  org: one(org, { fields: [people.orgId], references: [org.id] }),
   owner: one(user, { fields: [people.ownerId], references: [user.id] }),
   deals: many(deals),
 }));
@@ -105,6 +143,16 @@ export const dealsRelations = relations(deals, ({ one }) => ({
     references: [workspaces.id],
   }),
   person: one(people, { fields: [deals.personId], references: [people.id] }),
-  org: one(orgs, { fields: [deals.orgId], references: [orgs.id] }),
+  org: one(org, { fields: [deals.orgId], references: [org.id] }),
   owner: one(user, { fields: [deals.ownerId], references: [user.id] }),
 }));
+
+export const crmCustomFieldDefinitionsRelations = relations(
+  crmCustomFieldDefinitions,
+  ({ one }) => ({
+    workspace: one(workspaces, {
+      fields: [crmCustomFieldDefinitions.workspaceId],
+      references: [workspaces.id],
+    }),
+  }),
+);

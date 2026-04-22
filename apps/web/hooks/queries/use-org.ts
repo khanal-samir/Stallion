@@ -9,7 +9,7 @@ import {
   getOrganization,
   listOrganizations,
   updateOrganization,
-} from "@/services/crm/orgs.service";
+} from "@/services/crm/org.service";
 import type {
   BulkDeleteInput,
   CreateOrganizationInput,

@@ -35,8 +35,10 @@ const roleBadgeVariant: Record<WorkspaceRole, "default" | "secondary" | "outline
   [WORKSPACE_ROLE.member]: "outline",
 };
 
-export function MembersSettings({ members, organizationId, ownerId }: MembersSettingsProps) {
+export function MembersSettings({ members, ownerId }: MembersSettingsProps) {
   const { data: session } = useAuthSession();
+  const organizationId = session?.session?.activeOrganizationId ?? undefined;
+
   const { mutate: removeMemberMutation, isPending: isRemovePending } =
     useRemoveMember(organizationId);
   const { mutate: updateRoleMutation, isPending: isUpdateRolePending } =
@@ -45,9 +47,6 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
   const [removeTarget, setRemoveTarget] = useState<WorkspaceMember | null>(null);
 
   const currentUserId = session?.user?.id;
-  const currentMember = members.find((member) => member.userId === currentUserId);
-  const canManage =
-    currentMember?.role === WORKSPACE_ROLE.owner || currentMember?.role === WORKSPACE_ROLE.admin;
 
   function handleRoleChange(memberId: string, role: AssignableWorkspaceRole) {
     updateRoleMutation({ memberId, role });
@@ -90,15 +89,13 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Joined</TableHead>
-              {canManage && <TableHead className="w-14" />}
+              <TableHead className="w-14" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {members.map((member) => {
               const isCurrentUser = member.userId === currentUserId;
               const isOwner = member.userId === ownerId;
-              const canEditRole = canManage && !isOwner && !isCurrentUser;
-              const canRemove = canManage && !isOwner && !isCurrentUser;
 
               return (
                 <TableRow key={member.id}>
@@ -126,7 +123,14 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                     </div>
                   </TableCell>
                   <TableCell>
-                    {canEditRole ? (
+                    {isOwner ? (
+                      <Badge
+                        variant={roleBadgeVariant[member.role] ?? "outline"}
+                        className="text-xs"
+                      >
+                        {member.role}
+                      </Badge>
+                    ) : (
                       <Select
                         value={member.role}
                         onValueChange={(value) =>
@@ -152,31 +156,23 @@ export function MembersSettings({ members, organizationId, ownerId }: MembersSet
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                    ) : (
-                      <Badge
-                        variant={roleBadgeVariant[member.role] ?? "outline"}
-                        className="text-xs"
-                      >
-                        {member.role}
-                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {new Date(member.createdAt).toLocaleDateString()}
                   </TableCell>
-                  {canManage && (
+                  {!isOwner && (
                     <TableCell>
-                      {canRemove && (
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="cursor-pointer text-muted-foreground hover:text-destructive"
-                          onClick={() => setRemoveTarget(member)}
-                        >
-                          <Trash2 className="size-3.5" />
-                          <span className="sr-only">Remove member</span>
-                        </Button>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="ml-auto cursor-pointer text-muted-foreground hover:text-destructive"
+                        onClick={() => setRemoveTarget(member)}
+                        disabled={isRemovePending}
+                      >
+                        <Trash2 className="size-3.5" />
+                        <span className="sr-only">Remove member</span>
+                      </Button>
                     </TableCell>
                   )}
                 </TableRow>

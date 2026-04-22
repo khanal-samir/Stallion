@@ -1,5 +1,5 @@
 {
-  "id": "b818cb36-0f8a-4c28-9cff-63387bc0a9c2",
+  "id": "41874752-fba2-477a-bed6-e5acc7197bfc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -408,6 +408,134 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.crm_custom_field_definitions": {
+      "name": "crm_custom_field_definitions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "workspace_id": {
+          "name": "workspace_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "type": "crm_custom_field_entity_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "field_type": {
+          "name": "field_type",
+          "type": "crm_custom_field_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "options": {
+          "name": "options",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "crm_custom_field_definitions_workspace_entity_idx": {
+          "name": "crm_custom_field_definitions_workspace_entity_idx",
+          "columns": [
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "crm_custom_field_definitions_workspace_id_idx": {
+          "name": "crm_custom_field_definitions_workspace_id_idx",
+          "columns": [
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "crm_custom_field_definitions_workspace_id_workspaces_id_fk": {
+          "name": "crm_custom_field_definitions_workspace_id_workspaces_id_fk",
+          "tableFrom": "crm_custom_field_definitions",
+          "tableTo": "workspaces",
+          "columnsFrom": [
+            "workspace_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "crm_custom_field_definitions_workspace_entity_label_unique": {
+          "name": "crm_custom_field_definitions_workspace_entity_label_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "workspace_id",
+            "entity_type",
+            "label"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.deals": {
       "name": "deals",
       "schema": "",
@@ -464,7 +592,8 @@
         },
         "stage": {
           "name": "stage",
-          "type": "text",
+          "type": "deal_stage",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'new'"
@@ -609,10 +738,10 @@
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "deals_org_id_orgs_id_fk": {
-          "name": "deals_org_id_orgs_id_fk",
+        "deals_org_id_org_id_fk": {
+          "name": "deals_org_id_org_id_fk",
           "tableFrom": "deals",
-          "tableTo": "orgs",
+          "tableTo": "org",
           "columnsFrom": [
             "org_id"
           ],
@@ -642,8 +771,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.orgs": {
-      "name": "orgs",
+    "public.org": {
+      "name": "org",
       "schema": "",
       "columns": {
         "id": {
@@ -712,8 +841,8 @@
         }
       },
       "indexes": {
-        "orgs_workspace_id_idx": {
-          "name": "orgs_workspace_id_idx",
+        "org_workspace_id_idx": {
+          "name": "org_workspace_id_idx",
           "columns": [
             {
               "expression": "workspace_id",
@@ -729,9 +858,9 @@
         }
       },
       "foreignKeys": {
-        "orgs_workspace_id_workspaces_id_fk": {
-          "name": "orgs_workspace_id_workspaces_id_fk",
-          "tableFrom": "orgs",
+        "org_workspace_id_workspaces_id_fk": {
+          "name": "org_workspace_id_workspaces_id_fk",
+          "tableFrom": "org",
           "tableTo": "workspaces",
           "columnsFrom": [
             "workspace_id"
@@ -745,8 +874,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "orgs_workspace_name_unique": {
-          "name": "orgs_workspace_name_unique",
+        "org_workspace_name_unique": {
+          "name": "org_workspace_name_unique",
           "nullsNotDistinct": false,
           "columns": [
             "workspace_id",
@@ -819,14 +948,16 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "people_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'lead'"
         },
         "source": {
           "name": "source",
-          "type": "text",
+          "type": "people_source",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'manual'"
@@ -950,10 +1081,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "people_org_id_orgs_id_fk": {
-          "name": "people_org_id_orgs_id_fk",
+        "people_org_id_org_id_fk": {
+          "name": "people_org_id_org_id_fk",
           "tableFrom": "people",
-          "tableTo": "orgs",
+          "tableTo": "org",
           "columnsFrom": [
             "org_id"
           ],
@@ -1017,7 +1148,8 @@
         },
         "role": {
           "name": "role",
-          "type": "text",
+          "type": "workspace_invite_role",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'member'"
@@ -1030,7 +1162,8 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "workspace_invite_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'pending'"
@@ -1206,7 +1339,8 @@
         },
         "role": {
           "name": "role",
-          "type": "text",
+          "type": "workspace_role",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'member'"
@@ -1413,7 +1547,85 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.crm_custom_field_entity_type": {
+      "name": "crm_custom_field_entity_type",
+      "schema": "public",
+      "values": [
+        "people",
+        "org"
+      ]
+    },
+    "public.crm_custom_field_type": {
+      "name": "crm_custom_field_type",
+      "schema": "public",
+      "values": [
+        "text",
+        "number",
+        "select",
+        "dateTime"
+      ]
+    },
+    "public.deal_stage": {
+      "name": "deal_stage",
+      "schema": "public",
+      "values": [
+        "new",
+        "contacted",
+        "demo",
+        "proposal",
+        "won",
+        "lost"
+      ]
+    },
+    "public.people_source": {
+      "name": "people_source",
+      "schema": "public",
+      "values": [
+        "manual",
+        "csv",
+        "api"
+      ]
+    },
+    "public.people_status": {
+      "name": "people_status",
+      "schema": "public",
+      "values": [
+        "lead",
+        "prospect",
+        "qualified",
+        "customer",
+        "churned"
+      ]
+    },
+    "public.workspace_invite_role": {
+      "name": "workspace_invite_role",
+      "schema": "public",
+      "values": [
+        "admin",
+        "member"
+      ]
+    },
+    "public.workspace_invite_status": {
+      "name": "workspace_invite_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "accepted",
+        "rejected",
+        "canceled"
+      ]
+    },
+    "public.workspace_role": {
+      "name": "workspace_role",
+      "schema": "public",
+      "values": [
+        "owner",
+        "admin",
+        "member"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

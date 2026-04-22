@@ -3,22 +3,25 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Building2 } from "lucide-react";
 import { CrmRowActions } from "@/components/crm/crm-row-actions";
-import type { Organization } from "@/types/crm";
+import type { CustomFieldDefinition, Organization } from "@/types/crm";
+import { buildCustomFieldColumns } from "@/lib/crm-custom-fields";
 
 interface GetOrgsColumnsProps {
   onView: (org: Organization) => void;
   onEdit: (org: Organization) => void;
   onDelete: (org: Organization) => void;
+  customFields?: CustomFieldDefinition[];
 }
 
 export function getOrgsColumns({
   onView,
   onEdit,
   onDelete,
+  customFields = [],
 }: GetOrgsColumnsProps): ColumnDef<Organization>[] {
   const emptyCell = <span className="text-sm text-muted-foreground/50">—</span>;
 
-  return [
+  const baseColumns: ColumnDef<Organization>[] = [
     {
       id: "name",
       accessorKey: "name",
@@ -103,4 +106,9 @@ export function getOrgsColumns({
       ),
     },
   ];
+
+  const customColumns = buildCustomFieldColumns<Organization>(customFields);
+  const actionColumn = baseColumns[baseColumns.length - 1]!;
+
+  return [...baseColumns.slice(0, -1), ...customColumns, actionColumn];
 }

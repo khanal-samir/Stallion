@@ -42,28 +42,38 @@ export function toBetterAuthError(
   };
 }
 
+function getFriendlyErrorMessage(status: number | undefined, rawMessage: string): string {
+  if (status === 403) return "You don't have permission to do that";
+  if (status === 401) return "Please sign in again";
+  if (status === 404) return "Resource not found";
+  if (status && status >= 500) return "Something went wrong. Please try again.";
+  return rawMessage;
+}
+
 export function normalizeAppError(error: unknown): AppError {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<ApiErrorResponse | { message?: string }>;
     const responseData = axiosError.response?.data;
     const nestedError = responseData && "error" in responseData ? responseData.error : undefined;
-    const message =
+    const rawMessage =
       nestedError?.message ??
       (responseData && "message" in responseData ? responseData.message : undefined) ??
       axiosError.message ??
       "Request failed";
+    const status = axiosError.response?.status;
 
     return {
       details: nestedError?.details as string | undefined,
-      message,
-      status: axiosError.response?.status,
+      message: getFriendlyErrorMessage(status, rawMessage),
+      status,
     };
   }
 
   if (isBetterAuthError(error)) {
+    const rawMessage = error.message ?? error.statusText ?? "Request failed";
     return {
       code: error.code,
-      message: error.message ?? error.statusText ?? "Request failed",
+      message: getFriendlyErrorMessage(error.status, rawMessage),
       status: error.status,
     };
   }

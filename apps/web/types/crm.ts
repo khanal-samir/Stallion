@@ -1,17 +1,23 @@
 import type {
+  CreateCustomFieldDefinitionInput,
   CreateDeal,
   CreateOrg,
   CreatePerson,
+  CustomFieldOption,
+  CustomFieldType as ValidatorCustomFieldType,
   DealStage,
   ListDealsQuery,
   ListOrgsQuery,
   ListPeopleQuery,
   PersonSource,
   PersonStatus,
+  UpdateCustomFieldDefinitionInput,
   UpdateDeal,
   UpdateOrg,
   UpdatePerson,
 } from "@workspace/validators/schemas/crm";
+
+export type CustomFieldType = ValidatorCustomFieldType;
 
 export interface PaginationMeta {
   page: number;
@@ -75,8 +81,12 @@ export interface Deal {
   closeDate: string | null;
   createdAt: string;
   updatedAt: string;
-  person?: RelatedEntityRef | null;
+  personName?: string | null;
+  orgName?: string | null;
+  ownerName?: string | null;
+  people?: RelatedEntityRef[];
   org?: RelatedEntityRef | null;
+  person?: RelatedEntityRef | null;
   owner?: RelatedEntityRef | null;
 }
 
@@ -86,7 +96,7 @@ export interface PeopleListResponse {
 }
 
 export interface OrganizationsListResponse {
-  orgs: Organization[];
+  org: Organization[];
   meta: PaginationMeta;
 }
 
@@ -111,6 +121,31 @@ export interface BulkDeleteResponse {
   deleted: number;
 }
 
+export interface CustomFieldDefinition {
+  id: string;
+  workspaceId: string;
+  entityType: "people" | "org";
+  fieldType: CustomFieldType;
+  label: string;
+  options: CustomFieldOption[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomFieldDefinitionsResponse {
+  customFields: CustomFieldDefinition[];
+}
+
+export type CustomFieldFilterType = "text" | "number" | "select" | "dateTime";
+
+export type CustomFieldFilterValue = {
+  fieldId: string;
+  type: CustomFieldFilterType;
+  value?: string;
+  from?: string;
+  to?: string;
+};
+
 export type PeopleListParams = Partial<ListPeopleQuery>;
 export type OrganizationsListParams = Partial<ListOrgsQuery>;
 export type DealsListParams = Partial<ListDealsQuery>;
@@ -127,3 +162,6 @@ export type UpdateDealInput = UpdateDeal;
 export interface BulkDeleteInput {
   ids: string[];
 }
+
+export type CreateCustomFieldDefinition = CreateCustomFieldDefinitionInput;
+export type UpdateCustomFieldDefinition = UpdateCustomFieldDefinitionInput;

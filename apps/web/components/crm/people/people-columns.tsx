@@ -5,8 +5,9 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@workspace/ui/components/ui/badge";
 import { cn } from "@workspace/ui/lib/utils";
 import { CrmRowActions } from "@/components/crm/crm-row-actions";
-import type { Person } from "@/types/crm";
+import type { CustomFieldDefinition, Person } from "@/types/crm";
 import { PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
+import { buildCustomFieldColumns } from "@/lib/crm-custom-fields";
 
 // ─── Column factory ──────────────────────────────────────────────────────────
 
@@ -14,16 +15,18 @@ interface GetPeopleColumnsProps {
   onView: (person: Person) => void;
   onEdit: (person: Person) => void;
   onDelete: (person: Person) => void;
+  customFields?: CustomFieldDefinition[];
 }
 
 export function getPeopleColumns({
   onView,
   onEdit,
   onDelete,
+  customFields = [],
 }: GetPeopleColumnsProps): ColumnDef<Person>[] {
   const emptyCell = <span className="text-muted-foreground/40">—</span>;
 
-  return [
+  const baseColumns: ColumnDef<Person>[] = [
     {
       id: "name",
       accessorKey: "name",
@@ -148,4 +151,9 @@ export function getPeopleColumns({
       ),
     },
   ];
+
+  const customColumns = buildCustomFieldColumns<Person>(customFields);
+  const actionColumn = baseColumns[baseColumns.length - 1]!;
+
+  return [...baseColumns.slice(0, -1), ...customColumns, actionColumn];
 }

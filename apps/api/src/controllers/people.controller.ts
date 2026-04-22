@@ -7,7 +7,7 @@ import type {
 } from "@workspace/validators/schemas/crm";
 import { and, asc, count, desc, eq, ilike, or, inArray } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { orgs, people, user } from "@/db/schema/index.js";
+import { org, people, user } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/lib/api-response.js";
 import { AppError } from "@/lib/app-error.js";
@@ -69,11 +69,11 @@ export async function listPeople(c: Context, query: ListPeopleQuery) {
         customFields: people.customFields,
         createdAt: people.createdAt,
         updatedAt: people.updatedAt,
-        orgName: orgs.name,
+        orgName: org.name,
         ownerName: user.name,
       })
       .from(people)
-      .leftJoin(orgs, eq(people.orgId, orgs.id))
+      .leftJoin(org, eq(people.orgId, org.id))
       .leftJoin(user, eq(people.ownerId, user.id))
       .where(whereClause)
       .orderBy(orderBy)

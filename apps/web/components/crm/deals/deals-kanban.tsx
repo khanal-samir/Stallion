@@ -20,28 +20,16 @@ import type { Deal } from "@/types/crm";
 import type { DealStage } from "@workspace/validators/schemas/crm";
 import { DEAL_STAGE_OPTIONS } from "./deals-options";
 import type { EntitySheetMode } from "@/components/shared/entity-sheet";
+import { ErrorState } from "@/components/shared/error-state";
+import { LoadingState } from "@/components/shared/loading-state";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export interface DrawerState {
-  open: boolean;
-  mode: EntitySheetMode;
-  deal?: Deal;
-  initialStage?: string;
-}
-
 interface DealsKanbanProps {
-  drawerState: DrawerState;
-  onDrawerStateChange: (state: DrawerState) => void;
+  onOpenDrawer: (mode: EntitySheetMode, deal?: Deal, initialStage?: string) => void;
 }
-
-// ─── Deal Card ────────────────────────────────────────────────────────────────
 
 function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
-  const personName = deal.person?.name;
-  const orgName = deal.org?.name;
-  const ownerName = deal.owner?.name;
-
   return (
     <div
       className={cn(
@@ -73,16 +61,16 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
 
       {/* Meta */}
       <div className="flex flex-col gap-1">
-        {personName && (
+        {deal.personName && (
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <User className="size-3 shrink-0" />
-            <span className="truncate">{personName}</span>
+            <span className="truncate">{deal.personName}</span>
           </div>
         )}
-        {orgName && (
+        {deal.orgName && (
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Building2 className="size-3 shrink-0" />
-            <span className="truncate">{orgName}</span>
+            <span className="truncate">{deal.orgName}</span>
           </div>
         )}
         {deal.closeDate && (
@@ -93,16 +81,14 @@ function DealCard({ deal, onClick }: { deal: Deal; onClick: () => void }) {
         )}
       </div>
 
-      {ownerName && (
+      {deal.ownerName && (
         <div className="mt-2 pt-2 border-t border-dashed flex items-center justify-end">
-          <span className="text-[10px] text-muted-foreground">{ownerName}</span>
+          <span className="text-[10px] text-muted-foreground">{deal.ownerName}</span>
         </div>
       )}
     </div>
   );
 }
-
-// ─── Overlay ghost card ───────────────────────────────────────────────────────
 
 function DealCardGhost({ deal }: { deal: Deal }) {
   return (
@@ -120,9 +106,7 @@ function DealCardGhost({ deal }: { deal: Deal }) {
   );
 }
 
-// ─── Kanban board ─────────────────────────────────────────────────────────────
-
-export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
+export function DealsKanban({ onOpenDrawer }: DealsKanbanProps) {
   const { data, isLoading, isError } = useDeals({ pageSize: 100 });
   const { mutate: updateDeal } = useUpdateDeal();
 
@@ -169,50 +153,11 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
     updateDeal({ dealId: movedDeal.id, input: { stage: newStage } });
   }
 
-  function openDrawer(mode: EntitySheetMode, deal?: Deal, initialStage?: string) {
-    onDrawerStateChange({ open: true, mode, deal, initialStage });
-  }
-
-  // ─── Loading ────────────────────────────────────────────────────────────────
-
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-3 gap-3">
-        {DEAL_STAGE_OPTIONS.map((stage) => (
-          <div key={stage.value} className="flex flex-col animate-pulse">
-            <div
-              className={cn(
-                "rounded-t-lg border border-b-0 px-3 py-2.5 border-t-2 bg-muted/40",
-                stage.columnClassName,
-              )}
-            >
-              <div className="h-4 bg-muted rounded w-20" />
-            </div>
-            <div className="rounded-b-lg border border-t-0 p-2 min-h-70 bg-muted/10 flex flex-col gap-2">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="bg-card border rounded-lg p-3 space-y-2">
-                  <div className="h-3.5 bg-muted rounded w-4/5" />
-                  <div className="h-3 bg-muted rounded w-1/2" />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <LoadingState variant="kanban" />;
   }
 
-  // ─── Error ──────────────────────────────────────────────────────────────────
-
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
-        Failed to load deals. Please refresh the page.
-      </div>
-    );
-  }
-
-  // ─── Render ─────────────────────────────────────────────────────────────────
+  if (isError) return <ErrorState description="Failed to load deals." />;
 
   return (
     <Kanban
@@ -272,7 +217,7 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
                 {stageDeals.map((deal) => (
                   <KanbanItem key={deal.id} value={deal.id} className="rounded-lg">
                     <KanbanItemHandle className="block w-full">
-                      <DealCard deal={deal} onClick={() => openDrawer("view", deal)} />
+                      <DealCard deal={deal} onClick={() => onOpenDrawer("view", deal)} />
                     </KanbanItemHandle>
                   </KanbanItem>
                 ))}
@@ -280,7 +225,7 @@ export function DealsKanban({ onDrawerStateChange }: DealsKanbanProps) {
                 {/* Add deal */}
                 <button
                   type="button"
-                  onClick={() => openDrawer("create", undefined, stage.value)}
+                  onClick={() => onOpenDrawer("create", undefined, stage.value)}
                   className={cn(
                     "flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground",
                     "rounded-md px-2 py-1.5 hover:bg-muted/50 transition-colors w-full mt-auto",

@@ -27,15 +27,26 @@ import { cn } from "@workspace/ui/lib/utils";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
 import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreatePerson, useUpdatePerson, useDeletePerson } from "@/hooks/queries/use-people";
-import { useOrganizations } from "@/hooks/queries/use-orgs";
+import { useOrganizations } from "@/hooks/queries/use-org";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
-import type { Person } from "@/types/crm";
+import type { CustomFieldDefinition, Person } from "@/types/crm";
 import type { WorkspaceMember } from "@/types/workspace-settings";
 import { PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
+import {
+  buildCustomFieldsPayload,
+  formatCustomFieldValueForView,
+  toDateTimeInputValue,
+} from "@/lib/crm-custom-fields";
 
 // ─── View content ─────────────────────────────────────────────────────────────
 
-function PersonViewContent({ person }: { person: Person }) {
+function PersonViewContent({
+  person,
+  customFields,
+}: {
+  person: Person;
+  customFields: CustomFieldDefinition[];
+}) {
   const statusConfig = PERSON_STATUS_OPTIONS.find((option) => option.value === person.status);
   const orgName = person.orgName ?? person.org?.name;
   const ownerName = person.ownerName ?? person.owner?.name;
@@ -118,6 +129,19 @@ function PersonViewContent({ person }: { person: Person }) {
         </CrmViewField>
       </CrmViewSection>
 
+      {customFields.length > 0 && (
+        <>
+          <Separator />
+          <CrmViewSection title="Custom fields">
+            {customFields.map((field) => (
+              <CrmViewField key={field.id} label={field.label}>
+                {formatCustomFieldValueForView(field, person.customFields?.[field.id])}
+              </CrmViewField>
+            ))}
+          </CrmViewSection>
+        </>
+      )}
+
       <div className="pt-2 border-t border-dashed">
         <div className="grid grid-cols-2 gap-4">
           <CrmViewField label="Created">
@@ -141,14 +165,16 @@ function PersonViewContent({ person }: { person: Person }) {
 function PersonForm({
   form,
   isPending,
+  customFields,
 }: {
   form: ReturnType<typeof useForm<CreatePerson>>;
   isPending: boolean;
+  customFields: CustomFieldDefinition[];
 }) {
-  const { data: orgsData } = useOrganizations({ pageSize: 100 });
+  const { data: orgData } = useOrganizations({ pageSize: 100 });
   const { data: workspace } = useActiveWorkspace();
 
-  const orgs = orgsData?.orgs ?? [];
+  const org = orgData?.org ?? [];
   const members = (workspace?.members ?? []) as Pick<WorkspaceMember, "userId" | "user">[];
 
   return (
@@ -283,9 +309,9 @@ function PersonForm({
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="__none">No organization</SelectItem>
-                  {orgs.map((org) => (
-                    <SelectItem key={org.id} value={org.id}>
-                      {org.name}
+                  {org.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -369,6 +395,80 @@ function PersonForm({
             </FormItem>
           )}
         />
+
+        {customFields.length > 0 && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                Custom fields
+              </p>
+
+              {customFields.map((customField) => {
+                const fieldName = `customFields.${customField.id}` as const;
+
+                return (
+                  <FormField
+                    key={customField.id}
+                    control={form.control}
+                    name={fieldName}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{customField.label}</FormLabel>
+                        <FormControl>
+                          {customField.fieldType === "select" ? (
+                            <Select
+                              value={typeof field.value === "string" ? field.value : "__none"}
+                              onValueChange={(value) =>
+                                field.onChange(value === "__none" ? undefined : value)
+                              }
+                              disabled={isPending}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Not set" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="__none">Not set</SelectItem>
+                                {customField.options.map((option) => (
+                                  <SelectItem key={option.id} value={option.id}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : customField.fieldType === "number" ? (
+                            <Input
+                              type="number"
+                              step="any"
+                              value={field.value == null ? "" : String(field.value)}
+                              onChange={(event) => field.onChange(event.target.value)}
+                              disabled={isPending}
+                            />
+                          ) : customField.fieldType === "dateTime" ? (
+                            <Input
+                              type="datetime-local"
+                              value={toDateTimeInputValue(field.value)}
+                              onChange={(event) => field.onChange(event.target.value || undefined)}
+                              disabled={isPending}
+                            />
+                          ) : (
+                            <Input
+                              maxLength={255}
+                              value={typeof field.value === "string" ? field.value : ""}
+                              onChange={(event) => field.onChange(event.target.value)}
+                              disabled={isPending}
+                            />
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </Form>
   );
@@ -382,6 +482,7 @@ interface PeopleDrawerProps {
   mode: EntitySheetMode;
   onModeChange: (mode: EntitySheetMode) => void;
   person?: Person | null;
+  customFields?: CustomFieldDefinition[];
   onDeleteSuccess?: () => void;
 }
 
@@ -391,6 +492,7 @@ export function PeopleDrawer({
   mode,
   onModeChange,
   person,
+  customFields = [],
   onDeleteSuccess,
 }: PeopleDrawerProps) {
   const { mutate: createPerson, isPending: isCreating } = useCreatePerson();
@@ -416,6 +518,7 @@ export function PeopleDrawer({
           : person?.lastContactedAt
             ? dayjs(person.lastContactedAt).toDate()
             : undefined,
+      customFields: mode === "create" ? undefined : (person?.customFields ?? undefined),
     }),
     [mode, person],
   );
@@ -432,6 +535,10 @@ export function PeopleDrawer({
       phone: values.phone || undefined,
       jobTitle: values.jobTitle || undefined,
       linkedinUrl: values.linkedinUrl || undefined,
+      customFields: buildCustomFieldsPayload(
+        customFields,
+        (values.customFields ?? {}) as Record<string, unknown>,
+      ),
     };
 
     if (mode === "create") {
@@ -478,9 +585,9 @@ export function PeopleDrawer({
       onDelete={mode !== "create" && person ? handleDelete : undefined}
     >
       {mode === "view" && person ? (
-        <PersonViewContent person={person} />
+        <PersonViewContent person={person} customFields={customFields} />
       ) : (
-        <PersonForm form={form} isPending={isSaving} />
+        <PersonForm form={form} isPending={isSaving} customFields={customFields} />
       )}
     </EntitySheet>
   );

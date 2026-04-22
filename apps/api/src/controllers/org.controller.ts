@@ -7,7 +7,7 @@ import type {
 } from "@workspace/validators/schemas/crm";
 import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { orgs, people } from "@/db/schema/index.js";
+import { org, people } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/lib/api-response.js";
 import { AppError } from "@/lib/app-error.js";
@@ -17,18 +17,18 @@ export async function listOrgs(c: Context, query: ListOrgsQuery) {
   const workspaceId = getSessionWorkspaceId(c);
   const { page, pageSize, sortOrder, sortBy, search, industry, size } = query;
 
-  const conditions = [eq(orgs.workspaceId, workspaceId)];
-  if (industry) conditions.push(eq(orgs.industry, industry));
-  if (size) conditions.push(eq(orgs.size, size));
+  const conditions = [eq(org.workspaceId, workspaceId)];
+  if (industry) conditions.push(eq(org.industry, industry));
+  if (size) conditions.push(eq(org.size, size));
   if (search) {
     const searchTerm = `%${search}%`;
     conditions.push(
       or(
-        ilike(orgs.name, searchTerm),
-        ilike(orgs.domain, searchTerm),
-        ilike(orgs.industry, searchTerm),
-        ilike(orgs.size, searchTerm),
-        ilike(orgs.location, searchTerm),
+        ilike(org.name, searchTerm),
+        ilike(org.domain, searchTerm),
+        ilike(org.industry, searchTerm),
+        ilike(org.size, searchTerm),
+        ilike(org.location, searchTerm),
       )!,
     );
   }
@@ -39,32 +39,32 @@ export async function listOrgs(c: Context, query: ListOrgsQuery) {
   const orderBy = (() => {
     switch (sortBy) {
       case "domain":
-        return direction(orgs.domain);
+        return direction(org.domain);
       case "industry":
-        return direction(orgs.industry);
+        return direction(org.industry);
       case "size":
-        return direction(orgs.size);
+        return direction(org.size);
       case "location":
-        return direction(orgs.location);
+        return direction(org.location);
       case "createdAt":
-        return direction(orgs.createdAt);
+        return direction(org.createdAt);
       case "updatedAt":
-        return direction(orgs.updatedAt);
+        return direction(org.updatedAt);
       case "name":
       default:
-        return direction(orgs.name);
+        return direction(org.name);
     }
   })();
 
   const [rows, totalCountResult, peopleCounts] = await Promise.all([
     db
       .select()
-      .from(orgs)
+      .from(org)
       .where(whereClause)
       .orderBy(orderBy)
       .limit(pageSize)
       .offset((page - 1) * pageSize),
-    db.select({ totalCount: count() }).from(orgs).where(whereClause),
+    db.select({ totalCount: count() }).from(org).where(whereClause),
     db
       .select({ orgId: people.orgId, count: count() })
       .from(people)
@@ -79,7 +79,7 @@ export async function listOrgs(c: Context, query: ListOrgsQuery) {
   return sendSuccess(
     c,
     {
-      orgs: rows.map((org) => ({ ...org, peopleCount: peopleCountMap.get(org.id) ?? 0 })),
+      org: rows.map((o) => ({ ...o, peopleCount: peopleCountMap.get(o.id) ?? 0 })),
       meta: { page, pageSize, totalCount, totalPages },
     },
     STATUS_CODES.OK,
@@ -88,8 +88,8 @@ export async function listOrgs(c: Context, query: ListOrgsQuery) {
 
 export async function getOrg(c: Context, id: string) {
   const workspaceId = getSessionWorkspaceId(c);
-  const org = await db.query.orgs.findFirst({
-    where: and(eq(orgs.id, id), eq(orgs.workspaceId, workspaceId)),
+  const result = await db.query.org.findFirst({
+    where: and(eq(org.id, id), eq(org.workspaceId, workspaceId)),
     with: {
       people: {
         columns: {
@@ -100,64 +100,64 @@ export async function getOrg(c: Context, id: string) {
     },
   });
 
-  if (!org) {
+  if (!result) {
     throw new AppError("Organization not found", STATUS_CODES.NOT_FOUND);
   }
 
-  return sendSuccess(c, { org }, STATUS_CODES.OK);
+  return sendSuccess(c, { org: result }, STATUS_CODES.OK);
 }
 
 export async function createOrg(c: Context, payload: CreateOrg) {
   const workspaceId = getSessionWorkspaceId(c);
-  const [org] = await db
-    .insert(orgs)
+  const [result] = await db
+    .insert(org)
     .values({
       ...payload,
       workspaceId,
     })
     .returning();
 
-  return sendSuccess(c, { org }, STATUS_CODES.CREATED);
+  return sendSuccess(c, { org: result }, STATUS_CODES.CREATED);
 }
 
 export async function updateOrg(c: Context, id: string, payload: UpdateOrg) {
   const workspaceId = getSessionWorkspaceId(c);
-  const [org] = await db
-    .update(orgs)
+  const [result] = await db
+    .update(org)
     .set({
       ...payload,
       updatedAt: new Date(),
     })
-    .where(and(eq(orgs.id, id), eq(orgs.workspaceId, workspaceId)))
+    .where(and(eq(org.id, id), eq(org.workspaceId, workspaceId)))
     .returning();
 
-  if (!org) {
+  if (!result) {
     throw new AppError("Organization not found", STATUS_CODES.NOT_FOUND);
   }
 
-  return sendSuccess(c, { org }, STATUS_CODES.OK);
+  return sendSuccess(c, { org: result }, STATUS_CODES.OK);
 }
 
 export async function deleteOrg(c: Context, id: string) {
   const workspaceId = getSessionWorkspaceId(c);
-  const [org] = await db
-    .delete(orgs)
-    .where(and(eq(orgs.id, id), eq(orgs.workspaceId, workspaceId)))
+  const [result] = await db
+    .delete(org)
+    .where(and(eq(org.id, id), eq(org.workspaceId, workspaceId)))
     .returning();
 
-  if (!org) {
+  if (!result) {
     throw new AppError("Organization not found", STATUS_CODES.NOT_FOUND);
   }
 
-  return sendSuccess(c, { org }, STATUS_CODES.OK);
+  return sendSuccess(c, { org: result }, STATUS_CODES.OK);
 }
 
 export async function bulkDeleteOrgs(c: Context, payload: BulkDeleteInput) {
   const workspaceId = getSessionWorkspaceId(c);
-  const deletedOrgs = await db
-    .delete(orgs)
-    .where(and(eq(orgs.workspaceId, workspaceId), inArray(orgs.id, payload.ids)))
-    .returning({ id: orgs.id });
+  const deleted = await db
+    .delete(org)
+    .where(and(eq(org.workspaceId, workspaceId), inArray(org.id, payload.ids)))
+    .returning({ id: org.id });
 
-  return sendSuccess(c, { deleted: deletedOrgs.length }, STATUS_CODES.OK);
+  return sendSuccess(c, { deleted: deleted.length }, STATUS_CODES.OK);
 }

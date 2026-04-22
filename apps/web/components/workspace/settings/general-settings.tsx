@@ -65,7 +65,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
     deleteWorkspaceMutation(workspace.id, {
       onSuccess: () => {
         setDialogState("idle");
-        router.push("/onboarding");
+        router.push("/dashboard");
       },
     });
   }
@@ -74,7 +74,7 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
     leaveWorkspaceMutation(workspace.id, {
       onSuccess: () => {
         setDialogState("idle");
-        router.push("/onboarding");
+        router.push("/dashboard");
       },
     });
   }
@@ -179,45 +179,41 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
         </div>
 
         <div className="space-y-3 rounded-lg border border-destructive/20 p-4">
-          {!isOwner && (
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium">Leave workspace</p>
-                <p className="text-xs text-muted-foreground">
-                  You will lose access to all workspace data.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setDialogState("leave")}
-                className="shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <LogOutIcon className="mr-1.5 size-3.5" />
-                Leave
-              </Button>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium">Leave workspace</p>
+              <p className="text-xs text-muted-foreground">
+                You will lose access to all workspace data.
+              </p>
             </div>
-          )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDialogState("leave")}
+              className="shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <LogOutIcon className="mr-1.5 size-3.5" />
+              Leave
+            </Button>
+          </div>
 
-          {isOwner && (
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium">Delete workspace</p>
-                <p className="text-xs text-muted-foreground">
-                  Permanently delete this workspace and all its data.
-                </p>
-              </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setDialogState("delete")}
-                className="shrink-0"
-              >
-                <Trash2 className="mr-1.5 size-3.5" />
-                Delete
-              </Button>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium">Delete workspace</p>
+              <p className="text-xs text-muted-foreground">
+                Permanently delete this workspace and all its data.
+              </p>
             </div>
-          )}
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setDialogState("delete")}
+              className="shrink-0"
+            >
+              <Trash2 className="mr-1.5 size-3.5" />
+              Delete
+            </Button>
+          </div>
         </div>
       </section>
 

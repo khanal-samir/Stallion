@@ -15,22 +15,19 @@ import { Badge } from "@workspace/ui/components/ui/badge";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import { useCancelInvitation } from "@/hooks/queries/use-workspace";
 import type { WorkspaceInvitation, InvitationsSettingsProps } from "@/types/workspace-settings";
-import { WORKSPACE_ROLE } from "@workspace/validators/schemas/common";
 
-export function InvitationsSettings({
-  invitations,
-  organizationId,
-  currentUserRole,
-}: InvitationsSettingsProps) {
+export function InvitationsSettings({ invitations }: InvitationsSettingsProps) {
+  const { data: session } = useAuthSession();
+  const organizationId = session?.session?.activeOrganizationId ?? undefined;
+
   const { mutate: cancelInvitationMutation, isPending: isCancelPending } = useCancelInvitation();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<WorkspaceInvitation | null>(null);
 
-  const canInvite =
-    currentUserRole === WORKSPACE_ROLE.owner || currentUserRole === WORKSPACE_ROLE.admin;
   const pendingInvitations = invitations.filter((invitation) => invitation.status === "pending");
 
   function handleCancel() {
@@ -51,12 +48,10 @@ export function InvitationsSettings({
             {pendingInvitations.length === 1 ? "invite" : "invites"}.
           </p>
         </div>
-        {canInvite && (
-          <Button size="sm" onClick={() => setInviteOpen(true)}>
-            <Plus className="mr-1.5 size-3.5" />
-            Invite member
-          </Button>
-        )}
+        <Button size="sm" onClick={() => setInviteOpen(true)}>
+          <Plus className="mr-1.5 size-3.5" />
+          Invite member
+        </Button>
       </div>
 
       {pendingInvitations.length === 0 ? (
@@ -64,9 +59,7 @@ export function InvitationsSettings({
           icon={Mail}
           title="No pending invitations"
           description="Invite team members to collaborate in this workspace."
-          action={
-            canInvite ? { label: "Invite member", onClick: () => setInviteOpen(true) } : undefined
-          }
+          action={{ label: "Invite member", onClick: () => setInviteOpen(true) }}
           className="rounded-lg border border-dashed border-border bg-muted/20"
         />
       ) : (
@@ -77,7 +70,7 @@ export function InvitationsSettings({
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Expires</TableHead>
-                {canInvite && <TableHead className="w-14" />}
+                <TableHead className="w-14" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -92,19 +85,17 @@ export function InvitationsSettings({
                   <TableCell className="text-xs text-muted-foreground">
                     {new Date(invitation.expiresAt).toLocaleDateString()}
                   </TableCell>
-                  {canInvite && (
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="cursor-pointer text-muted-foreground hover:text-destructive"
-                        onClick={() => setCancelTarget(invitation)}
-                      >
-                        <X className="size-3.5" />
-                        <span className="sr-only">Cancel invitation</span>
-                      </Button>
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="cursor-pointer text-muted-foreground hover:text-destructive"
+                      onClick={() => setCancelTarget(invitation)}
+                    >
+                      <X className="size-3.5" />
+                      <span className="sr-only">Cancel invitation</span>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -115,7 +106,7 @@ export function InvitationsSettings({
       <InviteMemberDialog
         open={inviteOpen}
         onOpenChange={setInviteOpen}
-        organizationId={organizationId}
+        organizationId={organizationId!}
       />
 
       <ConfirmDialog
