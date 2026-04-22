@@ -1,11 +1,11 @@
 services:
   postgres:
     image: postgres:15
-    container_name: verio-postgres-dev
+    container_name: stallion-postgres-dev
     environment:
-      POSTGRES_USER: verio
-      POSTGRES_PASSWORD: verio123
-      POSTGRES_DB: verio
+      POSTGRES_USER: stallion
+      POSTGRES_PASSWORD: stallion123
+      POSTGRES_DB: stallion
     ports:
       - "5433:5432"
     volumes:
