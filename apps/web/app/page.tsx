@@ -18,7 +18,6 @@ export default function Page() {
       <main id="main-content">
         <HeroSection />
         <LogoStrip />
-
         <FeatureSection
           id="features"
           eyebrow="People & Organizations"
@@ -119,8 +118,6 @@ export default function Page() {
         >
           <FeatureDemoTeam />
         </FeatureSection>
-
-        <div className="border-t border-border/30" />
 
         <CtaSection />
       </main>
