@@ -5,7 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@workspace/ui/components/ui/button";
-import { Particles } from "@/components/ui/particles";
+import { Particles } from "@workspace/ui/components/ui/particles";
 import { MouseGlow } from "./mouse-glow";
 import { FloatingCard } from "./floating-card";
 import {
