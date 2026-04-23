@@ -8,14 +8,7 @@ import { Button } from "@workspace/ui/components/ui/button";
 import { Particles } from "@workspace/ui/components/ui/particles";
 import { MouseGlow } from "./mouse-glow";
 import { FloatingCard } from "./floating-card";
-import {
-  BarChart3,
-  Users,
-  Mail,
-  Building2,
-  Calendar,
-  Sparkles,
-} from "lucide-react";
+import { BarChart3, Mail, Building2, Calendar, Sparkles } from "lucide-react";
 
 function PipelineMiniCard() {
   return (
@@ -25,19 +18,14 @@ function PipelineMiniCard() {
         Pipeline
       </div>
       <div className="flex gap-1.5">
-        {["bg-primary/20", "bg-primary/15", "bg-primary/10", "bg-primary/25"].map(
-          (color, i) => (
-            <div key={i} className="flex-1 space-y-1.5">
-              <div className="h-1.5 w-full rounded-full bg-muted" />
-              {[...Array(3)].map((_, j) => (
-                <div
-                  key={j}
-                  className={`h-8 rounded-md ${color} border border-border/20`}
-                />
-              ))}
-            </div>
-          )
-        )}
+        {["bg-primary/20", "bg-primary/15", "bg-primary/10", "bg-primary/25"].map((color, i) => (
+          <div key={i} className="flex-1 space-y-1.5">
+            <div className="h-1.5 w-full rounded-full bg-muted" />
+            {[...Array(3)].map((_, j) => (
+              <div key={j} className={`h-8 rounded-md ${color} border border-border/20`} />
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -64,7 +52,10 @@ function ContactMiniCard() {
           { icon: Building2, text: "Acme Corp" },
           { icon: Calendar, text: "Last contacted 2d ago" },
         ].map((item) => (
-          <div key={item.text} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <div
+            key={item.text}
+            className="flex items-center gap-1.5 text-[10px] text-muted-foreground"
+          >
             <item.icon className="size-3" />
             {item.text}
           </div>
@@ -122,7 +113,7 @@ export function HeroSection() {
             duration: 0.8,
             ease: "power3.out",
           },
-          "-=0.5"
+          "-=0.5",
         );
       }
 
@@ -135,7 +126,7 @@ export function HeroSection() {
             duration: 0.6,
             ease: "power3.out",
           },
-          "-=0.4"
+          "-=0.4",
         );
       }
     });
@@ -156,12 +147,7 @@ export function HeroSection() {
       />
 
       {/* Mouse Glow */}
-      <MouseGlow
-        className="hidden md:block"
-        color="hsl(var(--primary))"
-        size={700}
-        opacity={0.1}
-      />
+      <MouseGlow className="hidden md:block" color="hsl(var(--primary))" size={700} opacity={0.1} />
 
       <div className="relative z-10 w-full max-w-7xl mx-auto">
         <div className="text-center max-w-4xl mx-auto">
@@ -180,8 +166,8 @@ export function HeroSection() {
             ref={subheadRef}
             className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            The CRM that manages your pipeline, automates your outreach, and
-            drafts personalized emails with AI — so you can focus on closing.
+            The CRM that manages your pipeline, automates your outreach, and drafts personalized
+            emails with AI — so you can focus on closing.
           </p>
 
           {/* CTAs */}
@@ -189,11 +175,7 @@ export function HeroSection() {
             ref={ctaRef}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
           >
-            <Button
-              asChild
-              size="lg"
-              className="cursor-pointer h-12 px-8 text-base"
-            >
+            <Button asChild size="lg" className="cursor-pointer h-12 px-8 text-base">
               <Link href="/signup">
                 Get Started Free
                 <ArrowRight className="size-4 ml-2" />
@@ -213,31 +195,19 @@ export function HeroSection() {
         {/* Floating Cards — Desktop */}
         <div className="hidden lg:block relative h-64 mt-16 max-w-5xl mx-auto">
           <div className="absolute top-0 right-[5%] w-56">
-            <FloatingCard
-              floatDuration={3.5}
-              floatDelay={0}
-              floatDistance={12}
-            >
+            <FloatingCard floatDuration={3.5} floatDelay={0} floatDistance={12}>
               <PipelineMiniCard />
             </FloatingCard>
           </div>
 
           <div className="absolute bottom-0 left-[8%] w-56">
-            <FloatingCard
-              floatDuration={4}
-              floatDelay={0.5}
-              floatDistance={10}
-            >
+            <FloatingCard floatDuration={4} floatDelay={0.5} floatDistance={10}>
               <ContactMiniCard />
             </FloatingCard>
           </div>
 
           <div className="absolute top-[20%] left-[35%] w-52">
-            <FloatingCard
-              floatDuration={3}
-              floatDelay={1}
-              floatDistance={14}
-            >
+            <FloatingCard floatDuration={3} floatDelay={1} floatDistance={14}>
               <EmailMiniCard />
             </FloatingCard>
           </div>
@@ -245,25 +215,13 @@ export function HeroSection() {
 
         {/* Floating Cards — Mobile (stacked below text) */}
         <div className="lg:hidden mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-md mx-auto">
-          <FloatingCard
-            floatDuration={3.5}
-            floatDelay={0}
-            floatDistance={8}
-          >
+          <FloatingCard floatDuration={3.5} floatDelay={0} floatDistance={8}>
             <PipelineMiniCard />
           </FloatingCard>
-          <FloatingCard
-            floatDuration={4}
-            floatDelay={0.3}
-            floatDistance={8}
-          >
+          <FloatingCard floatDuration={4} floatDelay={0.3} floatDistance={8}>
             <ContactMiniCard />
           </FloatingCard>
-          <FloatingCard
-            floatDuration={3}
-            floatDelay={0.6}
-            floatDistance={8}
-          >
+          <FloatingCard floatDuration={3} floatDelay={0.6} floatDistance={8}>
             <EmailMiniCard />
           </FloatingCard>
         </div>
