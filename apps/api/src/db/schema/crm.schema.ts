@@ -50,6 +50,7 @@ export const org = pgTable(
     workspaceId: uuid("workspace_id")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
+    ownerId: uuid("owner_id").references(() => user.id, { onDelete: "set null" }),
     name: varchar("name", { length: 255 }).notNull(),
     domain: varchar("domain", { length: 255 }),
     industry: varchar("industry", { length: 100 }),
@@ -61,6 +62,7 @@ export const org = pgTable(
   (table) => [
     unique("org_workspace_name_unique").on(table.workspaceId, table.name),
     index("org_workspace_id_idx").on(table.workspaceId),
+    index("org_owner_id_idx").on(table.ownerId),
   ],
 );
 
@@ -123,6 +125,7 @@ export const deals = pgTable(
 
 export const orgRelations = relations(org, ({ one, many }) => ({
   workspace: one(workspaces, { fields: [org.workspaceId], references: [workspaces.id] }),
+  owner: one(user, { fields: [org.ownerId], references: [user.id] }),
   people: many(people),
   deals: many(deals),
 }));

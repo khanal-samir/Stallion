@@ -84,6 +84,15 @@ export function getOrgsColumns({
         ),
     },
     {
+      id: "ownerName",
+      header: "Owner",
+      enableSorting: false,
+      cell: ({ row }) => {
+        const name = row.original.ownerName ?? row.original.owner?.name;
+        return name ? <span className="text-sm text-muted-foreground">{name}</span> : emptyCell;
+      },
+    },
+    {
       id: "peopleCount",
       header: "People",
       enableSorting: false,

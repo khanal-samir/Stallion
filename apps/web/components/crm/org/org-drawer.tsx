@@ -25,7 +25,10 @@ import { Separator } from "@workspace/ui/components/ui/separator";
 import { EntitySheet, type EntitySheetMode } from "@/components/shared/entity-sheet";
 import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreateOrg, useUpdateOrg, useDeleteOrg } from "@/hooks/queries/use-org";
+import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import type { CustomFieldDefinition, Organization } from "@/types/crm";
+import type { WorkspaceMember } from "@/types/workspace-settings";
 import { ORG_INDUSTRY_OPTIONS, ORG_SIZE_OPTIONS } from "@/components/crm/crm-options";
 import {
   buildCustomFieldsPayload,
@@ -55,6 +58,8 @@ function ViewContent({
   org: Organization;
   customFields: CustomFieldDefinition[];
 }) {
+  const ownerName = org.ownerName ?? org.owner?.name;
+
   return (
     <div className="space-y-6">
       {/* Identity */}
@@ -77,6 +82,9 @@ function ViewContent({
         </CrmViewField>
         <CrmViewField label="Location">
           {org.location ?? <span className="text-muted-foreground/50">Not set</span>}
+        </CrmViewField>
+        <CrmViewField label="Owner">
+          {ownerName ?? <span className="text-muted-foreground/50">Not assigned</span>}
         </CrmViewField>
       </CrmViewSection>
 
@@ -116,6 +124,9 @@ function OrgForm({
   isPending: boolean;
   customFields: CustomFieldDefinition[];
 }) {
+  const { data: workspace } = useActiveWorkspace();
+  const members = (workspace?.members ?? []) as Pick<WorkspaceMember, "userId" | "user">[];
+
   return (
     <Form {...form}>
       <div className="space-y-4">
@@ -239,6 +250,37 @@ function OrgForm({
           )}
         />
 
+        {/* Owner */}
+        <FormField
+          control={form.control}
+          name="ownerId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Owner</FormLabel>
+              <Select
+                value={field.value ?? "__none"}
+                onValueChange={(v) => field.onChange(v === "__none" ? null : v)}
+                disabled={isPending}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="No owner" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="__none">No owner</SelectItem>
+                  {members.map((member) => (
+                    <SelectItem key={member.userId} value={member.userId}>
+                      {member.user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {customFields.length > 0 && (
           <>
             <Separator />
@@ -336,6 +378,7 @@ export function OrgDrawer({
   org,
   customFields = [],
 }: OrgDrawerProps) {
+  const { data: session } = useAuthSession();
   const { mutate: createOrgMutate, isPending: isCreating } = useCreateOrg();
   const { mutate: updateOrgMutate, isPending: isUpdating } = useUpdateOrg(org?.id ?? "");
   const { mutate: deleteOrgMutate, isPending: isDeleting } = useDeleteOrg();
@@ -349,9 +392,10 @@ export function OrgDrawer({
       industry: mode === "create" ? "" : (org?.industry ?? ""),
       size: mode === "create" ? "" : (org?.size ?? ""),
       location: mode === "create" ? "" : (org?.location ?? ""),
+      ownerId: mode === "create" ? (session?.user?.id ?? null) : (org?.ownerId ?? null),
       customFields: mode === "create" ? undefined : (org?.customFields ?? undefined),
     }),
-    [mode, org],
+    [mode, org, session?.user?.id],
   );
 
   const form = useForm<CreateOrg>({
@@ -367,6 +411,7 @@ export function OrgDrawer({
       industry: values.industry || undefined,
       size: values.size || undefined,
       location: values.location || undefined,
+      ownerId: values.ownerId ?? null,
       customFields: buildCustomFieldsPayload(
         customFields,
         (values.customFields ?? {}) as Record<string, unknown>,

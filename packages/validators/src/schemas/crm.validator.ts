@@ -45,6 +45,7 @@ export const listOrgsQuerySchema = crmListQueryBaseSchema.extend({
   sortBy: orgSortBySchema.default("name"),
   industry: optionalTrimmedString(100),
   size: optionalTrimmedString(50),
+  ownerId: optionalUuidFilter,
 });
 
 export const listPeopleQuerySchema = crmListQueryBaseSchema.extend({
@@ -72,6 +73,7 @@ export const createOrgSchema = z.object({
   industry: z.string().max(100).optional(),
   size: z.string().max(50).optional(),
   location: z.string().max(255).optional(),
+  ownerId: nullableUuidSchema,
   customFields: z.record(z.unknown()).optional(),
 });
 

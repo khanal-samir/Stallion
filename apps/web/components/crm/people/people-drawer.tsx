@@ -29,6 +29,7 @@ import { CrmViewField, CrmViewSection } from "@/components/crm/crm-view";
 import { useCreatePerson, useUpdatePerson, useDeletePerson } from "@/hooks/queries/use-people";
 import { useOrganizations } from "@/hooks/queries/use-org";
 import { useActiveWorkspace } from "@/hooks/queries/use-workspace";
+import { useAuthSession } from "@/hooks/queries/use-auth";
 import type { CustomFieldDefinition, Person } from "@/types/crm";
 import type { WorkspaceMember } from "@/types/workspace-settings";
 import { PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
@@ -495,6 +496,7 @@ export function PeopleDrawer({
   customFields = [],
   onDeleteSuccess,
 }: PeopleDrawerProps) {
+  const { data: session } = useAuthSession();
   const { mutate: createPerson, isPending: isCreating } = useCreatePerson();
   const { mutate: updatePerson, isPending: isUpdating } = useUpdatePerson(person?.id ?? "");
   const { mutate: deletePerson, isPending: isDeleting } = useDeletePerson();
@@ -511,7 +513,7 @@ export function PeopleDrawer({
       status: mode === "create" ? "lead" : (person?.status ?? "lead"),
       source: mode === "create" ? "manual" : (person?.source ?? "manual"),
       orgId: mode === "create" ? null : (person?.orgId ?? null),
-      ownerId: mode === "create" ? null : (person?.ownerId ?? null),
+      ownerId: mode === "create" ? (session?.user?.id ?? null) : (person?.ownerId ?? null),
       lastContactedAt:
         mode === "create"
           ? undefined
@@ -520,7 +522,7 @@ export function PeopleDrawer({
             : undefined,
       customFields: mode === "create" ? undefined : (person?.customFields ?? undefined),
     }),
-    [mode, person],
+    [mode, person, session?.user?.id],
   );
 
   const form = useForm<CreatePerson>({

@@ -56,6 +56,7 @@ export interface Person {
 export interface Organization {
   id: string;
   workspaceId: string;
+  ownerId: string | null;
   name: string;
   domain: string | null;
   industry: string | null;
@@ -66,6 +67,8 @@ export interface Organization {
   updatedAt: string;
   peopleCount?: number;
   people?: RelatedEntityRef[];
+  owner?: RelatedEntityRef | null;
+  ownerName?: string | null;
 }
 
 export interface Deal {

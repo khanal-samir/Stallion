@@ -88,11 +88,7 @@ export async function listPeople(c: Context, query: ListPeopleQuery) {
   return sendSuccess(
     c,
     {
-      people: rows.map((row) => ({
-        ...row,
-        orgName: row.orgName ?? null,
-        ownerName: row.ownerName ?? null,
-      })),
+      people: rows,
       meta: { page, pageSize, totalCount, totalPages },
     },
     STATUS_CODES.OK,
@@ -127,11 +123,13 @@ export async function getPerson(c: Context, id: string) {
 
 export async function createPerson(c: Context, payload: CreatePerson) {
   const workspaceId = getSessionWorkspaceId(c);
+  const user = c.get("user");
   const [person] = await db
     .insert(people)
     .values({
       ...payload,
       workspaceId,
+      ownerId: payload.ownerId ?? user.id,
       lastContactedAt: toDate(payload.lastContactedAt),
     })
     .returning();

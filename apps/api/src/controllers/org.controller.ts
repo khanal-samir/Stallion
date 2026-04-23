@@ -7,7 +7,7 @@ import type {
 } from "@workspace/validators/schemas/crm";
 import { and, asc, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import { org, people } from "@/db/schema/index.js";
+import { org, people, user } from "@/db/schema/index.js";
 import { STATUS_CODES } from "@/constants/status-codes.js";
 import { sendSuccess } from "@/lib/api-response.js";
 import { AppError } from "@/lib/app-error.js";
@@ -15,11 +15,12 @@ import { getSessionWorkspaceId } from "@/lib/workspace.js";
 
 export async function listOrgs(c: Context, query: ListOrgsQuery) {
   const workspaceId = getSessionWorkspaceId(c);
-  const { page, pageSize, sortOrder, sortBy, search, industry, size } = query;
+  const { page, pageSize, sortOrder, sortBy, search, industry, size, ownerId } = query;
 
   const conditions = [eq(org.workspaceId, workspaceId)];
   if (industry) conditions.push(eq(org.industry, industry));
   if (size) conditions.push(eq(org.size, size));
+  if (ownerId) conditions.push(eq(org.ownerId, ownerId));
   if (search) {
     const searchTerm = `%${search}%`;
     conditions.push(
@@ -58,8 +59,22 @@ export async function listOrgs(c: Context, query: ListOrgsQuery) {
 
   const [rows, totalCountResult, peopleCounts] = await Promise.all([
     db
-      .select()
+      .select({
+        id: org.id,
+        workspaceId: org.workspaceId,
+        ownerId: org.ownerId,
+        name: org.name,
+        domain: org.domain,
+        industry: org.industry,
+        size: org.size,
+        location: org.location,
+        customFields: org.customFields,
+        createdAt: org.createdAt,
+        updatedAt: org.updatedAt,
+        ownerName: user.name,
+      })
       .from(org)
+      .leftJoin(user, eq(org.ownerId, user.id))
       .where(whereClause)
       .orderBy(orderBy)
       .limit(pageSize)
@@ -79,7 +94,10 @@ export async function listOrgs(c: Context, query: ListOrgsQuery) {
   return sendSuccess(
     c,
     {
-      org: rows.map((o) => ({ ...o, peopleCount: peopleCountMap.get(o.id) ?? 0 })),
+      org: rows.map((o) => ({
+        ...o,
+        peopleCount: peopleCountMap.get(o.id) ?? 0,
+      })),
       meta: { page, pageSize, totalCount, totalPages },
     },
     STATUS_CODES.OK,
@@ -97,6 +115,12 @@ export async function getOrg(c: Context, id: string) {
           name: true,
         },
       },
+      owner: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -109,11 +133,13 @@ export async function getOrg(c: Context, id: string) {
 
 export async function createOrg(c: Context, payload: CreateOrg) {
   const workspaceId = getSessionWorkspaceId(c);
+  const user = c.get("user");
   const [result] = await db
     .insert(org)
     .values({
       ...payload,
       workspaceId,
+      ownerId: payload.ownerId ?? user.id,
     })
     .returning();
 
