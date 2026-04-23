@@ -68,6 +68,10 @@
       "types": "./src/components/ui/pagination.tsx",
       "import": "./src/components/ui/pagination.tsx"
     },
+    "./components/ui/particles": {
+      "types": "./src/components/ui/particles.tsx",
+      "import": "./src/components/ui/particles.tsx"
+    },
     "./components/ui/popover": {
       "types": "./src/components/ui/popover.tsx",
       "import": "./src/components/ui/popover.tsx"

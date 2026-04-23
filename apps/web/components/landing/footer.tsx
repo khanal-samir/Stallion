@@ -11,9 +11,8 @@ const linkGroups: FooterLinkGroup[] = [
     title: "Product",
     links: [
       { label: "Features", href: "#features" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Integrations", href: "#" },
       { label: "Changelog", href: "#" },
+      { label: "Roadmap", href: "#" },
     ],
   },
   {
@@ -37,27 +36,29 @@ const linkGroups: FooterLinkGroup[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border py-12 px-4">
+    <footer className="border-t border-border/50 py-16 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand Column */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2 md:col-span-2">
             <Link
               href="/"
-              className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm inline-block"
             >
               <Logo size="lg" className="text-foreground" />
             </Link>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-xs">
-              The modern CRM built for outbound sales teams. Manage contacts, automate sequences,
-              and close more deals.
+              The modern CRM built for outbound sales teams. Manage contacts,
+              automate sequences, and close more deals.
             </p>
           </div>
 
           {/* Link Groups */}
           {linkGroups.map((group) => (
             <div key={group.title}>
-              <h4 className="text-sm font-semibold text-foreground mb-4">{group.title}</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-4">
+                {group.title}
+              </h4>
               <ul className="space-y-2.5">
                 {group.links.map((link) => (
                   <li key={link.label}>
@@ -75,10 +76,30 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-border/50">
-          <p className="text-sm text-muted-foreground text-center">
+        <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
             &copy; 2026 Stallion. All rights reserved.
           </p>
+          <div className="flex items-center gap-4">
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              Twitter
+            </a>
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              LinkedIn
+            </a>
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              GitHub
+            </a>
+          </div>
         </div>
       </div>
     </footer>

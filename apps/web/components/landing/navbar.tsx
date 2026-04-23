@@ -10,8 +10,7 @@ import { Logo } from "@workspace/ui/components/ui/logo";
 
 const navLinks = [
   { label: "Features", href: "#features" },
-  { label: "How it Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Docs", href: "#" },
 ];
 
 export function Navbar() {
@@ -39,11 +38,13 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         <nav
           className={cn(
-            "mt-4 mx-0 sm:mx-4 rounded-xl border border-border/50 bg-background/80 backdrop-blur-lg transition-shadow duration-200",
-            scrolled && "shadow-md",
+            "mt-4 mx-0 sm:mx-4 rounded-2xl border border-transparent transition-all duration-300",
+            scrolled
+              ? "bg-background/80 backdrop-blur-xl border-border/50 shadow-lg"
+              : "bg-transparent"
           )}
         >
           <div className="flex items-center justify-between h-14 px-4">
@@ -96,7 +97,7 @@ export function Navbar() {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-border/50 px-4 pb-4 pt-2">
+            <div className="md:hidden border-t border-border/50 px-4 pb-4 pt-2 bg-background/95 backdrop-blur-xl rounded-b-2xl">
               <div className="flex flex-col gap-1">
                 {navLinks.map((link) => (
                   <a
