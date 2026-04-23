@@ -7,9 +7,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const columns = [
-  { label: "New Lead", count: 4, color: "bg-primary/10" },
+  { label: "New", count: 4, color: "bg-primary/10" },
   { label: "Contacted", count: 3, color: "bg-primary/15" },
-  { label: "Meeting Set", count: 2, color: "bg-primary/10" },
+  { label: "Demo", count: 2, color: "bg-primary/10" },
   { label: "Proposal", count: 3, color: "bg-primary/20" },
 ];
 
