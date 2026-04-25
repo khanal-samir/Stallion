@@ -8,12 +8,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <TooltipProvider>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="min-w-0">
           <header className="flex items-center justify-between h-14 px-6 border-b border-border/50 shrink-0 bg-background">
             <SidebarTrigger className="-ml-1" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-auto p-8">{children}</main>
+          <main className="min-w-0 flex-1 overflow-auto p-8">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

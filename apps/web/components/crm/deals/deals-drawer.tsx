@@ -38,9 +38,9 @@ import { DEAL_STAGE_OPTIONS, DEAL_STAGE_MAP } from "@/components/crm/deals/deals
 
 function DealViewContent({ deal }: { deal: Deal }) {
   const stageConfig = DEAL_STAGE_MAP[deal.stage];
-  const personName = deal.person?.name;
-  const orgName = deal.org?.name;
-  const ownerName = deal.owner?.name;
+  const personName = deal.personName ?? deal.person?.name;
+  const orgName = deal.orgName ?? deal.org?.name;
+  const ownerName = deal.ownerName ?? deal.owner?.name;
 
   return (
     <div className="space-y-6 py-2">

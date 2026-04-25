@@ -243,12 +243,12 @@ export function DataTable<TData>({
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("min-w-0 space-y-4", className)}>
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 rounded-lg border bg-background p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="flex min-w-0 flex-col gap-3 rounded-lg border bg-background p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           {onSearchChange && (
-            <div className="relative min-w-60 flex-1 sm:max-w-sm">
+            <div className="relative min-w-0 flex-1 sm:min-w-60 sm:max-w-sm">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={searchValue}
@@ -290,7 +290,7 @@ export function DataTable<TData>({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {toolbarActions}
 
           <DropdownMenu>
@@ -321,8 +321,8 @@ export function DataTable<TData>({
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border bg-background">
-        <Table>
+      <div className="max-w-full overflow-hidden rounded-lg border bg-background">
+        <Table className="min-w-max">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
