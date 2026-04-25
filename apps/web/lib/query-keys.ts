@@ -19,4 +19,9 @@ export const QUERY_KEYS = {
   DEALS: "deals",
   DEALS_LIST: "deals-list",
   DEALS_DETAIL: "deals-detail",
+
+  ANALYTICS: "analytics",
+  ANALYTICS_PIPELINE: "analytics-pipeline",
+  ANALYTICS_PEOPLE_STATUS: "analytics-people-status",
+  ANALYTICS_WIN_RATE: "analytics-win-rate",
 } as const;

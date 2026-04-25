@@ -1,4 +1,5 @@
 import type { Hono } from "hono";
+import { analyticsRoutes } from "./analytics.route.js";
 import { authRoutes } from "./auth.route.js";
 import { dealRoutes } from "./deals.route.js";
 import { healthRoutes } from "./health.route.js";
@@ -11,4 +12,5 @@ export function registerRoutes(app: Hono) {
   app.route("/org", orgRoutes);
   app.route("/people", peopleRoutes);
   app.route("/deals", dealRoutes);
+  app.route("/analytics", analyticsRoutes);
 }

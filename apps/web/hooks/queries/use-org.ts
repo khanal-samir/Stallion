@@ -42,6 +42,7 @@ export function useCreateOrg() {
     mutationFn: (input: CreateOrganizationInput) => createOrganization(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ANALYTICS] });
       toast.success("Organization created", {
         description: "The organization has been created successfully.",
       });
@@ -55,6 +56,7 @@ export function useUpdateOrg(orgId: string) {
     mutationFn: (input: UpdateOrganizationInput) => updateOrganization(orgId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ANALYTICS] });
       toast.success("Organization updated", {
         description: "The organization has been updated successfully.",
       });
@@ -68,6 +70,7 @@ export function useDeleteOrg() {
     mutationFn: (orgId: string) => deleteOrganization(orgId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ANALYTICS] });
       toast.success("Organization deleted", {
         description: "The organization has been deleted successfully.",
       });
@@ -81,6 +84,7 @@ export function useBulkDeleteOrgs() {
     mutationFn: (input: BulkDeleteInput) => bulkDeleteOrganizations(input),
     onSuccess: (deletedCount) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ORGS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ANALYTICS] });
       toast.success("Organizations deleted", {
         description:
           deletedCount === 1
