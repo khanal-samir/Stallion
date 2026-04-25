@@ -12,6 +12,7 @@
     "db:generate": "pnpm build && drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "pnpm build && drizzle-kit push",
+    "db:seed": "bun run src/db/seed.ts",
     "db:studio": "pnpm build && drizzle-kit studio",
     "db:reset": "pnpm build && drizzle-kit push --force"
   },
