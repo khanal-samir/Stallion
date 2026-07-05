@@ -13,15 +13,17 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   const segments = pathname.split("/");
   const lastSegment = segments.pop() ?? "general";
   const parentSegment = segments.pop();
-  const activeId =
-    parentSegment === "custom-fields" ? "custom-fields" : lastSegment;
+  const activeId = parentSegment === "custom-fields" ? "custom-fields" : lastSegment;
   const activeItem = SETTINGS_NAV_ITEMS.find((item) => item.id === activeId);
   const title = activeItem?.label ?? "Settings";
   const isCustomFieldsSubRoute = parentSegment === "custom-fields";
 
   return (
-    <div className="-m-6 flex h-[calc(100vh-3rem)] overflow-hidden">
-      <div className="flex w-13 shrink-0 flex-col items-center gap-1 border-r border-border/50 bg-sidebar-background py-3">
+    <div className="-m-8 flex h-[calc(100svh-3.5rem)] overflow-hidden" data-tour="settings-page">
+      <div
+        className="flex w-13 shrink-0 flex-col items-center gap-1 border-r border-border/50 bg-background py-3"
+        data-tour="settings-navigation"
+      >
         {SETTINGS_NAV_ITEMS.map(({ id, label, icon: Icon }) => {
           const isActive = activeId === id;
           return (
@@ -64,7 +66,9 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <h1 className="text-sm font-semibold">{title}</h1>
         </div>
 
-        <div className="flex-1 overflow-auto p-8">{children}</div>
+        <div className="flex-1 overflow-auto p-8" data-tour="settings-content">
+          {children}
+        </div>
       </div>
     </div>
   );

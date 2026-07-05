@@ -10,6 +10,7 @@ export const user = pgTable(
     email: text().notNull().unique(),
     emailVerified: boolean().notNull().default(false),
     image: text(),
+    crmTourCompletedAt: timestamp(),
     ...timestamps,
   },
   (table) => [index("user_email_idx").on(table.email)],

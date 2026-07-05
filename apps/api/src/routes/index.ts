@@ -5,6 +5,7 @@ import { dealRoutes } from "./deals.route.js";
 import { healthRoutes } from "./health.route.js";
 import { orgRoutes } from "./org.route.js";
 import { peopleRoutes } from "./people.route.js";
+import { onboardingRoutes } from "./onboarding.route.js";
 
 export function registerRoutes(app: Hono) {
   app.route("/api/auth", authRoutes);
@@ -13,4 +14,5 @@ export function registerRoutes(app: Hono) {
   app.route("/people", peopleRoutes);
   app.route("/deals", dealRoutes);
   app.route("/analytics", analyticsRoutes);
+  app.route("/onboarding", onboardingRoutes);
 }

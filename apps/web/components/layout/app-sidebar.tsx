@@ -65,7 +65,17 @@ export function AppSidebar() {
                     tooltip={item.label}
                     className={cn("relative", isActive && "text-sidebar-foreground font-medium")}
                   >
-                    <Link href={item.href} className="relative">
+                    <Link
+                      href={item.href}
+                      className="relative"
+                      data-tour={
+                        item.href === "/organizations"
+                          ? "organizations-nav"
+                          : item.href === "/deals"
+                            ? "deals-nav"
+                            : undefined
+                      }
+                    >
                       <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
                       {isActive && (

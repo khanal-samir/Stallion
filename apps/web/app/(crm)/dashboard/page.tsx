@@ -101,7 +101,7 @@ export default function Dashboard() {
   const topStage = [...(pipelineData ?? [])].sort((a, b) => b.count - a.count)[0];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="dashboard-page">
       <PageHeader
         title="Dashboard"
         description="Workspace pipeline, contacts, and account coverage at a glance."
@@ -124,12 +124,14 @@ export default function Dashboard() {
         }
       />
 
-      <StatsCards
-        totalDeals={totalDeals}
-        totalPeople={totalPeople}
-        totalOrgs={totalOrgs}
-        isLoading={isLoading}
-      />
+      <div data-tour="dashboard-overview">
+        <StatsCards
+          totalDeals={totalDeals}
+          totalPeople={totalPeople}
+          totalOrgs={totalOrgs}
+          isLoading={isLoading}
+        />
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="space-y-6">

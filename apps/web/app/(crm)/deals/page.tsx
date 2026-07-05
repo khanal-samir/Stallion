@@ -41,19 +41,21 @@ export default function DealsPage() {
       : "";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="deals-page">
       <PageHeader
         title="Deals"
         description="Manage your pipeline and track deals through stages."
         actions={
-          <Button size="sm" onClick={() => handleOpenDrawer("create")}>
+          <Button size="sm" onClick={() => handleOpenDrawer("create")} data-tour="deals-create">
             <Plus className="size-3.5" />
             Add Deal
           </Button>
         }
       />
 
-      <DealsKanban onOpenDrawer={handleOpenDrawer} />
+      <div data-tour="deals-pipeline">
+        <DealsKanban onOpenDrawer={handleOpenDrawer} />
+      </div>
 
       <DealsDrawer
         open={drawer.drawer.open}

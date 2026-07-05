@@ -6,6 +6,8 @@ export const QUERY_KEYS = {
   ACTIVE_WORKSPACE: "active-workspace",
   WORKSPACE_INVITATIONS: "workspace-invitations",
   WORKSPACE_INVITATION: "workspace-invitation",
+  ONBOARDING: "onboarding",
+  CRM_TOUR: "crm-tour",
 
   // CRM
   PEOPLE: "people",
