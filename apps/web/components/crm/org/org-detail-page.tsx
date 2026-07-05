@@ -4,17 +4,17 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Building2, CalendarClock, Check, Globe2, Pencil, X } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Building2, Check, Globe2, Pencil, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { createOrgSchema, type CreateOrg } from "@workspace/validators/schemas/crm";
 import { Badge } from "@workspace/ui/components/ui/badge";
 import { Button } from "@workspace/ui/components/ui/button";
-import { Separator } from "@workspace/ui/components/ui/separator";
 import {
-  CrmRecordField,
+  CrmDossierMetric,
+  CrmDossierRow,
+  CrmDossierSection,
   CrmRecordPanel,
   CrmRecordShell,
-  CrmRecordStat,
   EmptyRecordValue,
 } from "@/components/crm/crm-record-detail";
 import { OrgForm } from "@/components/crm/org/org-drawer";
@@ -69,96 +69,88 @@ function OrgReadView({
   const peopleCount = org.peopleCount ?? org.people?.length ?? 0;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="space-y-6">
-        <CrmRecordPanel title="Company Profile" eyebrow="Core record">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <CrmRecordField label="Organization Name">{org.name}</CrmRecordField>
-            <CrmRecordField label="Domain">
-              {org.domain ? (
-                <a
-                  className="inline-flex items-center gap-2 text-primary hover:underline"
-                  href={`https://${org.domain}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Globe2 className="size-4" />
-                  {org.domain}
-                </a>
-              ) : (
-                <EmptyRecordValue />
-              )}
-            </CrmRecordField>
-            <CrmRecordField label="Industry">
-              {org.industry ? getIndustryLabel(org.industry) : <EmptyRecordValue />}
-            </CrmRecordField>
-            <CrmRecordField label="Company Size">{org.size ?? <EmptyRecordValue />}</CrmRecordField>
-            <CrmRecordField label="Location" className="sm:col-span-2">
-              {org.location ?? <EmptyRecordValue />}
-            </CrmRecordField>
-          </div>
-        </CrmRecordPanel>
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="space-y-5">
+        <CrmDossierSection
+          title="Company information"
+          description="Primary account fields used by the sales team."
+        >
+          <CrmDossierRow label="Name">{org.name}</CrmDossierRow>
+          <CrmDossierRow label="Domain">
+            {org.domain ? (
+              <a
+                className="inline-flex min-w-0 items-center gap-2 text-primary hover:underline"
+                href={`https://${org.domain}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Globe2 className="size-4 shrink-0" />
+                <span className="truncate">{org.domain}</span>
+              </a>
+            ) : (
+              <EmptyRecordValue />
+            )}
+          </CrmDossierRow>
+          <CrmDossierRow label="Industry">
+            {org.industry ? getIndustryLabel(org.industry) : <EmptyRecordValue />}
+          </CrmDossierRow>
+          <CrmDossierRow label="Company size">{org.size ?? <EmptyRecordValue />}</CrmDossierRow>
+          <CrmDossierRow label="Location">{org.location ?? <EmptyRecordValue />}</CrmDossierRow>
+          <CrmDossierRow label="Owner">
+            {ownerName ?? <EmptyRecordValue>Unassigned</EmptyRecordValue>}
+          </CrmDossierRow>
+        </CrmDossierSection>
 
-        <CrmRecordPanel title="Custom Intelligence" eyebrow="Workspace fields">
-          {customFields.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {customFields.map((field) => {
-                const value = formatCustomFieldValueForView(field, org.customFields?.[field.id]);
-                return (
-                  <CrmRecordField key={field.id} label={field.label}>
-                    {value === "Not set" ? <EmptyRecordValue /> : value}
-                  </CrmRecordField>
-                );
-              })}
-            </div>
+        <CrmDossierSection title="People" description="Contacts associated with this organization.">
+          {org.people && org.people.length > 0 ? (
+            org.people.map((person) => (
+              <div key={person.id} className="px-5 py-3.5">
+                <Link
+                  href={`/people/${person.id}`}
+                  className="group flex items-center justify-between gap-4 text-sm font-medium text-foreground"
+                >
+                  <span className="truncate">{person.name}</span>
+                  <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+                </Link>
+              </div>
+            ))
           ) : (
-            <p className="rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              No organization custom fields have been configured yet.
-            </p>
+            <div className="px-5 py-4 text-sm text-muted-foreground">
+              {peopleCount > 0
+                ? `${peopleCount} ${peopleCount === 1 ? "person is" : "people are"} linked to this organization.`
+                : "No people linked yet."}
+            </div>
           )}
-        </CrmRecordPanel>
+        </CrmDossierSection>
+
+        <CrmDossierSection
+          title="Custom fields"
+          description="Workspace-specific qualification data."
+        >
+          {customFields.length > 0 ? (
+            customFields.map((field) => {
+              const value = formatCustomFieldValueForView(field, org.customFields?.[field.id]);
+              return (
+                <CrmDossierRow key={field.id} label={field.label}>
+                  {value === "Not set" ? <EmptyRecordValue /> : value}
+                </CrmDossierRow>
+              );
+            })
+          ) : (
+            <div className="px-5 py-4 text-sm text-muted-foreground">
+              No organization custom fields have been configured yet.
+            </div>
+          )}
+        </CrmDossierSection>
       </div>
 
-      <aside className="space-y-4">
-        <CrmRecordStat
-          label="Contacts"
-          value={peopleCount}
-          detail={`${peopleCount === 1 ? "person" : "people"} linked to this company`}
-          tone="accent"
-        />
-        <CrmRecordStat
-          label="Owner"
-          value={ownerName ?? "Unassigned"}
-          detail="Responsible teammate"
-        />
-        <CrmRecordStat
-          label="Last Updated"
-          value={dayjs(org.updatedAt).format("MMM D")}
-          detail={dayjs(org.updatedAt).format("YYYY, h:mm A")}
-        />
-        <CrmRecordPanel title="Timeline" eyebrow="Audit trail" className="rounded-[1.5rem]">
-          <div className="space-y-4 text-sm">
-            <div className="flex gap-3">
-              <CalendarClock className="mt-0.5 size-4 text-primary" />
-              <div>
-                <p className="font-medium">Created</p>
-                <p className="text-muted-foreground">
-                  {dayjs(org.createdAt).format("MMMM D, YYYY h:mm A")}
-                </p>
-              </div>
-            </div>
-            <Separator />
-            <div className="flex gap-3">
-              <Check className="mt-0.5 size-4 text-primary" />
-              <div>
-                <p className="font-medium">Record refreshed</p>
-                <p className="text-muted-foreground">
-                  {dayjs(org.updatedAt).format("MMMM D, YYYY h:mm A")}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CrmRecordPanel>
+      <aside className="space-y-5">
+        <CrmDossierSection title="Record summary">
+          <CrmDossierMetric label="People" value={peopleCount.toLocaleString()} />
+          <CrmDossierMetric label="Owner" value={ownerName ?? "Unassigned"} />
+          <CrmDossierMetric label="Created" value={dayjs(org.createdAt).format("MMM D, YYYY")} />
+          <CrmDossierMetric label="Updated" value={dayjs(org.updatedAt).format("MMM D, YYYY")} />
+        </CrmDossierSection>
       </aside>
     </div>
   );
@@ -253,49 +245,43 @@ export function OrgDetailPage({
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-[2rem] border border-border/70 bg-card shadow-xl">
-        <div className="relative p-6 sm:p-8">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-primary/30 to-transparent" />
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-                <Building2 className="size-8" />
-              </div>
-              <div>
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary" className="rounded-full">
-                    Organization
-                  </Badge>
-                  {org.industry ? (
-                    <Badge className="rounded-full">{getIndustryLabel(org.industry)}</Badge>
-                  ) : null}
-                </div>
-                <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                  {org.name}
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                  {org.domain ?? "No domain captured"}{" "}
-                  {ownerName ? `• Owned by ${ownerName}` : "• No owner assigned"}
-                </p>
-              </div>
+      <section className="border-y border-border/70 bg-card/60 px-5 py-5 backdrop-blur-xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="rounded-full">
+                <Building2 className="size-3.5" />
+                Organization
+              </Badge>
+              {org.industry ? (
+                <Badge className="rounded-full">{getIndustryLabel(org.industry)}</Badge>
+              ) : null}
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:min-w-80">
-              <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  People
-                </p>
-                <p className="mt-2 text-2xl font-semibold">
-                  {org.peopleCount ?? org.people?.length ?? 0}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Size
-                </p>
-                <p className="mt-2 text-2xl font-semibold">{org.size ?? "-"}</p>
-              </div>
-            </div>
+            <h1 className="truncate text-3xl font-semibold tracking-tight text-foreground">
+              {org.name}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {org.domain ?? "No domain captured"} · {ownerName ?? "No owner assigned"}
+            </p>
           </div>
+          <dl className="grid gap-4 text-sm sm:grid-cols-3 lg:min-w-[30rem]">
+            <div>
+              <dt className="text-xs uppercase tracking-[0.18em] text-muted-foreground">People</dt>
+              <dd className="mt-1 font-semibold text-foreground">
+                {(org.peopleCount ?? org.people?.length ?? 0).toLocaleString()}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Size</dt>
+              <dd className="mt-1 font-semibold text-foreground">{org.size ?? "Not set"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Updated</dt>
+              <dd className="mt-1 font-semibold text-foreground">
+                {dayjs(org.updatedAt).format("MMM D, YYYY")}
+              </dd>
+            </div>
+          </dl>
         </div>
       </section>
 

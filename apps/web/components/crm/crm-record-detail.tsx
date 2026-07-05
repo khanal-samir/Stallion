@@ -110,3 +110,49 @@ export function CrmRecordStat({
 export function EmptyRecordValue({ children = "Not set" }: { children?: ReactNode }) {
   return <span className="font-normal text-muted-foreground/58">{children}</span>;
 }
+
+export function CrmDossierSection({
+  title,
+  description,
+  children,
+  className,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={cn("rounded-xl border border-border/70 bg-card/75 backdrop-blur-xl", className)}
+    >
+      <div className="border-b border-border/60 px-5 py-4">
+        <h2 className="text-sm font-semibold tracking-tight text-foreground">{title}</h2>
+        {description ? <p className="mt-1 text-xs text-muted-foreground">{description}</p> : null}
+      </div>
+      <div className="divide-y divide-border/60">{children}</div>
+    </section>
+  );
+}
+
+export function CrmDossierRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="grid gap-2 px-5 py-3.5 text-sm sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
+      <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </div>
+      <div className="min-w-0 font-medium text-foreground">{children}</div>
+    </div>
+  );
+}
+
+export function CrmDossierMetric({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="border-b border-border/60 px-5 py-4 last:border-b-0">
+      <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        {label}
+      </p>
+      <div className="mt-1.5 text-lg font-semibold tracking-tight text-foreground">{value}</div>
+    </div>
+  );
+}

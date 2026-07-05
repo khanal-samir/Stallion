@@ -16,33 +16,44 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  iconBg,
+  iconClassName,
+  accentClassName,
+  description,
   isLoading,
 }: {
   label: string;
   value: number;
   icon: React.ElementType;
-  iconBg: string;
+  iconClassName: string;
+  accentClassName: string;
+  description: string;
   isLoading: boolean;
 }) {
   return (
-    <Card className="relative overflow-hidden border-border/60 hover:border-primary/30 hover:shadow-sm transition-all duration-200">
+    <Card className="group relative overflow-hidden rounded-[1.5rem] border-border/70 bg-card/88 shadow-sm backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-xl">
+      <div className={cn("absolute inset-x-0 top-0 h-1", accentClassName)} />
       <CardContent className="p-5">
-        <div className="flex items-center gap-4">
-          <div
-            className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", iconBg)}
-          >
-            <Icon className="h-5 w-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-muted-foreground leading-none mb-1.5">{label}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              {label}
+            </p>
             {isLoading ? (
-              <Skeleton className="h-7 w-16" />
+              <Skeleton className="mt-3 h-8 w-20" />
             ) : (
-              <p className="text-2xl font-semibold tracking-tight tabular-nums">
+              <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums text-foreground">
                 {value.toLocaleString()}
               </p>
             )}
+            <p className="mt-2 text-xs text-muted-foreground">{description}</p>
+          </div>
+          <div
+            className={cn(
+              "flex size-11 shrink-0 items-center justify-center rounded-2xl transition-transform duration-200 group-hover:scale-105",
+              iconClassName,
+            )}
+          >
+            <Icon className="size-5" />
           </div>
         </div>
       </CardContent>
@@ -57,21 +68,27 @@ export function StatsCards({ totalDeals, totalPeople, totalOrgs, isLoading }: St
         label="Total Deals"
         value={totalDeals ?? 0}
         icon={Briefcase}
-        iconBg="bg-primary/10 text-primary"
+        iconClassName="bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+        accentClassName="bg-primary"
+        description="Opportunities moving through the pipeline"
         isLoading={isLoading}
       />
       <StatCard
         label="Total People"
         value={totalPeople ?? 0}
         icon={Users}
-        iconBg="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+        iconClassName="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+        accentClassName="bg-emerald-500"
+        description="Contacts, leads, and customers tracked"
         isLoading={isLoading}
       />
       <StatCard
         label="Organizations"
         value={totalOrgs ?? 0}
         icon={Building2}
-        iconBg="bg-violet-500/10 text-violet-600 dark:text-violet-400"
+        iconClassName="bg-violet-500/10 text-violet-700 dark:text-violet-300"
+        accentClassName="bg-violet-500"
+        description="Accounts in the workspace database"
         isLoading={isLoading}
       />
     </div>

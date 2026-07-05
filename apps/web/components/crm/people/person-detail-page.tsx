@@ -6,27 +6,26 @@ import dayjs from "dayjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
+  ArrowUpRight,
   Building2,
-  CalendarClock,
   Check,
   Linkedin,
   Mail,
   Pencil,
   Phone,
-  UserRound,
   X,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { createPersonSchema, type CreatePerson } from "@workspace/validators/schemas/crm";
 import { Badge } from "@workspace/ui/components/ui/badge";
 import { Button } from "@workspace/ui/components/ui/button";
-import { Separator } from "@workspace/ui/components/ui/separator";
 import { cn } from "@workspace/ui/lib/utils";
 import {
-  CrmRecordField,
+  CrmDossierMetric,
+  CrmDossierRow,
+  CrmDossierSection,
   CrmRecordPanel,
   CrmRecordShell,
-  CrmRecordStat,
   EmptyRecordValue,
 } from "@/components/crm/crm-record-detail";
 import { PERSON_SOURCE_OPTIONS, PERSON_STATUS_OPTIONS } from "@/components/crm/crm-options";
@@ -84,153 +83,127 @@ function PersonReadView({
   const status = PERSON_STATUS_OPTIONS.find((option) => option.value === person.status);
   const source = PERSON_SOURCE_OPTIONS.find((option) => option.value === person.source);
   const orgName = person.orgName ?? person.org?.name;
+  const orgId = person.org?.id ?? person.orgId;
   const ownerName = person.ownerName ?? person.owner?.name;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="space-y-6">
-        <CrmRecordPanel title="Contact Details" eyebrow="Primary information">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <CrmRecordField label="Full Name">{person.name}</CrmRecordField>
-            <CrmRecordField label="Job Title">
-              {person.jobTitle ?? <EmptyRecordValue />}
-            </CrmRecordField>
-            <CrmRecordField label="Email">
-              {person.email ? (
-                <a
-                  className="inline-flex items-center gap-2 text-primary hover:underline"
-                  href={`mailto:${person.email}`}
-                >
-                  <Mail className="size-4" />
-                  {person.email}
-                </a>
-              ) : (
-                <EmptyRecordValue />
-              )}
-            </CrmRecordField>
-            <CrmRecordField label="Phone">
-              {person.phone ? (
-                <a
-                  className="inline-flex items-center gap-2 text-primary hover:underline"
-                  href={`tel:${person.phone}`}
-                >
-                  <Phone className="size-4" />
-                  {person.phone}
-                </a>
-              ) : (
-                <EmptyRecordValue />
-              )}
-            </CrmRecordField>
-            <CrmRecordField label="LinkedIn" className="sm:col-span-2">
-              {person.linkedinUrl ? (
-                <a
-                  className="inline-flex max-w-full items-center gap-2 truncate text-primary hover:underline"
-                  href={person.linkedinUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Linkedin className="size-4 shrink-0" />
-                  <span className="truncate">{person.linkedinUrl}</span>
-                </a>
-              ) : (
-                <EmptyRecordValue />
-              )}
-            </CrmRecordField>
-          </div>
-        </CrmRecordPanel>
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="space-y-5">
+        <CrmDossierSection
+          title="Contact information"
+          description="Direct contact details and role context."
+        >
+          <CrmDossierRow label="Name">{person.name}</CrmDossierRow>
+          <CrmDossierRow label="Email">
+            {person.email ? (
+              <a
+                className="inline-flex min-w-0 items-center gap-2 text-primary hover:underline"
+                href={`mailto:${person.email}`}
+              >
+                <Mail className="size-4 shrink-0" />
+                <span className="truncate">{person.email}</span>
+              </a>
+            ) : (
+              <EmptyRecordValue />
+            )}
+          </CrmDossierRow>
+          <CrmDossierRow label="Phone">
+            {person.phone ? (
+              <a
+                className="inline-flex items-center gap-2 text-primary hover:underline"
+                href={`tel:${person.phone}`}
+              >
+                <Phone className="size-4 shrink-0" />
+                {person.phone}
+              </a>
+            ) : (
+              <EmptyRecordValue />
+            )}
+          </CrmDossierRow>
+          <CrmDossierRow label="Job title">{person.jobTitle ?? <EmptyRecordValue />}</CrmDossierRow>
+          <CrmDossierRow label="LinkedIn">
+            {person.linkedinUrl ? (
+              <a
+                className="inline-flex max-w-full items-center gap-2 truncate text-primary hover:underline"
+                href={person.linkedinUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Linkedin className="size-4 shrink-0" />
+                <span className="truncate">{person.linkedinUrl}</span>
+              </a>
+            ) : (
+              <EmptyRecordValue />
+            )}
+          </CrmDossierRow>
+        </CrmDossierSection>
 
-        <CrmRecordPanel title="CRM Classification" eyebrow="Pipeline context">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <CrmRecordField label="Status">
-              {status ? (
-                <Badge className={cn("font-medium", status.badgeClassName)}>{status.label}</Badge>
-              ) : (
-                <EmptyRecordValue />
-              )}
-            </CrmRecordField>
-            <CrmRecordField label="Source">{source?.label ?? person.source}</CrmRecordField>
-            <CrmRecordField label="Organization">
-              {orgName ? (
-                <span className="inline-flex items-center gap-2">
-                  <Building2 className="size-4 text-muted-foreground" />
-                  {orgName}
-                </span>
-              ) : (
-                <EmptyRecordValue>Not linked</EmptyRecordValue>
-              )}
-            </CrmRecordField>
-            <CrmRecordField label="Owner">
-              {ownerName ?? <EmptyRecordValue>Unassigned</EmptyRecordValue>}
-            </CrmRecordField>
-          </div>
-        </CrmRecordPanel>
+        <CrmDossierSection
+          title="CRM classification"
+          description="Lifecycle, source, and relationship ownership."
+        >
+          <CrmDossierRow label="Status">
+            {status ? (
+              <Badge className={cn("font-medium", status.badgeClassName)}>{status.label}</Badge>
+            ) : (
+              <EmptyRecordValue />
+            )}
+          </CrmDossierRow>
+          <CrmDossierRow label="Source">{source?.label ?? person.source}</CrmDossierRow>
+          <CrmDossierRow label="Organization">
+            {orgId && orgName ? (
+              <Link
+                href={`/organizations/${orgId}`}
+                className="group inline-flex min-w-0 items-center gap-2 text-primary hover:underline"
+              >
+                <Building2 className="size-4 shrink-0" />
+                <span className="truncate">{orgName}</span>
+                <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+              </Link>
+            ) : (
+              <EmptyRecordValue>Not linked</EmptyRecordValue>
+            )}
+          </CrmDossierRow>
+          <CrmDossierRow label="Owner">
+            {ownerName ?? <EmptyRecordValue>Unassigned</EmptyRecordValue>}
+          </CrmDossierRow>
+          <CrmDossierRow label="Last contacted">
+            {person.lastContactedAt ? (
+              dayjs(person.lastContactedAt).format("MMMM D, YYYY")
+            ) : (
+              <EmptyRecordValue>No activity date</EmptyRecordValue>
+            )}
+          </CrmDossierRow>
+        </CrmDossierSection>
 
-        <CrmRecordPanel title="Custom Intelligence" eyebrow="Workspace fields">
+        <CrmDossierSection
+          title="Custom fields"
+          description="Workspace-specific qualification data."
+        >
           {customFields.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {customFields.map((field) => {
-                const value = formatCustomFieldValueForView(field, person.customFields?.[field.id]);
-                return (
-                  <CrmRecordField key={field.id} label={field.label}>
-                    {value === "Not set" ? <EmptyRecordValue /> : value}
-                  </CrmRecordField>
-                );
-              })}
-            </div>
+            customFields.map((field) => {
+              const value = formatCustomFieldValueForView(field, person.customFields?.[field.id]);
+              return (
+                <CrmDossierRow key={field.id} label={field.label}>
+                  {value === "Not set" ? <EmptyRecordValue /> : value}
+                </CrmDossierRow>
+              );
+            })
           ) : (
-            <p className="rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+            <div className="px-5 py-4 text-sm text-muted-foreground">
               No people custom fields have been configured yet.
-            </p>
+            </div>
           )}
-        </CrmRecordPanel>
+        </CrmDossierSection>
       </div>
 
-      <aside className="space-y-4">
-        <CrmRecordStat
-          label="Last Contacted"
-          value={
-            person.lastContactedAt ? dayjs(person.lastContactedAt).format("MMM D") : "No touch"
-          }
-          detail={
-            person.lastContactedAt
-              ? dayjs(person.lastContactedAt).format("YYYY")
-              : "No activity date captured"
-          }
-          tone="accent"
-        />
-        <CrmRecordStat
-          label="Status"
-          value={status?.label ?? person.status}
-          detail="Relationship stage"
-        />
-        <CrmRecordStat
-          label="Owner"
-          value={ownerName ?? "Unassigned"}
-          detail="Responsible teammate"
-        />
-        <CrmRecordPanel title="Timeline" eyebrow="Audit trail" className="rounded-[1.5rem]">
-          <div className="space-y-4 text-sm">
-            <div className="flex gap-3">
-              <CalendarClock className="mt-0.5 size-4 text-primary" />
-              <div>
-                <p className="font-medium">Created</p>
-                <p className="text-muted-foreground">
-                  {dayjs(person.createdAt).format("MMMM D, YYYY h:mm A")}
-                </p>
-              </div>
-            </div>
-            <Separator />
-            <div className="flex gap-3">
-              <Check className="mt-0.5 size-4 text-primary" />
-              <div>
-                <p className="font-medium">Updated</p>
-                <p className="text-muted-foreground">
-                  {dayjs(person.updatedAt).format("MMMM D, YYYY h:mm A")}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CrmRecordPanel>
+      <aside className="space-y-5">
+        <CrmDossierSection title="Record summary">
+          <CrmDossierMetric label="Status" value={status?.label ?? person.status} />
+          <CrmDossierMetric label="Owner" value={ownerName ?? "Unassigned"} />
+          <CrmDossierMetric label="Created" value={dayjs(person.createdAt).format("MMM D, YYYY")} />
+          <CrmDossierMetric label="Updated" value={dayjs(person.updatedAt).format("MMM D, YYYY")} />
+        </CrmDossierSection>
       </aside>
     </div>
   );
@@ -326,49 +299,42 @@ export function PersonDetailPage({
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-[2rem] border border-border/70 bg-card shadow-xl">
-        <div className="relative p-6 sm:p-8">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-primary/30 to-transparent" />
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-                <UserRound className="size-8" />
-              </div>
-              <div>
-                <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary" className="rounded-full">
-                    Contact
-                  </Badge>
-                  {status ? (
-                    <Badge className={cn("rounded-full", status.badgeClassName)}>
-                      {status.label}
-                    </Badge>
-                  ) : null}
-                </div>
-                <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                  {person.name}
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                  {person.jobTitle ?? "No job title"}{" "}
-                  {orgName ? `• ${orgName}` : "• No organization linked"}
-                </p>
-              </div>
+      <section className="border-y border-border/70 bg-card/60 px-5 py-5 backdrop-blur-xl">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="rounded-full">
+                Contact
+              </Badge>
+              {status ? (
+                <Badge className={cn("rounded-full", status.badgeClassName)}>{status.label}</Badge>
+              ) : null}
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:min-w-80">
-              <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Email
-                </p>
-                <p className="mt-2 truncate text-sm font-semibold">{person.email ?? "-"}</p>
-              </div>
-              <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Role
-                </p>
-                <p className="mt-2 truncate text-sm font-semibold">{person.jobTitle ?? "-"}</p>
-              </div>
-            </div>
+            <h1 className="truncate text-3xl font-semibold tracking-tight text-foreground">
+              {person.name}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {person.jobTitle ?? "No job title"} · {orgName ?? "No organization linked"}
+            </p>
           </div>
+          <dl className="grid gap-4 text-sm sm:grid-cols-3 lg:min-w-[30rem]">
+            <div>
+              <dt className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Email</dt>
+              <dd className="mt-1 truncate font-semibold text-foreground">
+                {person.email ?? "Not set"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Source</dt>
+              <dd className="mt-1 font-semibold text-foreground capitalize">{person.source}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Updated</dt>
+              <dd className="mt-1 font-semibold text-foreground">
+                {dayjs(person.updatedAt).format("MMM D, YYYY")}
+              </dd>
+            </div>
+          </dl>
         </div>
       </section>
 
