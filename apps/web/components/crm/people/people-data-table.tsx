@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -16,6 +17,7 @@ import { useEntityDelete } from "@/hooks/use-entity-delete";
 import type { CustomFieldDefinition, Person, PeopleListParams } from "@/types/crm";
 
 export function PeopleDataTable() {
+  const router = useRouter();
   const table = useDataTableState({ defaultPageSize: 25, debounceMs: 350 });
   const drawer = useEntityDrawer<Person>();
   const deleteDialog = useEntityDelete<Person>({ enableBulkDelete: true });
@@ -69,8 +71,8 @@ export function PeopleDataTable() {
   const selectedCount = selectedIds.length;
 
   const columns = getPeopleColumns({
-    onView: (person) => drawer.openDrawer("view", person),
-    onEdit: (person) => drawer.openDrawer("edit", person),
+    onView: (person) => router.push(`/people/${person.id}`),
+    onEdit: (person) => router.push(`/people/${person.id}?edit=true`),
     onDelete: (person) => deleteDialog.openDelete(person),
     customFields,
   });
@@ -148,7 +150,7 @@ export function PeopleDataTable() {
         rowSelection={table.rowSelection}
         onRowSelectionChange={table.onRowSelectionChange}
         getRowId={(row) => row.id}
-        onRowClick={(person) => drawer.openDrawer("view", person)}
+        onRowClick={(person) => router.push(`/people/${person.id}`)}
         emptyTitle="No people yet"
         emptyDescription="Add your first contact to get started."
         toolbarActions={

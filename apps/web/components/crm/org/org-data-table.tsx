@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { DataTable } from "@/components/shared/data-table";
@@ -16,6 +17,7 @@ import { useEntityDelete } from "@/hooks/use-entity-delete";
 import type { CustomFieldDefinition, Organization, OrganizationsListParams } from "@/types/crm";
 
 export function OrgsDataTable() {
+  const router = useRouter();
   const table = useDataTableState({ defaultPageSize: 50, debounceMs: 300 });
   const drawer = useEntityDrawer<Organization>();
   const deleteDialog = useEntityDelete<Organization>({ enableBulkDelete: true });
@@ -66,8 +68,8 @@ export function OrgsDataTable() {
   const isDeletePending = isBulkDeleting || isDeleting;
 
   const columns = getOrgsColumns({
-    onView: (org) => drawer.openDrawer("view", org),
-    onEdit: (org) => drawer.openDrawer("edit", org),
+    onView: (org) => router.push(`/organizations/${org.id}`),
+    onEdit: (org) => router.push(`/organizations/${org.id}?edit=true`),
     onDelete: (org) => deleteDialog.openDelete(org),
     customFields,
   });
@@ -151,7 +153,7 @@ export function OrgsDataTable() {
         rowSelection={table.rowSelection}
         onRowSelectionChange={table.onRowSelectionChange}
         getRowId={(row) => row.id}
-        onRowClick={(org) => drawer.openDrawer("view", org)}
+        onRowClick={(org) => router.push(`/organizations/${org.id}`)}
         emptyTitle="No organizations yet"
         emptyDescription="Add your first organization to start tracking companies in your CRM."
         toolbarActions={toolbarActions}
