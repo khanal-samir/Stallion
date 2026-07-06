@@ -27,7 +27,8 @@ export function proxy(request: NextRequest) {
   if (!sessionCookie && !isPublicRoute)
     return NextResponse.redirect(new URL("/login", request.url));
 
-  if (sessionCookie && isPublicRoute) return NextResponse.redirect(new URL("/people", request.url));
+  if (sessionCookie && isPublicRoute)
+    return NextResponse.redirect(new URL("/dashboard", request.url));
 
   return NextResponse.next();
 }

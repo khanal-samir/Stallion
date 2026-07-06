@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { DataTable } from "@/components/shared/data-table";
@@ -16,6 +17,7 @@ import { useEntityDelete } from "@/hooks/use-entity-delete";
 import type { CustomFieldDefinition, Organization, OrganizationsListParams } from "@/types/crm";
 
 export function OrgsDataTable() {
+  const router = useRouter();
   const table = useDataTableState({ defaultPageSize: 50, debounceMs: 300 });
   const drawer = useEntityDrawer<Organization>();
   const deleteDialog = useEntityDelete<Organization>({ enableBulkDelete: true });
@@ -66,8 +68,8 @@ export function OrgsDataTable() {
   const isDeletePending = isBulkDeleting || isDeleting;
 
   const columns = getOrgsColumns({
-    onView: (org) => drawer.openDrawer("view", org),
-    onEdit: (org) => drawer.openDrawer("edit", org),
+    onView: (org) => router.push(`/organizations/${org.id}`),
+    onEdit: (org) => router.push(`/organizations/${org.id}?edit=true`),
     onDelete: (org) => deleteDialog.openDelete(org),
     customFields,
   });
@@ -114,48 +116,54 @@ export function OrgsDataTable() {
     : `This will permanently delete "${(deleteDialog.deleteTarget as Organization | null)?.name}". People linked to this organization will have their organization cleared. This action cannot be undone.`;
 
   return (
-    <>
+    <div data-tour="organizations-page">
       <PageHeader
         title="Organizations"
         description="Manage the companies you're tracking in your CRM."
         count={isLoading ? undefined : totalCount}
         actions={
-          <Button size="sm" onClick={() => drawer.openDrawer("create")}>
+          <Button
+            size="sm"
+            onClick={() => drawer.openDrawer("create")}
+            data-tour="organizations-create"
+          >
             <Plus className="size-3.5" />
             Add Organization
           </Button>
         }
       />
 
-      <DataTable
-        columns={columns}
-        data={org}
-        pageCount={pageCount}
-        pageIndex={table.pagination.pageIndex}
-        pageSize={table.pagination.pageSize}
-        onPaginationChange={table.onPaginationChange}
-        sorting={table.sorting}
-        onSortingChange={table.onSortingChange}
-        columnFilters={table.columnFilters}
-        onColumnFiltersChange={table.onColumnFiltersChange}
-        searchValue={table.searchInput}
-        onSearchChange={table.onSearchChange}
-        searchPlaceholder="Search organizations…"
-        filterConfig={ORGS_FILTER_CONFIG}
-        isLoading={isLoading}
-        isError={isError}
-        errorTitle="Failed to load organizations"
-        errorDescription="There was a problem fetching your organizations."
-        onRetry={refetch}
-        enableRowSelection
-        rowSelection={table.rowSelection}
-        onRowSelectionChange={table.onRowSelectionChange}
-        getRowId={(row) => row.id}
-        onRowClick={(org) => drawer.openDrawer("view", org)}
-        emptyTitle="No organizations yet"
-        emptyDescription="Add your first organization to start tracking companies in your CRM."
-        toolbarActions={toolbarActions}
-      />
+      <div data-tour="organizations-table">
+        <DataTable
+          columns={columns}
+          data={org}
+          pageCount={pageCount}
+          pageIndex={table.pagination.pageIndex}
+          pageSize={table.pagination.pageSize}
+          onPaginationChange={table.onPaginationChange}
+          sorting={table.sorting}
+          onSortingChange={table.onSortingChange}
+          columnFilters={table.columnFilters}
+          onColumnFiltersChange={table.onColumnFiltersChange}
+          searchValue={table.searchInput}
+          onSearchChange={table.onSearchChange}
+          searchPlaceholder="Search organizations…"
+          filterConfig={ORGS_FILTER_CONFIG}
+          isLoading={isLoading}
+          isError={isError}
+          errorTitle="Failed to load organizations"
+          errorDescription="There was a problem fetching your organizations."
+          onRetry={refetch}
+          enableRowSelection
+          rowSelection={table.rowSelection}
+          onRowSelectionChange={table.onRowSelectionChange}
+          getRowId={(row) => row.id}
+          onRowClick={(org) => router.push(`/organizations/${org.id}`)}
+          emptyTitle="No organizations yet"
+          emptyDescription="Add your first organization to start tracking companies in your CRM."
+          toolbarActions={toolbarActions}
+        />
+      </div>
 
       <OrgDrawer
         open={drawer.drawer.open}
@@ -178,6 +186,6 @@ export function OrgsDataTable() {
         isPending={isDeletePending}
         onConfirm={handleConfirmDelete}
       />
-    </>
+    </div>
   );
 }

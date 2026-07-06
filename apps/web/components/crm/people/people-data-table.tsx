@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -16,6 +17,7 @@ import { useEntityDelete } from "@/hooks/use-entity-delete";
 import type { CustomFieldDefinition, Person, PeopleListParams } from "@/types/crm";
 
 export function PeopleDataTable() {
+  const router = useRouter();
   const table = useDataTableState({ defaultPageSize: 25, debounceMs: 350 });
   const drawer = useEntityDrawer<Person>();
   const deleteDialog = useEntityDelete<Person>({ enableBulkDelete: true });
@@ -69,8 +71,8 @@ export function PeopleDataTable() {
   const selectedCount = selectedIds.length;
 
   const columns = getPeopleColumns({
-    onView: (person) => drawer.openDrawer("view", person),
-    onEdit: (person) => drawer.openDrawer("edit", person),
+    onView: (person) => router.push(`/people/${person.id}`),
+    onEdit: (person) => router.push(`/people/${person.id}?edit=true`),
     onDelete: (person) => deleteDialog.openDelete(person),
     customFields,
   });
@@ -111,60 +113,62 @@ export function PeopleDataTable() {
         : { title: "", description: "" };
 
   return (
-    <div>
+    <div data-tour="people-page">
       <PageHeader
         title="People"
         count={isLoading ? undefined : totalCount}
         description="Manage your contacts, leads, and customers."
         actions={
-          <Button size="sm" onClick={() => drawer.openDrawer("create")}>
+          <Button size="sm" onClick={() => drawer.openDrawer("create")} data-tour="people-create">
             <Plus className="size-3.5" />
             Add Person
           </Button>
         }
       />
 
-      <DataTable
-        columns={columns}
-        data={people}
-        pageCount={pageCount}
-        pageIndex={table.pagination.pageIndex}
-        pageSize={table.pagination.pageSize}
-        onPaginationChange={table.onPaginationChange}
-        sorting={table.sorting}
-        onSortingChange={table.onSortingChange}
-        columnFilters={table.columnFilters}
-        onColumnFiltersChange={table.onColumnFiltersChange}
-        searchValue={table.searchInput}
-        onSearchChange={table.onSearchChange}
-        searchPlaceholder="Search people…"
-        filterConfig={PEOPLE_FILTER_CONFIG}
-        isLoading={isLoading}
-        isError={isError}
-        errorTitle="Failed to load people"
-        errorDescription="There was a problem loading your contacts. Please try again."
-        onRetry={refetch}
-        enableRowSelection
-        rowSelection={table.rowSelection}
-        onRowSelectionChange={table.onRowSelectionChange}
-        getRowId={(row) => row.id}
-        onRowClick={(person) => drawer.openDrawer("view", person)}
-        emptyTitle="No people yet"
-        emptyDescription="Add your first contact to get started."
-        toolbarActions={
-          selectedCount > 0 ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={deleteDialog.openBulkDelete}
-              disabled={isDeletePending}
-            >
-              <Trash2 className="size-3.5" />
-              Delete {selectedCount} selected
-            </Button>
-          ) : null
-        }
-      />
+      <div data-tour="people-table">
+        <DataTable
+          columns={columns}
+          data={people}
+          pageCount={pageCount}
+          pageIndex={table.pagination.pageIndex}
+          pageSize={table.pagination.pageSize}
+          onPaginationChange={table.onPaginationChange}
+          sorting={table.sorting}
+          onSortingChange={table.onSortingChange}
+          columnFilters={table.columnFilters}
+          onColumnFiltersChange={table.onColumnFiltersChange}
+          searchValue={table.searchInput}
+          onSearchChange={table.onSearchChange}
+          searchPlaceholder="Search people…"
+          filterConfig={PEOPLE_FILTER_CONFIG}
+          isLoading={isLoading}
+          isError={isError}
+          errorTitle="Failed to load people"
+          errorDescription="There was a problem loading your contacts. Please try again."
+          onRetry={refetch}
+          enableRowSelection
+          rowSelection={table.rowSelection}
+          onRowSelectionChange={table.onRowSelectionChange}
+          getRowId={(row) => row.id}
+          onRowClick={(person) => router.push(`/people/${person.id}`)}
+          emptyTitle="No people yet"
+          emptyDescription="Add your first contact to get started."
+          toolbarActions={
+            selectedCount > 0 ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={deleteDialog.openBulkDelete}
+                disabled={isDeletePending}
+              >
+                <Trash2 className="size-3.5" />
+                Delete {selectedCount} selected
+              </Button>
+            ) : null
+          }
+        />
+      </div>
 
       <PeopleDrawer
         open={drawer.drawer.open}

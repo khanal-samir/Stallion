@@ -65,7 +65,17 @@ export function AppSidebar() {
                     tooltip={item.label}
                     className={cn("relative", isActive && "text-sidebar-foreground font-medium")}
                   >
-                    <Link href={item.href} className="relative">
+                    <Link
+                      href={item.href}
+                      className="relative"
+                      data-tour={
+                        item.href === "/organizations"
+                          ? "organizations-nav"
+                          : item.href === "/deals"
+                            ? "deals-nav"
+                            : undefined
+                      }
+                    >
                       <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
                       {isActive && (
@@ -108,11 +118,11 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer */}
-      <SidebarFooter className="px-3 py-3">
+      <SidebarFooter className="px-3 py-3 group-data-[collapsible=icon]:px-2">
         {sessionPending ? (
-          <div className="flex items-center gap-2 p-2">
+          <div className="flex items-center gap-2 p-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0">
             <Skeleton className="size-8 rounded-full" />
-            <div className="flex-1 space-y-1.5">
+            <div className="flex-1 space-y-1.5 group-data-[collapsible=icon]:hidden">
               <Skeleton className="h-3.5 w-24" />
               <Skeleton className="h-2.5 w-32" />
             </div>
@@ -120,7 +130,7 @@ export function AppSidebar() {
         ) : (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 w-full rounded-md p-2 hover:bg-sidebar-accent transition-colors cursor-pointer">
+              <button className="flex w-full cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0">
                 <Avatar className="size-8">
                   {user?.image && <AvatarImage src={user.image} alt={user.name ?? ""} />}
                   <AvatarFallback className="text-xs bg-sidebar-accent">

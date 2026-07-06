@@ -40,6 +40,7 @@ export function useCreateDeal() {
     mutationFn: (input: CreateDeal) => createDeal(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DEALS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ANALYTICS] });
       toast.success("Deal created", {
         description: "The deal has been added successfully.",
       });
@@ -58,6 +59,7 @@ export function useUpdateDeal() {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.DEALS, QUERY_KEYS.DEALS_DETAIL, variables.dealId],
       });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ANALYTICS] });
       toast.success("Deal updated", {
         description: "The deal has been updated successfully.",
       });
@@ -72,6 +74,7 @@ export function useDeleteDeal() {
     mutationFn: (dealId: string) => deleteDeal(dealId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DEALS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ANALYTICS] });
       toast.success("Deal deleted", {
         description: "The deal has been removed successfully.",
       });

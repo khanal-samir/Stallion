@@ -6,6 +6,8 @@ export const QUERY_KEYS = {
   ACTIVE_WORKSPACE: "active-workspace",
   WORKSPACE_INVITATIONS: "workspace-invitations",
   WORKSPACE_INVITATION: "workspace-invitation",
+  ONBOARDING: "onboarding",
+  CRM_TOUR: "crm-tour",
 
   // CRM
   PEOPLE: "people",
@@ -19,4 +21,9 @@ export const QUERY_KEYS = {
   DEALS: "deals",
   DEALS_LIST: "deals-list",
   DEALS_DETAIL: "deals-detail",
+
+  ANALYTICS: "analytics",
+  ANALYTICS_PIPELINE: "analytics-pipeline",
+  ANALYTICS_PEOPLE_STATUS: "analytics-people-status",
+  ANALYTICS_WIN_RATE: "analytics-win-rate",
 } as const;
