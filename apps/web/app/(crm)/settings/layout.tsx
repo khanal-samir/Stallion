@@ -19,7 +19,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   const isCustomFieldsSubRoute = parentSegment === "custom-fields";
 
   return (
-    <div className="-m-8 flex h-[calc(100svh-3.5rem)] overflow-hidden" data-tour="settings-page">
+    <div className="-m-8 flex h-svh overflow-hidden" data-tour="settings-page">
       <div
         className="flex w-13 shrink-0 flex-col items-center gap-1 border-r border-border/50 bg-background py-3"
         data-tour="settings-navigation"

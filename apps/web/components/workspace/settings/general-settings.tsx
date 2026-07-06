@@ -29,6 +29,7 @@ import {
 } from "@/hooks/queries/use-workspace";
 import { useAuthSession } from "@/hooks/queries/use-auth";
 import { Logo } from "@workspace/ui/components/ui/logo";
+import { ThemeToggle } from "@workspace/ui/components/ui/theme-toggle";
 import type { GeneralSettingsProps } from "@/types/workspace-settings";
 
 type DialogState = "idle" | "editing" | "delete" | "leave";
@@ -165,6 +166,25 @@ export function GeneralSettings({ workspace }: GeneralSettingsProps) {
             </div>
           </div>
         )}
+      </section>
+
+      <Separator />
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-sm font-medium">Appearance</h2>
+          <p className="text-sm text-muted-foreground">
+            Choose how Stallion looks on this device.
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/30 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium">Color mode</p>
+            <p className="text-xs text-muted-foreground">Switch between light and dark mode.</p>
+          </div>
+          <ThemeToggle showLabel />
+        </div>
       </section>
 
       <Separator />
