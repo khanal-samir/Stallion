@@ -9,7 +9,10 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "TZ=UTC vitest run",
+    "test:unit": "TZ=UTC vitest run",
+    "test:coverage": "TZ=UTC vitest run --coverage"
   },
   "dependencies": {
     "@dnd-kit/core": "catalog:",
@@ -42,15 +45,26 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tanstack/react-query-devtools": "catalog:",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.1.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "@vitest/coverage-v8": "4.1.9",
     "@workspace/eslint-config": "workspace:^",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.2",
+    "jsdom": "^29.1.1",
+    "msw": "^2.14.6",
     "tailwindcss": "^4.2.1",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "4.1.9",
+    "vitest-axe": "^0.1.0"
   }
 }

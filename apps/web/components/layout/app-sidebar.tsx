@@ -17,6 +17,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  SidebarTrigger,
 } from "@workspace/ui/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -47,7 +48,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* Header */}
       <SidebarHeader>
-        <TeamSwitcher />
+        <div className="flex items-center gap-1">
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <TeamSwitcher />
+          </div>
+          <SidebarTrigger className="shrink-0 text-muted-foreground hover:text-sidebar-foreground" />
+        </div>
       </SidebarHeader>
 
       {/* Content */}
