@@ -7,8 +7,11 @@
     "dev": "bun run --hot src/server.ts",
     "build": "tsc",
     "start": "bun run src/server.ts",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
     "lint": "eslint .",
+    "test": "TZ=UTC vitest run",
+    "test:unit": "TZ=UTC vitest run",
+    "test:coverage": "TZ=UTC vitest run --coverage",
     "db:generate": "pnpm build && drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "pnpm build && drizzle-kit push",
@@ -29,12 +32,15 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@types/bun": "^1.2.14",
+    "@vitest/coverage-v8": "4.1.9",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "dotenv": "^17.3.1",
     "drizzle-kit": "^0.31.1",
     "eslint": "^9.39.2",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "4.1.9"
   }
 }
