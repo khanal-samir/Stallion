@@ -12,6 +12,12 @@ export const apiEnvSchema = z
     RESEND_FROM_EMAIL: z.string(),
     GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
     GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
+    SEQUENCE_LIVE_SEND_ENABLED: z
+      .enum(["true", "false"])
+      .optional()
+      .default("false")
+      .transform((value) => value === "true"),
+    GROQ_API_KEY: z.string().optional(),
   })
   .strict();
 

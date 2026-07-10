@@ -1,4 +1,4 @@
-import { custom, z } from "zod";
+import { z } from "zod";
 import { dateLikeSchema, idSchema, nullableUuidSchema } from "./common.validator.js";
 import {
   CUSTOM_FIELD_ENTITY_TYPE_VALUES,

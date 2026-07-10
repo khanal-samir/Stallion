@@ -12,8 +12,10 @@
         "BETTER_AUTH_SECRET",
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET",
+        "GROQ_API_KEY",
         "BETTER_AUTH_URL",
-        "WEB_URL"
+        "WEB_URL",
+        "SEQUENCE_LIVE_SEND_ENABLED"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env*"]
     },

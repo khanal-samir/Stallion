@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/ui/card";
 import { Skeleton } from "@workspace/ui/components/ui/skeleton";
 import { StatsCards } from "@/components/crm/dashboard/stats-cards";
+import { SequenceAutomationPanel } from "@/components/crm/dashboard/sequence-automation-panel";
 import { PipelineChart } from "@/components/crm/dashboard/pipeline-chart";
 import { PeopleStatusChart } from "@/components/crm/dashboard/people-status-chart";
 import { WinRateCard } from "@/components/crm/dashboard/win-rate-card";
@@ -132,6 +133,8 @@ export default function Dashboard() {
           isLoading={isLoading}
         />
       </div>
+
+      <SequenceAutomationPanel />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="space-y-6">
