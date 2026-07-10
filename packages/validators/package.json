@@ -20,6 +20,10 @@
       "types": "./src/schemas/crm.validator.ts",
       "import": "./dist/schemas/crm.validator.js"
     },
+    "./schemas/sequence": {
+      "types": "./src/schemas/sequence.validator.ts",
+      "import": "./dist/schemas/sequence.validator.js"
+    },
     "./schemas/workspace": {
       "types": "./src/schemas/workspace.validator.ts",
       "import": "./dist/schemas/workspace.validator.js"
@@ -31,6 +35,10 @@
     "./types/workspace": {
       "types": "./src/types/workspace.types.ts",
       "import": "./dist/types/workspace.types.js"
+    },
+    "./types/sequence": {
+      "types": "./src/types/sequence.types.ts",
+      "import": "./dist/types/sequence.types.js"
     }
   },
   "scripts": {

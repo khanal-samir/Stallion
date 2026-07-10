@@ -26,4 +26,12 @@ export const QUERY_KEYS = {
   ANALYTICS_PIPELINE: "analytics-pipeline",
   ANALYTICS_PEOPLE_STATUS: "analytics-people-status",
   ANALYTICS_WIN_RATE: "analytics-win-rate",
+
+  SEQUENCES: "sequences",
+  SEQUENCES_LIST: "sequences-list",
+  SEQUENCE_DETAIL: "sequence-detail",
+  SEQUENCE_ENROLLMENTS: "sequence-enrollments",
+  SEQUENCE_ACTIVITY: "sequence-activity",
+  SEQUENCE_DASHBOARD: "sequence-dashboard",
+  GMAIL_INTEGRATIONS: "gmail-integrations",
 } as const;

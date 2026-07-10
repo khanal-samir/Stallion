@@ -46,6 +46,7 @@ import * as customFieldsService from "@/services/crm/custom-fields.service";
 import * as dealsService from "@/services/crm/deals.service";
 import * as orgService from "@/services/crm/org.service";
 import * as peopleService from "@/services/crm/people.service";
+import * as sequencesService from "@/services/sequences.service";
 
 const success = (data: unknown = { id: "result" }) => ({ data, error: null });
 const failure = { data: null, error: { code: "FAILED", message: "failed", status: 400 } };
@@ -64,6 +65,25 @@ describe("web service contracts", () => {
           org: { id: "org" },
           people: [],
           person: { id: "person" },
+          sequence: { id: "sequence" },
+          sequences: [],
+          version: { id: "version" },
+          enrollments: [],
+          activity: [],
+          gmailIntegrations: [],
+          gmailIntegration: { id: "gmail" },
+          task: { id: "task" },
+          email: { subject: "Subject", body: "Body" },
+          counters: {
+            activeEnrollments: 1,
+            emailsSentToday: 1,
+            repliesDetected: 0,
+            failedSteps: 0,
+          },
+          dueTasks: [],
+          gmailWarnings: [],
+          recentActivity: [],
+          alreadyUnsubscribed: false,
           pipeline: [],
           peopleStatus: [],
           won: 1,
@@ -125,6 +145,47 @@ describe("web service contracts", () => {
     await peopleService.updatePerson(id, { status: "customer" });
     await peopleService.deletePerson(id);
     await peopleService.bulkDeletePeople({ ids: [id] });
+    await sequencesService.listSequences();
+    await sequencesService.listSequences({ status: "published" });
+    await sequencesService.createSequence({ name: "Outbound" });
+    await sequencesService.getSequence(id);
+    await sequencesService.updateSequence(id, {
+      name: "Outbound 2",
+      steps: [
+        {
+          type: "email",
+          name: "Intro",
+          position: 0,
+          config: { subject: "Hello", body: "Hi" },
+        },
+      ],
+    });
+    await sequencesService.updateSequenceStep(id, id, { config: { subject: "New" } });
+    await sequencesService.publishSequence(id);
+    await sequencesService.archiveSequence(id);
+    await sequencesService.deleteSequence(id);
+    await sequencesService.enrollPeople(id, { personIds: [id], gmailIntegrationId: id });
+    await sequencesService.listSequenceEnrollments(id);
+    await sequencesService.listSequenceEnrollments(id, { status: "active" });
+    await sequencesService.listSequenceActivity(id);
+    await sequencesService.pauseEnrollment(id);
+    await sequencesService.resumeEnrollment(id);
+    await sequencesService.completeSequenceTask(id);
+    await sequencesService.getSequenceDashboard();
+    await sequencesService.listGmailIntegrations();
+    await sequencesService.connectGmail({
+      email: "sender@example.test",
+      grantedScopes: [
+        "https://www.googleapis.com/auth/gmail.send",
+        "https://www.googleapis.com/auth/gmail.metadata",
+      ],
+      accessToken: "access",
+      refreshToken: "refresh",
+    });
+    await sequencesService.disconnectGmail(id);
+    await sequencesService.generateEmailContent("Write an intro");
+    await sequencesService.previewUnsubscribe("a".repeat(32));
+    await sequencesService.confirmUnsubscribe("a".repeat(32));
 
     expect(mocks.api.get).toHaveBeenCalled();
     expect(mocks.api.post).toHaveBeenCalled();

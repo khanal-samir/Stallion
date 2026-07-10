@@ -32,6 +32,27 @@ const controller = vi.hoisted(() => {
     createCustomFieldDefinition: respond,
     updateCustomFieldDefinition: respond,
     deleteCustomFieldDefinition: respond,
+    listSequencesController: respond,
+    createSequenceController: respond,
+    getSequenceController: respond,
+    updateSequenceController: respond,
+    updateSequenceStepController: respond,
+    publishSequenceController: respond,
+    archiveSequenceController: respond,
+    deleteSequenceController: respond,
+    enrollPeopleController: respond,
+    listSequenceEnrollmentsController: respond,
+    listSequenceActivityController: respond,
+    pauseEnrollmentController: respond,
+    resumeEnrollmentController: respond,
+    completeSequenceTaskController: respond,
+    getSequenceDashboardController: respond,
+    listGmailIntegrationsController: respond,
+    connectGmailController: respond,
+    disconnectGmailController: respond,
+    generateEmailContentController: respond,
+    previewUnsubscribeController: respond,
+    confirmUnsubscribeController: respond,
     authHandler: vi.fn(() => new Response("auth")),
   };
 });
@@ -74,6 +95,29 @@ vi.mock("@/controllers/crm-custom-fields.controller.js", () => ({
   updateCustomFieldDefinition: controller.updateCustomFieldDefinition,
   deleteCustomFieldDefinition: controller.deleteCustomFieldDefinition,
 }));
+vi.mock("@/controllers/sequences.controller.js", () => ({
+  listSequencesController: controller.listSequencesController,
+  createSequenceController: controller.createSequenceController,
+  getSequenceController: controller.getSequenceController,
+  updateSequenceController: controller.updateSequenceController,
+  updateSequenceStepController: controller.updateSequenceStepController,
+  publishSequenceController: controller.publishSequenceController,
+  archiveSequenceController: controller.archiveSequenceController,
+  deleteSequenceController: controller.deleteSequenceController,
+  enrollPeopleController: controller.enrollPeopleController,
+  listSequenceEnrollmentsController: controller.listSequenceEnrollmentsController,
+  listSequenceActivityController: controller.listSequenceActivityController,
+  pauseEnrollmentController: controller.pauseEnrollmentController,
+  resumeEnrollmentController: controller.resumeEnrollmentController,
+  completeSequenceTaskController: controller.completeSequenceTaskController,
+  getSequenceDashboardController: controller.getSequenceDashboardController,
+  listGmailIntegrationsController: controller.listGmailIntegrationsController,
+  connectGmailController: controller.connectGmailController,
+  disconnectGmailController: controller.disconnectGmailController,
+  generateEmailContentController: controller.generateEmailContentController,
+  previewUnsubscribeController: controller.previewUnsubscribeController,
+  confirmUnsubscribeController: controller.confirmUnsubscribeController,
+}));
 vi.mock("@/middlewares/auth-middleware.js", () => ({
   authMiddleware: (_c: Context, next: Next) => next(),
 }));
@@ -95,6 +139,8 @@ import { healthRoutes } from "@/routes/health.route.js";
 import { onboardingRoutes } from "@/routes/onboarding.route.js";
 import { orgRoutes } from "@/routes/org.route.js";
 import { peopleRoutes } from "@/routes/people.route.js";
+import { sequenceRoutes } from "@/routes/sequences.route.js";
+import { sequenceUnsubscribeRoutes } from "@/routes/sequence-unsubscribe.route.js";
 import { registerRoutes } from "@/routes/index.js";
 
 const jsonRequest = (method: string, body?: unknown) => ({
@@ -114,6 +160,8 @@ describe("API route wiring without database infrastructure", () => {
     [analyticsRoutes, "/win-rate", "GET"],
     [onboardingRoutes, "/", "GET"],
     [onboardingRoutes, "/crm-tour/complete", "POST"],
+    [sequenceRoutes, "/dashboard", "GET"],
+    [sequenceRoutes, "/gmail", "GET"],
   ])("dispatches %s %s routes", async (app, path, method) => {
     expect((await app.request(path, { method })).status).toBe(200);
   });
@@ -162,11 +210,67 @@ describe("API route wiring without database infrastructure", () => {
     expect(controller.authHandler).toHaveBeenCalledTimes(2);
   });
 
+  it("dispatches every sequence management route with validated values", async () => {
+    const id = faker.string.uuid();
+    const stepId = faker.string.uuid();
+    const enrollmentId = faker.string.uuid();
+    const taskId = faker.string.uuid();
+    const gmailIntegrationId = faker.string.uuid();
+    const token = "a".repeat(32);
+    const step = {
+      type: "email",
+      name: "Intro",
+      position: 0,
+      config: { subject: "Hello", body: "Hi there" },
+    };
+    const cases: Array<[string, RequestInit | undefined]> = [
+      ["/", undefined],
+      ["/", jsonRequest("POST", { name: "Outbound" })],
+      ["/generate-email", jsonRequest("POST", { prompt: "Write an intro" })],
+      [
+        "/gmail",
+        jsonRequest("POST", {
+          email: "sender@example.test",
+          grantedScopes: [
+            "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/gmail.metadata",
+          ],
+          accessToken: "access",
+          refreshToken: "refresh",
+        }),
+      ],
+      [`/gmail/${gmailIntegrationId}`, { method: "DELETE" }],
+      [`/enrollments/${enrollmentId}/pause`, { method: "PATCH" }],
+      [`/enrollments/${enrollmentId}/resume`, { method: "PATCH" }],
+      [`/tasks/${taskId}/complete`, { method: "PATCH" }],
+      [`/${id}`, undefined],
+      [`/${id}`, jsonRequest("PATCH", { name: "Outbound 2", steps: [step] })],
+      [`/${id}/steps/${stepId}`, jsonRequest("PATCH", { config: { subject: "New" } })],
+      [`/${id}/publish`, { method: "POST" }],
+      [`/${id}/archive`, { method: "POST" }],
+      [`/${id}/enrollments`, jsonRequest("POST", { personIds: [id], gmailIntegrationId })],
+      [`/${id}/enrollments`, undefined],
+      [`/${id}/activity`, undefined],
+      [`/${id}`, { method: "DELETE" }],
+    ];
+
+    for (const [path, init] of cases) {
+      expect((await sequenceRoutes.request(path, init)).status).toBe(200);
+    }
+
+    expect((await sequenceUnsubscribeRoutes.request(`/${token}`)).status).toBe(200);
+    expect((await sequenceUnsubscribeRoutes.request(`/${token}`, { method: "POST" })).status).toBe(
+      200,
+    );
+  });
+
   it("registers the complete API and constructs the server export", async () => {
     const app = new Hono();
     registerRoutes(app);
 
     expect((await app.request("/health")).status).toBe(200);
+    expect((await app.request("/sequences")).status).toBe(200);
+    expect((await app.request(`/sequence-unsubscribe/${"a".repeat(32)}`)).status).toBe(200);
     expect(server.port).toBe(3001);
     expect(server.fetch).toEqual(expect.any(Function));
     expect((await healthRoutes.request("/")).status).toBe(200);

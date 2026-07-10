@@ -11,6 +11,8 @@ const rawEnv = {
   RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  SEQUENCE_LIVE_SEND_ENABLED: process.env.SEQUENCE_LIVE_SEND_ENABLED,
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
 };
 
 const parsedEnv = apiEnvSchema.safeParse(rawEnv);

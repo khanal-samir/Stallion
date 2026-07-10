@@ -7,6 +7,7 @@ import {
   Settings2,
   Users,
   FormInput,
+  Workflow,
 } from "lucide-react";
 
 export const MAIN_NAV_ITEMS = [
@@ -14,6 +15,7 @@ export const MAIN_NAV_ITEMS = [
   { label: "People", href: "/people", icon: Users },
   { label: "Organizations", href: "/organizations", icon: Building2 },
   { label: "Deals", href: "/deals", icon: Kanban },
+  { label: "Sequences", href: "/sequences", icon: Workflow },
 ] as const;
 
 export const WORKSPACE_NAV_ITEMS = [
