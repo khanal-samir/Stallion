@@ -53,6 +53,22 @@ const controller = vi.hoisted(() => {
     generateEmailContentController: respond,
     previewUnsubscribeController: respond,
     confirmUnsubscribeController: respond,
+    listConnectionsController: respond,
+    createConnectionController: respond,
+    updateConnectionController: respond,
+    deleteConnectionController: respond,
+    previewConnectionFieldsController: respond,
+    listApiKeysController: respond,
+    createApiKeyController: respond,
+    revokeApiKeyController: respond,
+    startImportJobController: respond,
+    listImportJobsController: respond,
+    getImportJobController: respond,
+    listImportRecordsController: respond,
+    updateImportJobController: respond,
+    commitImportJobController: respond,
+    cancelImportJobController: respond,
+    ingestWebhookController: respond,
     authHandler: vi.fn(() => new Response("auth")),
   };
 });
@@ -118,6 +134,24 @@ vi.mock("@/controllers/sequences.controller.js", () => ({
   previewUnsubscribeController: controller.previewUnsubscribeController,
   confirmUnsubscribeController: controller.confirmUnsubscribeController,
 }));
+vi.mock("@/controllers/imports.controller.js", () => ({
+  listConnectionsController: controller.listConnectionsController,
+  createConnectionController: controller.createConnectionController,
+  updateConnectionController: controller.updateConnectionController,
+  deleteConnectionController: controller.deleteConnectionController,
+  previewConnectionFieldsController: controller.previewConnectionFieldsController,
+  listApiKeysController: controller.listApiKeysController,
+  createApiKeyController: controller.createApiKeyController,
+  revokeApiKeyController: controller.revokeApiKeyController,
+  startImportJobController: controller.startImportJobController,
+  listImportJobsController: controller.listImportJobsController,
+  getImportJobController: controller.getImportJobController,
+  listImportRecordsController: controller.listImportRecordsController,
+  updateImportJobController: controller.updateImportJobController,
+  commitImportJobController: controller.commitImportJobController,
+  cancelImportJobController: controller.cancelImportJobController,
+  ingestWebhookController: controller.ingestWebhookController,
+}));
 vi.mock("@/middlewares/auth-middleware.js", () => ({
   authMiddleware: (_c: Context, next: Next) => next(),
 }));
@@ -141,6 +175,8 @@ import { orgRoutes } from "@/routes/org.route.js";
 import { peopleRoutes } from "@/routes/people.route.js";
 import { sequenceRoutes } from "@/routes/sequences.route.js";
 import { sequenceUnsubscribeRoutes } from "@/routes/sequence-unsubscribe.route.js";
+import { importRoutes } from "@/routes/imports.route.js";
+import { importWebhookRoutes } from "@/routes/import-webhook.route.js";
 import { registerRoutes } from "@/routes/index.js";
 
 const jsonRequest = (method: string, body?: unknown) => ({
@@ -262,6 +298,47 @@ describe("API route wiring without database infrastructure", () => {
     expect((await sequenceUnsubscribeRoutes.request(`/${token}`, { method: "POST" })).status).toBe(
       200,
     );
+  });
+
+  it("dispatches every import route with validated values", async () => {
+    const id = faker.string.uuid();
+    const cases: Array<[string, RequestInit | undefined]> = [
+      ["/connections", undefined],
+      [
+        "/connections",
+        jsonRequest("POST", {
+          provider: "posthog",
+          displayName: "PostHog",
+          accessToken: "phx_test",
+        }),
+      ],
+      [`/connections/${id}/fields`, undefined],
+      [`/connections/${id}`, jsonRequest("PATCH", { displayName: "Renamed" })],
+      [`/connections/${id}`, { method: "DELETE" }],
+      ["/api-keys", undefined],
+      ["/api-keys", jsonRequest("POST", { name: "Zapier" })],
+      [`/api-keys/${id}`, { method: "DELETE" }],
+      ["/jobs", undefined],
+      ["/jobs", jsonRequest("POST", { provider: "csv", csvContent: "Name\nDana\n" })],
+      [`/jobs/${id}`, undefined],
+      [`/jobs/${id}/records`, undefined],
+      [`/jobs/${id}`, jsonRequest("PATCH", { mapping: { fields: [] } })],
+      [`/jobs/${id}/commit`, { method: "POST" }],
+      [`/jobs/${id}/cancel`, { method: "POST" }],
+    ];
+
+    for (const [path, init] of cases) {
+      expect((await importRoutes.request(path, init)).status).toBe(200);
+    }
+  });
+
+  it("accepts an inbound webhook push outside the session middleware", async () => {
+    const response = await importWebhookRoutes.request(
+      "/",
+      jsonRequest("POST", { records: [{ email: "dana@northwind.example", name: "Dana" }] }),
+    );
+
+    expect(response.status).toBe(200);
   });
 
   it("registers the complete API and constructs the server export", async () => {

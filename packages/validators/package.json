@@ -28,6 +28,18 @@
       "types": "./src/schemas/workspace.validator.ts",
       "import": "./dist/schemas/workspace.validator.js"
     },
+    "./schemas/import": {
+      "types": "./src/schemas/import.validator.ts",
+      "import": "./dist/schemas/import.validator.js"
+    },
+    "./types/import": {
+      "types": "./src/types/import.types.ts",
+      "import": "./dist/types/import.types.js"
+    },
+    "./types/crm": {
+      "types": "./src/types/crm.types.ts",
+      "import": "./dist/types/crm.types.js"
+    },
     "./types/auth": {
       "types": "./src/types/auth.types.ts",
       "import": "./dist/types/auth.types.js"

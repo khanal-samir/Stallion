@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "bun run src/server.ts",
     "worker:sequences": "bun run src/workers/sequence-worker.ts",
+    "worker:imports": "bun run src/workers/import-worker.ts",
     "check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
     "lint": "eslint .",
     "test": "TZ=UTC vitest run",

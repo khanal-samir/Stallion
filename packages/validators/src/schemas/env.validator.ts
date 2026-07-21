@@ -18,6 +18,22 @@ export const apiEnvSchema = z
       .default("false")
       .transform((value) => value === "true"),
     GROQ_API_KEY: z.string().optional(),
+    /**
+     * Mirrors SEQUENCE_LIVE_SEND_ENABLED. When false, connectors resolve from fixtures
+     * instead of reaching the network, so imports are exercisable without credentials.
+     */
+    INTEGRATION_LIVE_FETCH_ENABLED: z
+      .enum(["true", "false"])
+      .optional()
+      .default("false")
+      .transform((value) => value === "true"),
+    /** Falls back to BETTER_AUTH_SECRET when unset, matching the sequence token handling. */
+    INTEGRATION_TOKEN_SECRET: z.string().optional(),
+    MICROSOFT_CLIENT_ID: z.string().optional(),
+    MICROSOFT_CLIENT_SECRET: z.string().optional(),
+    MICROSOFT_TENANT_ID: z.string().optional().default("common"),
+    POSTHOG_API_HOST: z.string().url().optional().default("https://us.posthog.com"),
+    CALENDLY_API_HOST: z.string().url().optional().default("https://api.calendly.com"),
   })
   .strict();
 
