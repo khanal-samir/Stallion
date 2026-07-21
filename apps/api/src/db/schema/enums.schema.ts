@@ -19,7 +19,7 @@ export const peopleStatusEnum = pgEnum("people_status", [
   "churned",
 ]);
 
-export const peopleSourceEnum = pgEnum("people_source", ["manual", "csv", "api"]);
+export const peopleSourceEnum = pgEnum("people_source", ["manual", "csv", "api", "import"]);
 
 export const dealStageEnum = pgEnum("deal_stage", [
   "new",
@@ -109,4 +109,50 @@ export const gmailConnectionStatusEnum = pgEnum("gmail_connection_status", [
   "connected",
   "reconnect_required",
   "disconnected",
+]);
+
+export const importProviderEnum = pgEnum("import_provider", [
+  "csv",
+  "webhook",
+  "gmail",
+  "google_calendar",
+  "calendly",
+  "google_sheets",
+  "posthog",
+  "outlook",
+]);
+
+export const importEntityTypeEnum = pgEnum("import_entity_type", ["person", "org"]);
+
+export const importJobStatusEnum = pgEnum("import_job_status", [
+  "pending",
+  "extracting",
+  "ready_for_review",
+  "loading",
+  "completed",
+  "failed",
+  "canceled",
+]);
+
+export const importRecordStatusEnum = pgEnum("import_record_status", [
+  "pending",
+  "valid",
+  "invalid",
+  "loaded",
+  "skipped",
+  "duplicate",
+]);
+
+export const importConnectionStatusEnum = pgEnum("import_connection_status", [
+  "connected",
+  "reconnect_required",
+  "disconnected",
+]);
+
+export const importMatchReasonEnum = pgEnum("import_match_reason", [
+  "external_identity",
+  "email",
+  "domain",
+  "name",
+  "none",
 ]);

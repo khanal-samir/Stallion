@@ -6,7 +6,7 @@ export const PERSON_STATUS_VALUES = [
   "churned",
 ] as const;
 
-export const PERSON_SOURCE_VALUES = ["manual", "csv", "api"] as const;
+export const PERSON_SOURCE_VALUES = ["manual", "csv", "api", "import"] as const;
 
 export const DEAL_STAGE_VALUES = ["new", "contacted", "demo", "proposal", "won", "lost"] as const;
 

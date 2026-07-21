@@ -1,6 +1,15 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "INTEGRATION_LIVE_FETCH_ENABLED",
+    "INTEGRATION_TOKEN_SECRET",
+    "MICROSOFT_CLIENT_ID",
+    "MICROSOFT_CLIENT_SECRET",
+    "MICROSOFT_TENANT_ID",
+    "POSTHOG_API_HOST",
+    "CALENDLY_API_HOST"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

@@ -3,6 +3,8 @@ import { analyticsRoutes } from "./analytics.route.js";
 import { authRoutes } from "./auth.route.js";
 import { dealRoutes } from "./deals.route.js";
 import { healthRoutes } from "./health.route.js";
+import { importRoutes } from "./imports.route.js";
+import { importWebhookRoutes } from "./import-webhook.route.js";
 import { orgRoutes } from "./org.route.js";
 import { peopleRoutes } from "./people.route.js";
 import { onboardingRoutes } from "./onboarding.route.js";
@@ -19,4 +21,6 @@ export function registerRoutes(app: Hono) {
   app.route("/onboarding", onboardingRoutes);
   app.route("/sequences", sequenceRoutes);
   app.route("/sequence-unsubscribe", sequenceUnsubscribeRoutes);
+  app.route("/imports", importRoutes);
+  app.route("/import-webhook", importWebhookRoutes);
 }
